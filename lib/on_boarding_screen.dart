@@ -4,10 +4,10 @@ class OnBoardingScreen extends StatefulWidget {
   const OnBoardingScreen({super.key});
 
   @override
-  _OnBoardingScreenState createState() => _OnBoardingScreenState();
+  OnBoardingScreenState createState() => OnBoardingScreenState();
 }
 
-class _OnBoardingScreenState extends State<OnBoardingScreen> {
+class OnBoardingScreenState extends State<OnBoardingScreen> {
   final List<OnBoardingPage> _pages = [
     OnBoardingPage(
       imagePath: 'assets/images/onboarding1.png',
@@ -27,7 +27,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     ),
   ];
 
-  final int _currentPageIndex = 0;
+  int _currentPageIndex = 0;
   late final PageController _pageController;
 
   @override
@@ -67,8 +67,152 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    return Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Align(
+                alignment: Alignment.center,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {},
+                    borderRadius: BorderRadius.horizontal(
+                      left: Radius.circular(10),
+                      right: Radius.circular(10),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 20,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Skip',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Icon(Icons.skip_next_sharp, color: Color(0xFF2E2F2B)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            //PageView for onboarding pages
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: _pages.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPageIndex = index;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  return OnBoardingPageWidget(page: _pages[index]);
+                },
+              ),
+            ),
+
+            //Row Widget to display the navigation buttons
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    //Previous Button shows only if not on the first page
+                    if (_currentPageIndex > 0)
+                      IconButton(
+                        onPressed: _previousPage,
+                        icon: Icon(Icons.arrow_back_ios),
+                        color: Color(0xFF2E2F2B),
+                      )
+                    else
+                      SizedBox(width: 50),
+
+                    //Pagiantion Dots
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(_pages.length, (index) {
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          margin: const EdgeInsets.symmetric(horizontal: 5),
+                          width: index == _currentPageIndex ? 20 : 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: index == _currentPageIndex
+                                ? const Color(0xFF2E2F2B)
+                                : Colors.grey[300],
+                            borderRadius: BorderRadius.horizontal(
+                              left: Radius.circular(5),
+                              right: Radius.circular(5),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+
+                    //Next Button shows only if not on the last page
+                    if (_currentPageIndex < _pages.length - 1)
+                      IconButton(
+                        onPressed: _nextPage,
+                        icon: Icon(Icons.arrow_forward_ios),
+                        color: Color(0xFF2E2F2B),
+                      )
+                    else
+                      SizedBox(width: 50),
+                  ],
+                ),
+
+                const SizedBox(height: 15),
+
+                //Continue Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _nextPage,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E2F2B),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.horizontal(
+                            left: Radius.circular(10),
+                            right: Radius.circular(10),
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        'Continue',
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
