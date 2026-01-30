@@ -62,7 +62,7 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
   }
 
   void _skipOnBoarding() {
-    Navigator.pushReplacementNamed(context, '/home');
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'screens/splash_screen.dart';
 import 'package:lsffend/screens/on_boarding_screen.dart';
+import 'package:lsffend/screens/login_screen.dart';
 import 'package:lsffend/screens/navigation/home_screen.dart';
 
 void main() {
@@ -34,7 +35,8 @@ class _MyAppState extends State<MyApp> {
       home: SplashScreenWrapper(),
       routes: {
         '/onBoarding': (context) => const OnBoardingScreen(),
-        '/home': (context) => HomeScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => const HomeScreen(),
       },
     );
   }
