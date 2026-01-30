@@ -61,9 +61,9 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
     }
   }
 
-  // void skipOnBoarding() {
-  //   Navigator.pushNamed(context, '/home');
-  // }
+  void _skipOnBoarding() {
+    Navigator.pushReplacementNamed(context, '/home');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,13 +73,13 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Align(
-                alignment: Alignment.center,
+                alignment: Alignment.centerRight,
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: () {},
+                    onTap: _skipOnBoarding,
                     borderRadius: BorderRadius.horizontal(
                       left: Radius.circular(10),
                       right: Radius.circular(10),
@@ -90,7 +90,7 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                         horizontal: 20,
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             'Skip',
@@ -118,6 +118,7 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                 controller: _pageController,
                 itemCount: _pages.length,
                 onPageChanged: (index) {
+                  // Update the current page index when the page changes
                   setState(() {
                     _currentPageIndex = index;
                   });
@@ -138,8 +139,10 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                     if (_currentPageIndex > 0)
                       IconButton(
                         onPressed: _previousPage,
-                        icon: Icon(Icons.arrow_back_ios),
-                        color: Color(0xFF2E2F2B),
+                        icon: Icon(
+                          Icons.arrow_back_ios,
+                          color: Color(0xFF2E2F2B),
+                        ),
                       )
                     else
                       SizedBox(width: 50),
@@ -155,7 +158,7 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                           height: 10,
                           decoration: BoxDecoration(
                             color: index == _currentPageIndex
-                                ? const Color(0xFF2E2F2B)
+                                ? const Color(0xFF2F5899)
                                 : Colors.grey[300],
                             borderRadius: BorderRadius.horizontal(
                               left: Radius.circular(5),
@@ -170,8 +173,10 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                     if (_currentPageIndex < _pages.length - 1)
                       IconButton(
                         onPressed: _nextPage,
-                        icon: Icon(Icons.arrow_forward_ios),
-                        color: Color(0xFF2E2F2B),
+                        icon: Icon(
+                          Icons.arrow_forward_ios,
+                          color: Color(0xFF2E2F2B),
+                        ),
                       )
                     else
                       SizedBox(width: 50),
@@ -185,24 +190,25 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _nextPage,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2E2F2B),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadiusGeometry.horizontal(
-                            left: Radius.circular(10),
-                            right: Radius.circular(10),
-                          ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2F5899),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadiusGeometry.horizontal(
+                          left: Radius.circular(10),
+                          right: Radius.circular(10),
                         ),
                       ),
-                      child: Text(
-                        'Continue',
-                        style: TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    ),
+                    child: Text(
+                      _currentPageIndex < _pages.length - 1
+                          ? 'Next'
+                          : 'Get Started',
+                      style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -264,10 +270,25 @@ class OnBoardingPageWidget extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'Montserrat',
               fontSize: 16,
-              fontWeight: FontWeight.normal,
+              fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
             textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 15),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              page.description,
+              style: TextStyle(
+                fontFamily: 'Montserrat',
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ],
       ),

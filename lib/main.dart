@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'screens/splash_screen.dart';
 import 'package:lsffend/screens/on_boarding_screen.dart';
+import 'package:lsffend/screens/navigation/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,9 +29,13 @@ class _MyAppState extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color.fromRGBO(47, 88, 153, 100),
         ),
+        useMaterial3: true,
       ),
       home: SplashScreenWrapper(),
-      routes: {'/onBoarding': (context) => const OnBoardingScreen()},
+      routes: {
+        '/onBoarding': (context) => const OnBoardingScreen(),
+        '/home': (context) => HomeScreen(),
+      },
     );
   }
 }
