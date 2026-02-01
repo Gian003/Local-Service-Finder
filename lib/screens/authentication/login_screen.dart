@@ -28,33 +28,18 @@ class LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 15),
-
                   //Logo and App Name
-                  Row(
+                  Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset(
-                        'assets/images/logo.png',
-                        width: 75,
-                        height: 75,
-                      ),
-
-                      const SizedBox(width: 10),
-
-                      const Text(
-                        'Local Service Finder',
-                        style: TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        'assets/images/icon.png',
+                        width: 250,
+                        height: 250,
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 40),
-
+                  
                   //Email Field
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

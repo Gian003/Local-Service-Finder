@@ -49,6 +49,8 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
       );
+    } else {
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
@@ -87,7 +89,7 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                     child: Padding(
                       padding: EdgeInsets.symmetric(
                         vertical: 10,
-                        horizontal: 20,
+                        horizontal: 5,
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -96,7 +98,7 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                             'Skip',
                             style: TextStyle(
                               fontFamily: 'Montserrat',
-                              fontSize: 15,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -169,7 +171,7 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                       }),
                     ),
 
-                    //Next Button shows only if not on the last page
+                    //Get Started Button shows only if not on the last page
                     if (_currentPageIndex < _pages.length - 1)
                       IconButton(
                         onPressed: _nextPage,
@@ -257,7 +259,7 @@ class OnBoardingPageWidget extends StatelessWidget {
                   width: 200,
                   height: 200,
                   color: Colors.grey[200],
-                  child: Icon(Icons.image, size: 100, color: Colors.grey[400]),
+                  child: Icon(Icons.image, size: 50, color: Colors.grey[400]),
                 );
               },
             ),
