@@ -198,8 +198,8 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadiusGeometry.horizontal(
-                          left: Radius.circular(10),
-                          right: Radius.circular(10),
+                          left: Radius.circular(30),
+                          right: Radius.circular(30),
                         ),
                       ),
                     ),
@@ -263,19 +263,6 @@ class OnBoardingPageWidget extends StatelessWidget {
                 );
               },
             ),
-          ),
-
-          const SizedBox(height: 30),
-
-          Text(
-            page.title,
-            style: TextStyle(
-              fontFamily: 'Montserrat',
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-            textAlign: TextAlign.center,
           ),
 
           const SizedBox(height: 15),

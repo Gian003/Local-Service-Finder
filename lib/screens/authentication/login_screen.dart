@@ -32,35 +32,19 @@ class LoginScreenState extends State<LoginScreen> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset(
-                        'assets/images/icon.png',
-                        width: 250,
-                        height: 250,
-                      ),
+                      Image.asset('assets/images/icon.png', scale: 2.0),
                     ],
                   ),
-                  
+
                   //Email Field
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-
                     children: [
-                      Text(
-                        'Email or Phone Number',
-                        style: TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-
-                      const SizedBox(height: 5),
-
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
-                          hintText: 'Enter your Email or Phone Number',
+                          labelText: 'Enter your Username',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.horizontal(
                               left: Radius.circular(10),
@@ -85,22 +69,11 @@ class LoginScreenState extends State<LoginScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
 
                         children: [
-                          Text(
-                            'Password',
-                            style: TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                          const SizedBox(height: 5),
-
                           TextFormField(
                             controller: _passwordController,
                             obscureText: _obscurePassword,
                             decoration: InputDecoration(
-                              hintText: 'Enter your Password',
+                              labelText: 'Enter your Password',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.horizontal(
                                   left: Radius.circular(10),
@@ -145,7 +118,7 @@ class LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 100),
+                          const SizedBox(height: 40),
 
                           //Login Button
                           ElevatedButton(
@@ -156,8 +129,8 @@ class LoginScreenState extends State<LoginScreen> {
                               minimumSize: const Size(double.infinity, 50),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadiusGeometry.horizontal(
-                                  left: Radius.circular(10),
-                                  right: Radius.circular(10),
+                                  left: Radius.circular(30),
+                                  right: Radius.circular(30),
                                 ),
                               ),
                             ),
@@ -184,10 +157,40 @@ class LoginScreenState extends State<LoginScreen> {
                                   fontFamily: 'Montserrat',
                                   fontSize: 15,
                                   fontWeight: FontWeight.normal,
-                                  color: Color(0xFF2F5899),
+                                  color: Colors.black,
+                                ),
+                              ),
+
+                              const SizedBox(width: 5),
+
+                              GestureDetector(
+                                onTap: () {},
+                                child: Text(
+                                  'Sign Up',
+                                  style: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF2F5899),
+                                  ),
                                 ),
                               ),
                             ],
+                          ),
+
+                          const SizedBox(height: 50),
+
+                          Center(
+                            child: Text(
+                              'or login with',
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[500],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ],
                       ),
