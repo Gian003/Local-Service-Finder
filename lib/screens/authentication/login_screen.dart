@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -118,7 +119,7 @@ class LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 50),
 
                           //Login Button
                           ElevatedButton(
@@ -145,7 +146,110 @@ class LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 50),
+
+                          Center(
+                            child: Text(
+                              'or login with',
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[500],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+
+                          const SizedBox(height: 50),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                onPressed: () {},
+                                icon: FaIcon(
+                                  FontAwesomeIcons.facebook,
+                                  color: Colors.blueAccent,
+                                  size: 35,
+                                ),
+                              ),
+
+                              const SizedBox(width: 10),
+
+                              IconButton(
+                                onPressed: () {},
+                                icon: FaIcon(
+                                  FontAwesomeIcons.google,
+                                  color: Colors.black,
+                                  size: 35,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          // ElevatedButton(
+                          //   onPressed: () {},
+                          //   style: ElevatedButton.styleFrom(
+                          //     backgroundColor: Colors.white,
+                          //     foregroundColor: Colors.black,
+                          //     minimumSize: const Size(double.infinity, 50),
+                          //   ),
+                          //   child: Row(
+                          //     mainAxisAlignment: MainAxisAlignment.center,
+                          //     children: [
+                          //       Icon(
+                          //         Icons.facebook,
+                          //         color: Colors.blueAccent,
+                          //         size: 25,
+                          //       ),
+
+                          //       const SizedBox(width: 5),
+
+                          //       Text(
+                          //         'Facebook',
+                          //         style: TextStyle(
+                          //           fontFamily: 'Montserrat',
+                          //           fontSize: 15,
+                          //           fontWeight: FontWeight.bold,
+                          //         ),
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+
+                          // const SizedBox(height: 10),
+
+                          // ElevatedButton(
+                          //   onPressed: () {},
+                          //   style: ElevatedButton.styleFrom(
+                          //     backgroundColor: Colors.white,
+                          //     foregroundColor: Colors.black,
+                          //     minimumSize: const Size(double.infinity, 50),
+                          //   ),
+                          //   child: Row(
+                          //     mainAxisAlignment: MainAxisAlignment.center,
+                          //     children: [
+                          //       Icon(
+                          //         FontAwesomeIcons.google,
+                          //         color: Colors.black,
+                          //         size: 25,
+                          //       ),
+
+                          //       const SizedBox(width: 5),
+
+                          //       Text(
+                          //         'Google',
+                          //         style: TextStyle(
+                          //           fontFamily: 'Montserrat',
+                          //           fontSize: 15,
+                          //           fontWeight: FontWeight.bold,
+                          //         ),
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          const SizedBox(height: 40),
 
                           //Sign Up Button
                           Row(
@@ -176,21 +280,6 @@ class LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ],
-                          ),
-
-                          const SizedBox(height: 50),
-
-                          Center(
-                            child: Text(
-                              'or login with',
-                              style: TextStyle(
-                                fontFamily: 'Montserrat',
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey[500],
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
                           ),
                         ],
                       ),
