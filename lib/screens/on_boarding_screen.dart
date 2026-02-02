@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lsffend/global%20variable/colors.dart';
 
 class OnBoardingScreen extends StatefulWidget {
   const OnBoardingScreen({super.key});
@@ -160,8 +161,8 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                           height: 10,
                           decoration: BoxDecoration(
                             color: index == _currentPageIndex
-                                ? const Color(0xFF2F5899)
-                                : Colors.grey[300],
+                                ? AppColors.primaryColor
+                                : AppColors.secondaryColor,
                             borderRadius: BorderRadius.horizontal(
                               left: Radius.circular(5),
                               right: Radius.circular(5),
@@ -193,7 +194,7 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                   child: ElevatedButton(
                     onPressed: _nextPage,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2F5899),
+                      backgroundColor: AppColors.primaryColor,
                       foregroundColor: Colors.white,
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(

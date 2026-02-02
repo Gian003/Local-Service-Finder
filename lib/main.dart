@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
 import 'package:lsffend/screens/on_boarding_screen.dart';
 import 'package:lsffend/screens/authentication/login_screen.dart';
+import 'package:lsffend/screens/authentication/register_screen.dart';
 import 'package:lsffend/screens/navigation/home_screen.dart';
 
 void main() {
@@ -36,6 +37,7 @@ class _MyAppState extends State<MyApp> {
       routes: {
         '/onBoarding': (context) => const OnBoardingScreen(),
         '/login': (context) => const LoginScreen(),
+        '/register': (context) => RegisterScreen(),
         '/home': (context) => const HomeScreen(),
       },
     );
