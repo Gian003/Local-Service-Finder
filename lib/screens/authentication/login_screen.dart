@@ -24,6 +24,23 @@ class LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  //VAlidation functions
+  bool _isEmailValid(String value) {
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    return emailRegex.hasMatch(value);
+  }
+
+  bool _isPhoneValid(String value) {
+    final phoneRegex = RegExp(r'^\+?[0-9]{7,15}$');
+    return phoneRegex.hasMatch(value);
+  }
+
+  bool _isPasswordValid(String value) {
+    return value.length >= 8;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,19 +57,31 @@ class LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Center(
-                      child: Text(
-                        'Login',
-                        style: TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.secondaryColor,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Image.asset(
+                          'assets/images/icon.png',
+                          width: 70,
+                          height: 70,
                         ),
-                      ),
+
+                        const SizedBox(width: 5),
+
+                        Text(
+                          'LOG IN',
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.secondaryColor,
+                          ),
+                        ),
+                      ],
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 30),
 
                     //Email Field
                     Column(
@@ -73,7 +102,7 @@ class LoginScreenState extends State<LoginScreen> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your email or phone number';
-                            } else if (!value.contains('@')) {
+                            } else if (!_isEmailValid(value)) {
                               return 'Please enter a valid email address';
                             }
                             return null;

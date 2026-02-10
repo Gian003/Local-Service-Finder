@@ -116,7 +116,7 @@ class SplashScreen extends StatelessWidget {
           child: Transform.scale(
             scale: 2 + (value * 0.1), // Scale from 2 to 1.0
             child: Image.asset(
-              'assets/images/icon.png',
+              'assets/images/logo.png',
               width: 200,
               height: 200,
               filterQuality: FilterQuality.high,
