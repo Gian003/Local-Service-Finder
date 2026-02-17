@@ -306,7 +306,9 @@ class RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 30),
 
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(context, '/verify');
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
                         foregroundColor: Colors.white,
