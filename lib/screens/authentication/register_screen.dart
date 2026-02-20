@@ -289,7 +289,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 40),
 
                     ElevatedButton(
                       onPressed: () {
@@ -386,8 +386,7 @@ class TermsAndConditionsTapBox extends StatelessWidget {
         width: 20,
         decoration: BoxDecoration(
           shape: BoxShape.rectangle,
-          border: Border.all(color: Colors.black),
-          color: active ? Colors.white : AppColors.secondaryColor,
+          color: active ? Colors.grey[300] : AppColors.secondaryColor,
         ),
       ),
     );
