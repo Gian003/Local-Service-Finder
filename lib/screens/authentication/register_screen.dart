@@ -19,8 +19,8 @@ class RegisterScreenState extends State<RegisterScreen> {
       TextEditingController();
 
   //Password visibility
-  bool _isPasswordObscure = true;
-  bool _isConfirnmPasswordObscure = true;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
@@ -39,11 +39,6 @@ class RegisterScreenState extends State<RegisterScreen> {
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
     );
     return emailRegex.hasMatch(value);
-  }
-
-  bool _isPhoneValid(String value) {
-    final phoneRegex = RegExp(r'^\+?[0-9]{7,15}$');
-    return phoneRegex.hasMatch(value);
   }
 
   bool _isPasswordValid(String value) {
@@ -184,7 +179,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                     //Password Field
                     TextFormField(
                       controller: _passwordController,
-                      obscureText: _isPasswordObscure,
+                      obscureText: _obscureNewPassword,
                       decoration: InputDecoration(
                         labelText: 'Password',
                         border: OutlineInputBorder(
@@ -194,12 +189,12 @@ class RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         suffixIcon: IconButton(
-                          icon: _isPasswordObscure
+                          icon: _obscureNewPassword
                               ? Icon(Icons.visibility)
                               : Icon(Icons.visibility_off),
                           onPressed: () {
                             setState(() {
-                              _isPasswordObscure = !_isPasswordObscure;
+                              _obscureNewPassword = !_obscureNewPassword;
                             });
                           },
                         ),
@@ -219,7 +214,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                     //Password Field
                     TextFormField(
                       controller: _confirmPasswordController,
-                      obscureText: _isConfirnmPasswordObscure,
+                      obscureText: _obscureConfirmPassword,
                       decoration: InputDecoration(
                         labelText: 'Password',
                         border: OutlineInputBorder(
@@ -229,13 +224,13 @@ class RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         suffixIcon: IconButton(
-                          icon: _isConfirnmPasswordObscure
+                          icon: _obscureConfirmPassword
                               ? Icon(Icons.visibility)
                               : Icon(Icons.visibility_off),
                           onPressed: () {
                             setState(() {
-                              _isConfirnmPasswordObscure =
-                                  !_isConfirnmPasswordObscure;
+                              _obscureConfirmPassword =
+                                  !_obscureConfirmPassword;
                             });
                           },
                         ),
