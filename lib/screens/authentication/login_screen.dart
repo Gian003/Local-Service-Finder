@@ -32,14 +32,9 @@ class LoginScreenState extends State<LoginScreen> {
     return emailRegex.hasMatch(value);
   }
 
-  bool _isPhoneValid(String value) {
-    final phoneRegex = RegExp(r'^\+?[0-9]{7,15}$');
-    return phoneRegex.hasMatch(value);
-  }
-
-  bool _isPasswordValid(String value) {
-    return value.length >= 8;
-  }
+  // bool _isPasswordValid(String value) {
+  //   return value.length >= 8;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +48,7 @@ class LoginScreenState extends State<LoginScreen> {
               key: _formKey,
               child: Center(
                 widthFactor: 3.0,
-                heightFactor: 1.5,
+                heightFactor: 1.4,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -181,8 +176,8 @@ class LoginScreenState extends State<LoginScreen> {
                                 minimumSize: const Size(double.infinity, 50),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadiusGeometry.horizontal(
-                                    left: Radius.circular(30),
-                                    right: Radius.circular(30),
+                                    left: Radius.circular(15),
+                                    right: Radius.circular(15),
                                   ),
                                 ),
                               ),

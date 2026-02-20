@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lsffend/screens/verification/auth_otp_email.dart';
 import 'package:lsffend/screens/verification/change_password.dart';
+import 'package:lsffend/screens/verification/forgot_password.dart';
 
 import 'screens/splash_screen.dart';
 import 'package:lsffend/screens/on_boarding_screen.dart';
@@ -42,7 +43,8 @@ class _MyAppState extends State<MyApp> {
         '/register': (context) => RegisterScreen(),
         '/home': (context) => const HomeScreen(),
         '/verify': (context) => const AuthOtpEmail(),
-        '/forgot-password': (context) => const ChangePassword(),
+        '/forgot-password': (context) => const ForgotPassword(),
+        'change-password': (context) => const ChangePassword(),
       },
     );
   }

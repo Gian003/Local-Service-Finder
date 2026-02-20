@@ -14,7 +14,6 @@ class RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
@@ -29,7 +28,6 @@ class RegisterScreenState extends State<RegisterScreen> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -52,6 +50,14 @@ class RegisterScreenState extends State<RegisterScreen> {
     return value.length >= 8;
   }
 
+  bool _acceptTerms = false;
+
+  void _handleTermsChanged(bool value) {
+    setState(() {
+      _acceptTerms = value;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,7 +70,7 @@ class RegisterScreenState extends State<RegisterScreen> {
               key: _formKey,
               child: Center(
                 widthFactor: 3.0,
-                heightFactor: 1.2,
+                heightFactor: 1.3,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -175,30 +181,6 @@ class RegisterScreenState extends State<RegisterScreen> {
 
                     const SizedBox(height: 25),
 
-                    //Phone Field
-                    TextFormField(
-                      controller: _phoneController,
-                      decoration: InputDecoration(
-                        labelText: 'Phone Number',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.horizontal(
-                            left: Radius.circular(10),
-                            right: Radius.circular(10),
-                          ),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your phone number';
-                        } else if (!_isPhoneValid(value)) {
-                          return 'Please enter a valid phone number';
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 25),
-
                     //Password Field
                     TextFormField(
                       controller: _passwordController,
@@ -268,15 +250,19 @@ class RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 15),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        IconButton(
-                          onPressed: () {},
-                          icon: Icon(Icons.check_box_outline_blank),
+                        SizedBox(
+                          child: TermsAndConditionsTapBox(
+                            active: _acceptTerms,
+                            onChanged: _handleTermsChanged,
+                          ),
                         ),
+
+                        const SizedBox(width: 10),
 
                         Text(
                           'I have read and I agree to',
@@ -315,8 +301,8 @@ class RegisterScreenState extends State<RegisterScreen> {
                         minimumSize: Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadiusGeometry.horizontal(
-                            left: Radius.circular(10),
-                            right: Radius.circular(10),
+                            left: Radius.circular(15),
+                            right: Radius.circular(15),
                           ),
                         ),
                       ),
@@ -371,6 +357,37 @@ class RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class TermsAndConditionsTapBox extends StatelessWidget {
+  const TermsAndConditionsTapBox({
+    super.key,
+    this.active = false,
+    required this.onChanged,
+  });
+
+  final bool active;
+  final ValueChanged<bool> onChanged;
+
+  void _handleTap() {
+    onChanged(!active);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _handleTap,
+      child: Container(
+        height: 20,
+        width: 20,
+        decoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          border: Border.all(color: Colors.black),
+          color: active ? Colors.white : AppColors.secondaryColor,
         ),
       ),
     );
