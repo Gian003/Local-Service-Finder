@@ -11,7 +11,7 @@ class ChangePassword extends StatefulWidget {
 class ChangePasswordState extends State<ChangePassword> {
   final _formkey = GlobalKey<FormState>();
   bool _isLoading = false;
-  final bool _obscureNewPassword = true;
+  bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
 
   final TextEditingController _newPasswordController = TextEditingController();
@@ -79,7 +79,7 @@ class ChangePasswordState extends State<ChangePassword> {
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
-                              _obscureConfirmPassword = !_obscureNewPassword;
+                              _obscureNewPassword = !_obscureNewPassword;
                             });
                           },
                           icon: Icon(
@@ -137,10 +137,75 @@ class ChangePasswordState extends State<ChangePassword> {
                       },
                     ),
 
+                    const SizedBox(height: 30),
+
+                    //Password Requirements
+                    Card(
+                      elevation: 1,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadiusGeometry.horizontal(
+                          left: Radius.circular(15),
+                          right: Radius.circular(15),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Password Requirements:',
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            const SizedBox(height: 5),
+
+                            _newPasswordRequirements(
+                              met: _newPasswordController.text.length >= 6,
+                              text: 'At least 8 characters long',
+                            ),
+
+                            _newPasswordRequirements(
+                              met: _newPasswordController.text.contains(
+                                RegExp(r'[A-Z]'),
+                              ),
+                              text: 'At least one uppercase letter',
+                            ),
+
+                            _newPasswordRequirements(
+                              met: _newPasswordController.text.contains(
+                                RegExp(r'[0-9]'),
+                              ),
+                              text: 'At least one number',
+                            ),
+
+                            _newPasswordRequirements(
+                              met:
+                                  _newPasswordController.text ==
+                                      _confirmPasswordController.text &&
+                                  _confirmPasswordController.text.isNotEmpty,
+                              text: 'Passwords match',
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
                     const SizedBox(height: 50),
 
+                    //Password Submisson Button
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // if (_formkey.currentState!.validate()) {
+                        //   //Handle password change logic
+                        // }
+                        Navigator.pushReplacementNamed(context, '/home');
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
                         foregroundColor: Colors.white,
@@ -171,7 +236,7 @@ class ChangePasswordState extends State<ChangePassword> {
     );
   }
 
-  Widget _buildRequirement({required bool met, required String text}) {
+  Widget _newPasswordRequirements({required bool met, required String text}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
