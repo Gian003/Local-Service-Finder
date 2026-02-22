@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart' hide ImageInfo;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsffend/global%20variable/colors.dart';
+import 'package:lsffend/templates/category.dart';
 import 'package:lsffend/templates/hero_layout_card.dart';
 import 'package:lsffend/templates/searh_bar.dart';
 
@@ -143,6 +144,82 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 const SizedBox(height: 20),
+
+                //Category View
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Services',
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+
+                        GestureDetector(
+                          onTap: () {},
+                          child: Text(
+                            'View all',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 15,
+                              fontWeight: FontWeight.normal,
+                              color: AppColors.secondaryColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // ConstrainedBox(
+                    //   constraints: const BoxConstraints(maxHeight: 100),
+                    //   child: CarouselView.weighted(
+                    //     flexWeights: const <int>[3, 3, 3],
+                    //     consumeMaxWeight: false,
+                    //     children: CategoryInfo.values.map((CategoryInfo info) {
+                    //       return ColoredBox(
+                    //         color: info.backgroundColor,
+                    //         child: Center(
+                    //           child: Column(
+                    //             mainAxisAlignment: MainAxisAlignment.center,
+                    //             children: <Widget>[
+                    //               Icon(info.icon, color: info.color, size: 32),
+
+                    //               Text(
+                    //                 info.label,
+                    //                 style: TextStyle(
+                    //                   fontWeight: FontWeight.bold,
+                    //                 ),
+                    //                 overflow: TextOverflow.clip,
+                    //                 softWrap: false,
+                    //               ),
+                    //             ],
+                    //           ),
+                    //         ),
+                    //       );
+                    //     }).toList(),
+                    //   ),
+                    // ),
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      crossAxisCount: 4,
+                      children: [
+                        _buildCategoryIcon(Icons.cleaning_services),
+                        _buildCategoryIcon(Icons.build),
+                        _buildCategoryIcon(Icons.local_laundry_service),
+                        _buildCategoryIcon(Icons.plumbing),
+                      ],
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -166,6 +243,22 @@ class _HomeScreenState extends State<HomeScreen> {
           _searchController.clear();
         });
       },
+    );
+  }
+
+  Widget _buildCategoryIcon(IconData icon) {
+    return Container(
+      width: 100,
+      height: 100,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.horizontal(
+          left: Radius.circular(10),
+          right: Radius.circular(10),
+        ),
+      ),
+      child: GestureDetector(onTap: () {}, child: Icon(icon)),
     );
   }
 }
