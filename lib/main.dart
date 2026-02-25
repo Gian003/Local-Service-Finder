@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lsffend/screens/verification/auth_otp_email.dart';
-import 'package:lsffend/screens/verification/change_password.dart';
-import 'package:lsffend/screens/verification/forgot_password.dart';
+import 'package:lsffend/screens/navigation/profile/change_password.dart';
+import 'package:lsffend/screens/navigation/profile/forgot_password.dart';
 
 import 'screens/splash_screen.dart';
 import 'package:lsffend/screens/on_boarding_screen.dart';
 import 'package:lsffend/screens/authentication/login_screen.dart';
 import 'package:lsffend/screens/authentication/register_screen.dart';
-import 'package:lsffend/screens/navigation/home_screen.dart';
+import 'package:lsffend/screens/navigation/home/home_screen.dart';
 
 void main() {
   runApp(const MyApp());

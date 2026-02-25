@@ -26,3 +26,25 @@ enum CategoryInfo {
   final Color color;
   final Color backgroundColor;
 }
+
+Widget buildCategoryIcon(IconData icon) {
+  return Padding(
+    padding: const EdgeInsets.all(5.0),
+    child: TextButton(
+      onPressed: () {},
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        iconSize: 30,
+        minimumSize: Size(80, 80),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadiusGeometry.horizontal(
+            left: Radius.circular(5),
+            right: Radius.circular(5),
+          ),
+          side: BorderSide(width: 1, color: Color.fromARGB(255, 216, 218, 220)),
+        ),
+      ),
+      child: Icon(icon),
+    ),
+  );
+}
