@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:lsffend/global%20variable/colors.dart';
 import 'package:lsffend/screens/navigation/home/home_screen.dart';
 
 class MainWrapper extends StatefulWidget {
