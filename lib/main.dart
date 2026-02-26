@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lsffend/main_wrapper.dart';
 import 'package:lsffend/screens/verification/auth_otp_email.dart';
 import 'package:lsffend/screens/navigation/profile/change_password.dart';
 import 'package:lsffend/screens/navigation/profile/forgot_password.dart';
@@ -41,10 +42,10 @@ class _MyAppState extends State<MyApp> {
         '/onBoarding': (context) => const OnBoardingScreen(),
         '/login': (context) => const LoginScreen(),
         '/register': (context) => RegisterScreen(),
-        '/home': (context) => const HomeScreen(),
+        '/home': (context) => const MainWrapper(),
         '/verify': (context) => const AuthOtpEmail(),
         '/forgot-password': (context) => const ForgotPassword(),
-        'change-password': (context) => const ChangePassword(),
+        '/change-password': (context) => const ChangePassword(),
       },
     );
   }

@@ -58,175 +58,172 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                //Header
-                SizedBox(
-                  height: 135,
-                  width: double.infinity,
+    return SafeArea(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              //Header
+              SizedBox(
+                height: 135,
+                width: double.infinity,
 
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'What service do you need?',
-                            style: TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.secondaryColor,
-                            ),
-                          ),
-
-                          const SizedBox(width: 20),
-
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              IconButton(
-                                onPressed: () {},
-                                icon: FaIcon(
-                                  FontAwesomeIcons.cartFlatbed,
-                                  color: Colors.black,
-                                  size: 20,
-                                ),
-                              ),
-
-                              IconButton(
-                                onPressed: () {},
-                                icon: FaIcon(
-                                  FontAwesomeIcons.bell,
-                                  color: Colors.black,
-                                  size: 20,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-
-                      _buildSearchBar(),
-                    ],
-                  ),
-                ),
-
-                //Body
-
-                //Carousel View
-                SizedBox(
-                  height: 200,
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: (notification) {
-                      if (notification is ScrollStartNotification) {
-                        _autoScrollTimer?.cancel();
-                      } else if (notification is ScrollEndNotification) {
-                        _startAutoScroll();
-                      }
-                      return false;
-                    },
-                    child: CarouselView.weighted(
-                      controller: _carouselController,
-                      itemSnapping: true,
-                      flexWeights: const <int>[7],
-                      children: ImageInfo.values.map((ImageInfo image) {
-                        return HeroLayoutCard(imageInfo: image);
-                      }).toList(),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                //Category View
-                Column(
+                child: Column(
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Services',
+                          'What service do you need?',
                           style: TextStyle(
                             fontFamily: 'Montserrat',
-                            fontSize: 20,
+                            fontSize: 17,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: AppColors.secondaryColor,
                           ),
                         ),
 
-                        GestureDetector(
-                          onTap: () {},
-                          child: Text(
-                            'View all',
-                            style: TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontSize: 15,
-                              fontWeight: FontWeight.normal,
-                              color: AppColors.secondaryColor,
+                        const SizedBox(width: 20),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            IconButton(
+                              onPressed: () {},
+                              icon: FaIcon(
+                                FontAwesomeIcons.cartFlatbed,
+                                color: Colors.black,
+                                size: 20,
+                              ),
                             ),
-                          ),
+
+                            IconButton(
+                              onPressed: () {},
+                              icon: FaIcon(
+                                FontAwesomeIcons.bell,
+                                color: Colors.black,
+                                size: 20,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 10),
-
-                    // ConstrainedBox(
-                    //   constraints: const BoxConstraints(maxHeight: 100),
-                    //   child: CarouselView.weighted(
-                    //     flexWeights: const <int>[3, 3, 3],
-                    //     consumeMaxWeight: false,
-                    //     children: CategoryInfo.values.map((CategoryInfo info) {
-                    //       return ColoredBox(
-                    //         color: info.backgroundColor,
-                    //         child: Center(
-                    //           child: Column(
-                    //             mainAxisAlignment: MainAxisAlignment.center,
-                    //             children: <Widget>[
-                    //               Icon(info.icon, color: info.color, size: 32),
-
-                    //               Text(
-                    //                 info.label,
-                    //                 style: TextStyle(
-                    //                   fontWeight: FontWeight.bold,
-                    //                 ),
-                    //                 overflow: TextOverflow.clip,
-                    //                 softWrap: false,
-                    //               ),
-                    //             ],
-                    //           ),
-                    //         ),
-                    //       );
-                    //     }).toList(),
-                    //   ),
-                    // ),
-                    SizedBox(
-                      height: 80,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          buildCategoryIcon(Icons.cleaning_services),
-                          buildCategoryIcon(Icons.build),
-                          buildCategoryIcon(Icons.local_laundry_service),
-                          buildCategoryIcon(Icons.plumbing),
-                          buildCategoryIcon(Icons.cleaning_services),
-                          buildCategoryIcon(Icons.build),
-                          buildCategoryIcon(Icons.local_laundry_service),
-                          buildCategoryIcon(Icons.plumbing),
-                        ],
-                      ),
-                    ),
+                    _buildSearchBar(),
                   ],
                 ),
-              ],
-            ),
+              ),
+
+              //Body
+
+              //Carousel View
+              SizedBox(
+                height: 200,
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    if (notification is ScrollStartNotification) {
+                      _autoScrollTimer?.cancel();
+                    } else if (notification is ScrollEndNotification) {
+                      _startAutoScroll();
+                    }
+                    return false;
+                  },
+                  child: CarouselView.weighted(
+                    controller: _carouselController,
+                    itemSnapping: true,
+                    flexWeights: const <int>[7],
+                    children: ImageInfo.values.map((ImageInfo image) {
+                      return HeroLayoutCard(imageInfo: image);
+                    }).toList(),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              //Category View
+              Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Services',
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+
+                      GestureDetector(
+                        onTap: () {},
+                        child: Text(
+                          'View all',
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 15,
+                            fontWeight: FontWeight.normal,
+                            color: AppColors.secondaryColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // ConstrainedBox(
+                  //   constraints: const BoxConstraints(maxHeight: 100),
+                  //   child: CarouselView.weighted(
+                  //     flexWeights: const <int>[3, 3, 3],
+                  //     consumeMaxWeight: false,
+                  //     children: CategoryInfo.values.map((CategoryInfo info) {
+                  //       return ColoredBox(
+                  //         color: info.backgroundColor,
+                  //         child: Center(
+                  //           child: Column(
+                  //             mainAxisAlignment: MainAxisAlignment.center,
+                  //             children: <Widget>[
+                  //               Icon(info.icon, color: info.color, size: 32),
+
+                  //               Text(
+                  //                 info.label,
+                  //                 style: TextStyle(
+                  //                   fontWeight: FontWeight.bold,
+                  //                 ),
+                  //                 overflow: TextOverflow.clip,
+                  //                 softWrap: false,
+                  //               ),
+                  //             ],
+                  //           ),
+                  //         ),
+                  //       );
+                  //     }).toList(),
+                  //   ),
+                  // ),
+                  SizedBox(
+                    height: 80,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        buildCategoryIcon(Icons.cleaning_services),
+                        buildCategoryIcon(Icons.build),
+                        buildCategoryIcon(Icons.local_laundry_service),
+                        buildCategoryIcon(Icons.plumbing),
+                        buildCategoryIcon(Icons.cleaning_services),
+                        buildCategoryIcon(Icons.build),
+                        buildCategoryIcon(Icons.local_laundry_service),
+                        buildCategoryIcon(Icons.plumbing),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
