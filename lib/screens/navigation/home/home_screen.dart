@@ -207,16 +207,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     //     }).toList(),
                     //   ),
                     // ),
-                    GridView.count(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      crossAxisCount: 4,
-                      children: [
-                        _buildCategoryIcon(Icons.cleaning_services),
-                        _buildCategoryIcon(Icons.build),
-                        _buildCategoryIcon(Icons.local_laundry_service),
-                        _buildCategoryIcon(Icons.plumbing),
-                      ],
+                    SizedBox(
+                      height: 80,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          buildCategoryIcon(Icons.cleaning_services),
+                          buildCategoryIcon(Icons.build),
+                          buildCategoryIcon(Icons.local_laundry_service),
+                          buildCategoryIcon(Icons.plumbing),
+                          buildCategoryIcon(Icons.cleaning_services),
+                          buildCategoryIcon(Icons.build),
+                          buildCategoryIcon(Icons.local_laundry_service),
+                          buildCategoryIcon(Icons.plumbing),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -243,22 +248,6 @@ class _HomeScreenState extends State<HomeScreen> {
           _searchController.clear();
         });
       },
-    );
-  }
-
-  Widget _buildCategoryIcon(IconData icon) {
-    return Container(
-      width: 100,
-      height: 100,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.horizontal(
-          left: Radius.circular(10),
-          right: Radius.circular(10),
-        ),
-      ),
-      child: GestureDetector(onTap: () {}, child: Icon(icon)),
     );
   }
 }
