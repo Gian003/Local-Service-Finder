@@ -6,6 +6,7 @@ import 'package:lsffend/global%20variable/colors.dart';
 import 'package:lsffend/templates/category.dart';
 import 'package:lsffend/templates/hero_layout_card.dart';
 import 'package:lsffend/templates/searh_bar.dart';
+import 'package:lsffend/templates/service%20card/service_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -55,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _carouselController.dispose();
     super.dispose();
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return SafeArea(
