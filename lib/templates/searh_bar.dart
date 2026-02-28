@@ -20,6 +20,8 @@ class CustomSearchBar extends StatefulWidget {
 }
 
 class CustomSearchBarState extends State<CustomSearchBar> {
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
   bool _hasText = false;
 
   void _onTextChanged() {

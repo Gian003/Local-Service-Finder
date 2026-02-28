@@ -101,22 +101,27 @@ class ServiceCard extends StatelessWidget {
                           fontWeight: FontWeight.normal,
                         ),
                       ),
+                    ],
+                  ),
+
+                  const SizedBox(width: 5),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '₱${serviceModel.price.toStringAsFixed(0)}',
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 10,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
 
                       const SizedBox(width: 5),
 
                       Row(
                         children: [
-                          Text(
-                            '₱${serviceModel.price.toStringAsFixed(0)}',
-                            style: TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontSize: 10,
-                              fontWeight: FontWeight.normal,
-                            ),
-                          ),
-
-                          const Spacer(),
-
                           if (serviceModel.discountPercent != null)
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -140,17 +145,16 @@ class ServiceCard extends StatelessWidget {
                                 ),
                               ),
                             ),
+
+                          IconButton(
+                            onPressed: onBookMark,
+                            icon: FaIcon(FontAwesomeIcons.bookmark, size: 16),
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                          ),
                         ],
                       ),
                     ],
-                  ),
-
-                  Align(
-                    alignment: AlignmentGeometry.topRight,
-                    child: IconButton(
-                      onPressed: onBookMark,
-                      icon: FaIcon(FontAwesomeIcons.bookmark, size: 20),
-                    ),
                   ),
                 ],
               ),

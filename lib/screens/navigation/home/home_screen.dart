@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart' hide ImageInfo;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:lsffend/dataset/dummy_data.dart';
 import 'package:lsffend/global%20variable/colors.dart';
 import 'package:lsffend/templates/category.dart';
 import 'package:lsffend/templates/hero_layout_card.dart';
 import 'package:lsffend/templates/searh_bar.dart';
+import 'package:lsffend/templates/service%20card/service_card.dart';
 import 'package:lsffend/templates/service%20card/service_model.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -56,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _carouselController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -75,13 +77,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          'What service do you need?',
-                          style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.secondaryColor,
+                        Expanded(
+                          child: Text(
+                            'What service do you need?',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.secondaryColor,
+                            ),
                           ),
                         ),
 
@@ -221,6 +225,56 @@ class _HomeScreenState extends State<HomeScreen> {
                         buildCategoryIcon(Icons.plumbing),
                       ],
                     ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              //Recommended View
+              Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Recommended',
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+
+                      GestureDetector(
+                        onTap: () {},
+                        child: Text(
+                          'View all',
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 15,
+                            fontWeight: FontWeight.normal,
+                            color: AppColors.secondaryColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: DummyData().serviceList.length,
+                    itemBuilder: (context, index) {
+                      return ServiceCard(
+                        serviceModel: DummyData().serviceList[index],
+                        onTap: () {},
+                        onBookMark: () {},
+                      );
+                    },
                   ),
                 ],
               ),

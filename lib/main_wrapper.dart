@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsffend/global%20variable/colors.dart';
+import 'package:lsffend/screens/navigation/explore/explore_screen.dart';
 import 'package:lsffend/screens/navigation/home/home_screen.dart';
 
 class MainWrapper extends StatefulWidget {
@@ -15,7 +16,7 @@ class MainWrapperState extends State<MainWrapper> {
 
   final List<Widget> _pages = [
     const HomeScreen(),
-    const Placeholder(),
+    const ExploreScreen(),
     const Placeholder(),
     const Placeholder(),
     const Placeholder(),

@@ -43,6 +43,7 @@ class _MyAppState extends State<MyApp> {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => RegisterScreen(),
         '/home': (context) => const MainWrapper(),
+        '/explore': (context) => const MainWrapper(),
         '/verify': (context) => const AuthOtpEmail(),
         '/forgot-password': (context) => const ForgotPassword(),
         '/change-password': (context) => const ChangePassword(),
