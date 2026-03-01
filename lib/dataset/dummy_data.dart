@@ -8,6 +8,7 @@ class DummyData {
       rating: 4.3,
       reviewCount: 500,
       price: 3000,
+      discountPercent: 40,
       imageUrl: 'https://picsum.photos/200',
     ),
     ServiceModel(
@@ -16,6 +17,7 @@ class DummyData {
       rating: 4.3,
       reviewCount: 500,
       price: 3000,
+      discountPercent: 40,
       imageUrl: 'https://picsum.photos/200',
     ),
     ServiceModel(
@@ -24,6 +26,7 @@ class DummyData {
       rating: 4.3,
       reviewCount: 500,
       price: 3000,
+      discountPercent: 40,
       imageUrl: 'https://picsum.photos/200',
     ),
     ServiceModel(
@@ -32,6 +35,7 @@ class DummyData {
       rating: 4.3,
       reviewCount: 500,
       price: 3000,
+      discountPercent: 40,
       imageUrl: 'https://picsum.photos/200',
     ),
     ServiceModel(
@@ -40,6 +44,7 @@ class DummyData {
       rating: 4.3,
       reviewCount: 500,
       price: 3000,
+      discountPercent: 40,
       imageUrl: 'https://picsum.photos/200',
     ),
     ServiceModel(
@@ -48,6 +53,7 @@ class DummyData {
       rating: 4.3,
       reviewCount: 500,
       price: 3000,
+      discountPercent: 40,
       imageUrl: 'https://picsum.photos/200',
     ),
   ];
