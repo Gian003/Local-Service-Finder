@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide ImageInfo;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsffend/dataset/dummy_data.dart';
 import 'package:lsffend/global%20variable/colors.dart';
+import 'package:lsffend/services/service_services.dart';
 import 'package:lsffend/templates/category.dart';
 import 'package:lsffend/templates/hero_layout_card.dart';
 import 'package:lsffend/templates/searh_bar.dart';
@@ -30,9 +31,22 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentCarouselIndex = 0;
   final int _carouselItemCount = ImageInfo.values.length;
 
+  //Service List
+  List<ServiceModel> _serviceList = [];
+  bool _isLoading = true;
+
+  Future<void> _loadServices() async {
+    final services = await ServiceServices.getAllServices();
+    setState(() {
+      _serviceList = services;
+      _isLoading = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    _loadServices();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startAutoScroll();
     });
@@ -264,18 +278,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 10),
 
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: DummyData().serviceList.length,
-                    itemBuilder: (context, index) {
-                      return ServiceCard(
-                        serviceModel: DummyData().serviceList[index],
-                        onTap: () {},
-                        onBookMark: () {},
-                      );
-                    },
-                  ),
+                  _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _serviceList.length,
+                          itemBuilder: (context, index) {
+                            return ServiceCard(
+                              serviceModel: _serviceList[index],
+                              onTap: () {},
+                              onBookMark: () {},
+                            );
+                          },
+                        ),
                 ],
               ),
             ],

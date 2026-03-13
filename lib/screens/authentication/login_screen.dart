@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsffend/global%20variable/colors.dart';
+import 'package:lsffend/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,7 +19,6 @@ class LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -169,11 +169,30 @@ class LoginScreenState extends State<LoginScreen> {
 
                             //Login Button
                             ElevatedButton(
-                              onPressed: () {
-                                Navigator.pushReplacementNamed(
-                                  context,
-                                  '/home',
+                              onPressed: () async {
+                                final result = await AuthService.customerLogin(
+                                  email: _emailController.text,
+                                  password: _passwordController.text,
                                 );
+
+                                if (result['status'] == 200) {
+                                  if (context.mounted) {
+                                    Navigator.pushReplacementNamed(
+                                      context,
+                                      '/home',
+                                    );
+                                  }
+                                } else {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          result['message'] ?? 'Login Failed',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryColor,
