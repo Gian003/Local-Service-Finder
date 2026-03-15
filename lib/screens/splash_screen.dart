@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:lsffend/services/api_service.dart';
 
 class SplashScreenWrapper extends StatefulWidget {
   const SplashScreenWrapper({super.key});
@@ -25,13 +26,13 @@ class SplashScreenWrapperState extends State<SplashScreenWrapper> {
   Future<void> _initializeApp() async {
     try {
       // Simulate some initialization time
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 5));
 
       if (mounted) {
         setState(() {
           _isInitialized = true;
         });
-        _navigateBasedOnAuth();
+        await _navigateBasedOnAuth();
       }
     } catch (e) {
       if (kDebugMode) {
@@ -47,9 +48,17 @@ class SplashScreenWrapperState extends State<SplashScreenWrapper> {
     }
   }
 
-  void _navigateBasedOnAuth() {
+  Future<void> _navigateBasedOnAuth() async {
+    final token = await ApiService.getToken();
+
+    if (!mounted) return;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.pushReplacementNamed(context, '/onBoarding');
+      if (token != null) {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        Navigator.pushReplacementNamed(context, '/onBoarding');
+      }
     });
   }
 

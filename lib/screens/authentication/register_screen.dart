@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lsffend/global%20variable/colors.dart';
+import 'package:lsffend/services/api_service.dart';
+import 'package:lsffend/services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -10,6 +12,7 @@ class RegisterScreen extends StatefulWidget {
 
 class RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
@@ -216,7 +219,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                       controller: _confirmPasswordController,
                       obscureText: _obscureConfirmPassword,
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: 'Confirm Password',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.horizontal(
                             left: Radius.circular(10),
@@ -287,9 +290,70 @@ class RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 40),
 
                     ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/verify');
-                      },
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                              if (!_formKey.currentState!.validate()) return;
+
+                              if (_passwordController.text !=
+                                  _confirmPasswordController.text) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Passwords do not match'),
+                                  ),
+                                );
+
+                                return;
+                              }
+
+                              if (!_acceptTerms) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Please accept the terms and conditions',
+                                    ),
+                                  ),
+                                );
+
+                                return;
+                              }
+
+                              final result = await AuthService.customerRegister(
+                                firstName: _firstNameController.text.trim(),
+                                lastName: _lastNameController.text.trim(),
+                                email: _emailController.text.trim(),
+                                password: _passwordController.text.trim(),
+                              );
+
+                              setState(() {
+                                _isLoading = false;
+                              });
+
+                              if (result['status'] == 201) {
+                                if (context.mounted) {
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    '/verify',
+                                  );
+                                }
+                              } else {
+                                final errors = result['errors'];
+                                String message =
+                                    result['message'] ?? 'Registration Failed';
+
+                                if (errors != null) {
+                                  if (errors['email'] != null) {
+                                    message = errors['email'][0];
+                                  }
+                                }
+
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(message)),
+                                  );
+                                }
+                              }
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
                         foregroundColor: Colors.white,
@@ -302,15 +366,17 @@ class RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
 
-                      child: Text(
-                        'Create Account',
-                        style: TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? CircularProgressIndicator()
+                          : Text(
+                              'Create Account',
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
 
                     const SizedBox(height: 40),
@@ -381,7 +447,7 @@ class TermsAndConditionsTapBox extends StatelessWidget {
         width: 20,
         decoration: BoxDecoration(
           shape: BoxShape.rectangle,
-          color: active ? Colors.grey[300] : AppColors.secondaryColor,
+          color: active ? AppColors.secondaryColor : Colors.grey[300],
         ),
       ),
     );

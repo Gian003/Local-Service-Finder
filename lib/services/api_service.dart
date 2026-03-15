@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:lsffend/config/app_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://127.0.0.1:8000/api';
+  static const String baseUrl = AppConfig.baseUrl;
 
   //Get Stored Token
   static Future<String?> getToken() async {
@@ -51,10 +53,18 @@ class ApiService {
       headers['Authorization'] = 'Bearer $token';
     }
 
-    return await http.post(
+    final result = await http.post(
       Uri.parse('$baseUrl/$endpoint'),
       headers: headers,
       body: jsonEncode(body),
     );
+
+    debugPrint('URL: $baseUrl/$endpoint');
+    debugPrint('Headers: $headers');
+    debugPrint('Body: ${jsonEncode(body)})');
+    debugPrint('Status Code: ${result.statusCode}');
+    debugPrint('Response Body: ${result.body}');
+
+    return result;
   }
 }

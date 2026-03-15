@@ -10,27 +10,20 @@ import 'package:lsffend/screens/authentication/login_screen.dart';
 import 'package:lsffend/screens/authentication/register_screen.dart';
 import 'package:lsffend/screens/navigation/home/home_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Local Service Finder',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color.fromRGBO(47, 88, 153, 100),
@@ -43,7 +36,6 @@ class _MyAppState extends State<MyApp> {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => RegisterScreen(),
         '/home': (context) => const MainWrapper(),
-        '/explore': (context) => const MainWrapper(),
         '/verify': (context) => const AuthOtpEmail(),
         '/forgot-password': (context) => const ForgotPassword(),
         '/change-password': (context) => const ChangePassword(),

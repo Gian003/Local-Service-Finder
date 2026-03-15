@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:lsffend/config/app_config.dart';
+import 'package:lsffend/dataset/mock_service.dart';
 import 'package:lsffend/templates/service card/service_model.dart';
 import 'api_service.dart';
 
@@ -8,6 +10,29 @@ class ServiceServices {
     String? category,
     String? sort,
   }) async {
+    //Offline Mode
+    if (AppConfig.offlineMode) {
+      await Future.delayed(Duration(seconds: 5));
+      var list = MockService.getServices();
+
+      if (category != null) {
+        list = list.where((sort) => sort.category == category).toList();
+      }
+
+      if (sort == 'popular') {
+        list.sort((a, b) => b.reviewCount.compareTo(a.reviewCount));
+      } else if (sort == 'newest') {
+        // Sort by newest
+      } else if (sort == 'most_expensive') {
+        list.sort((a, b) => b.price.compareTo(a.price));
+      } else if (sort == 'lowest_price') {
+        list.sort((a, b) => a.price.compareTo(b.price));
+      }
+
+      return list;
+    }
+
+    //Online Mode
     String endpoint = '/services';
     final parameters = <String>[];
 

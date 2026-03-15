@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lsffend/dataset/dummy_data.dart';
+import 'package:lsffend/dataset/mock_service.dart';
 import 'package:lsffend/global%20variable/colors.dart';
 import 'package:lsffend/templates/searh_bar.dart';
 import 'package:lsffend/templates/service%20card/service_card.dart';
@@ -19,8 +19,10 @@ class ExploreScreenState extends State<ExploreScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   late List<ServiceModel> _serviceList;
+  late List<ServiceModel> _fullServiceList;
 
   String _selectedFilter = 'Popular';
+  List<String> _selectedCategories = [];
 
   final List<String> _filterOptions = [
     'Popular',
@@ -32,7 +34,7 @@ class ExploreScreenState extends State<ExploreScreen> {
   @override
   void initState() {
     super.initState();
-    _serviceList = List.from(DummyData().serviceList);
+    _serviceList = List.from(MockService.getServices());
   }
 
   @override
@@ -42,23 +44,46 @@ class ExploreScreenState extends State<ExploreScreen> {
   }
 
   void _applyFiltering() {
+    List<ServiceModel> result = List.from(_fullServiceList);
+
+    //Apply search filter
+    if (_searchQuery.isNotEmpty) {
+      result = result
+          .where(
+            (sort) =>
+                sort.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                sort.workerName.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ),
+          )
+          .toList();
+    }
+
+    //Apply category filter
+    if (_selectedCategories.isNotEmpty) {
+      result = result
+          .where((sort) => _selectedCategories.contains(sort.category))
+          .toList();
+    }
+
+    //Apply sort filter
     setState(() {
       switch (_selectedFilter) {
         case 'Popular':
-          DummyData().serviceList.sort(
-            (a, b) => b.reviewCount.compareTo(a.reviewCount),
-          );
+          result.sort((a, b) => b.reviewCount.compareTo(a.reviewCount));
           break;
         case 'Newest':
-          // Sort by newest
+          result.sort((a, b) => (b.id ?? 0).compareTo(a.id ?? 0));
           break;
         case 'Most Expensive':
-          DummyData().serviceList.sort((a, b) => b.price.compareTo(a.price));
+          result.sort((a, b) => b.price.compareTo(a.price));
           break;
         case 'Lowest Price':
-          DummyData().serviceList.sort((a, b) => a.price.compareTo(b.price));
+          result.sort((a, b) => a.price.compareTo(b.price));
           break;
       }
+
+      _serviceList = result;
     });
   }
 
@@ -69,67 +94,90 @@ class ExploreScreenState extends State<ExploreScreen> {
         borderRadius: BorderRadiusGeometry.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Filter',
-                style: TextStyle(
-                  fontFamily: 'Montserrat',
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 15),
-
-              Text('Catefory'),
-
-              const SizedBox(height: 5),
-
-              Wrap(
-                spacing: 8,
-                children: ['Cleaning', 'PLumbing', 'Repair', 'Laundry'].map((
-                  category,
-                ) {
-                  return FilterChip(
-                    label: Text(category),
-                    onSelected: (value) {},
-                  );
-                }).toList(),
-              ),
-
-              const SizedBox(height: 20),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadiusGeometry.horizontal(
-                        left: Radius.circular(10),
-                        right: Radius.circular(10),
-                      ),
-                    ),
-                  ),
-                  child: Text(
-                    'Apply',
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Filter',
                     style: TextStyle(
                       fontFamily: 'Montserrat',
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
                     ),
                   ),
-                ),
+
+                  const SizedBox(height: 15),
+
+                  Text('Catefory'),
+
+                  const SizedBox(height: 5),
+
+                  Wrap(
+                    spacing: 8,
+                    children: ['Cleaning', 'PLumbing', 'Repair', 'Laundry'].map(
+                      (category) {
+                        final isSelected = _selectedCategories.contains(
+                          category,
+                        );
+
+                        return FilterChip(
+                          label: Text(category),
+                          selected: isSelected,
+                          selectedColor: AppColors.primaryColor.withValues(
+                            alpha: 0.2,
+                          ),
+                          onSelected: (value) {
+                            setModalState(() {
+                              if (value) {
+                                _selectedCategories.add(category);
+                              } else {
+                                _selectedCategories.remove(category);
+                              }
+                            });
+                          },
+                        );
+                      },
+                    ).toList(),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => {
+                        Navigator.pop(context),
+                        _applyFiltering(),
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.horizontal(
+                            left: Radius.circular(10),
+                            right: Radius.circular(10),
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        'Apply',
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -178,7 +226,7 @@ class ExploreScreenState extends State<ExploreScreen> {
                 onPressed: () {
                   setState(() {
                     _selectedFilter = option;
-                    _applyFiltering;
+                    _applyFiltering();
                   });
                 },
                 style: TextButton.styleFrom(
@@ -228,17 +276,20 @@ class ExploreScreenState extends State<ExploreScreen> {
                     icon: Icon(Icons.arrow_back),
                   ),
 
-                  const SizedBox(width: 100),
-
-                  Text(
-                    'Explore',
-                    style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.secondaryColor,
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        'Explore',
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.secondaryColor,
+                        ),
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 48),
                 ],
               ),
 
@@ -250,18 +301,31 @@ class ExploreScreenState extends State<ExploreScreen> {
 
               const SizedBox(height: 15),
 
-              ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: _serviceList.length,
-                itemBuilder: (context, index) {
-                  return ServiceCard(
-                    serviceModel: _serviceList[index],
-                    onTap: () {},
-                    onBookMark: () {},
-                  );
-                },
-              ),
+              _serviceList.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.only(top: 40),
+                      child: Text(
+                        'No Services Found',
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 15,
+                          fontWeight: FontWeight.normal,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: _serviceList.length,
+                      itemBuilder: (context, index) {
+                        return ServiceCard(
+                          serviceModel: _serviceList[index],
+                          onTap: () {},
+                          onBookMark: () {},
+                        );
+                      },
+                    ),
             ],
           ),
         ),
@@ -276,12 +340,14 @@ class ExploreScreenState extends State<ExploreScreen> {
       onSearch: (query) {
         setState(() {
           _searchQuery = query;
+          _applyFiltering();
         });
       },
       onClear: () {
         setState(() {
           _searchQuery = '';
           _searchController.clear();
+          _applyFiltering();
         });
       },
     );
