@@ -30,7 +30,10 @@ class ApiService {
     String endpoint, {
     bool auth = false,
   }) async {
-    final headers = {'Content-type': 'application/json'};
+    final headers = {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+    };
 
     if (auth) {
       final token = await getToken();
@@ -46,7 +49,10 @@ class ApiService {
     Map<String, dynamic> body, {
     bool auth = false,
   }) async {
-    final headers = {'Content-type': 'application/json'};
+    final headers = {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+    };
 
     if (auth) {
       final token = await getToken();

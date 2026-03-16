@@ -34,7 +34,8 @@ class ExploreScreenState extends State<ExploreScreen> {
   @override
   void initState() {
     super.initState();
-    _serviceList = List.from(MockService.getServices());
+    _fullServiceList = List.from(MockService.getServices());
+    _serviceList = List.from(_fullServiceList);
   }
 
   @override

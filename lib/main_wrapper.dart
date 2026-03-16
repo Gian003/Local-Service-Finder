@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsffend/global%20variable/colors.dart';
+import 'package:lsffend/screens/navigation/chat/conversation_list_screen.dart';
 import 'package:lsffend/screens/navigation/explore/explore_screen.dart';
 import 'package:lsffend/screens/navigation/home/home_screen.dart';
 
@@ -17,7 +18,7 @@ class MainWrapperState extends State<MainWrapper> {
   final List<Widget> _pages = [
     const HomeScreen(),
     const ExploreScreen(),
-    const Placeholder(),
+    const ConversationListScreen(),
     const Placeholder(),
     const Placeholder(),
   ];
