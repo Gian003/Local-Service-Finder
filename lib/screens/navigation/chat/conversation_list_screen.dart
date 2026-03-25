@@ -74,45 +74,38 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         children: [
           // Header
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(10),
             child: Row(
               children: [
-                const Expanded(
-                  child: Text(
-                    'Messages',
-                    style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Center(
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: Icon(Icons.arrow_back),
+                        ),
+
+                        const SizedBox(width: 55),
+
+                        const Text(
+                          'Chat & Calls',
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.secondaryColor,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.edit_outlined),
                 ),
               ],
             ),
           ),
-
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search conversations...',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 10),
 
           // Conversation list
           Expanded(
@@ -145,7 +138,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
           context,
           MaterialPageRoute(
             builder: (_) => ChatScreen(
-              workerId:   data['worker_id'],
+              workerId: data['worker_id'],
               workerName: data['worker_name'],
               workerImage: data['image'],
             ),
@@ -234,8 +227,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
           context,
           MaterialPageRoute(
             builder: (_) => ChatScreen(
-              workerId:    message.receiverId,
-              workerName:  'Worker',
+              workerId: message.receiverId,
+              workerName: 'Worker',
               workerImage: null,
             ),
           ),
@@ -248,9 +241,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      trailing: Text(
-        '${message.createdAt.hour}:${message.createdAt.minute}',
-      ),
+      trailing: Text('${message.createdAt.hour}:${message.createdAt.minute}'),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:lsffend/screens/navigation/bookmark/bookmark_model.dart';
 import 'package:lsffend/templates/service%20card/service_model.dart';
 
 class MockService {
@@ -6,56 +7,95 @@ class MockService {
       ServiceModel(
         title: "title",
         workerName: "workerName",
-        rating: 4.3,
-        reviewCount: 500,
-        price: 3000,
+        rating: 6.3,
+        reviewCount: 600,
+        price: 1000,
         discountPercent: 40,
         imageUrl: 'https://picsum.photos/200',
       ),
+
+      ServiceModel(
+        title: "title",
+        workerName: "workerName",
+        rating: 5.3,
+        reviewCount: 500,
+        price: 2000,
+        discountPercent: 40,
+        imageUrl: 'https://picsum.photos/200',
+      ),
+
       ServiceModel(
         title: "title",
         workerName: "workerName",
         rating: 4.3,
-        reviewCount: 500,
+        reviewCount: 400,
         price: 3000,
         discountPercent: 40,
         imageUrl: 'https://picsum.photos/200',
       ),
+
       ServiceModel(
         title: "title",
         workerName: "workerName",
-        rating: 4.3,
-        reviewCount: 500,
-        price: 3000,
+        rating: 3.3,
+        reviewCount: 300,
+        price: 4000,
         discountPercent: 40,
         imageUrl: 'https://picsum.photos/200',
       ),
+
       ServiceModel(
         title: "title",
         workerName: "workerName",
-        rating: 4.3,
-        reviewCount: 500,
-        price: 3000,
+        rating: 2.3,
+        reviewCount: 200,
+        price: 5000,
         discountPercent: 40,
         imageUrl: 'https://picsum.photos/200',
       ),
+
       ServiceModel(
         title: "title",
         workerName: "workerName",
-        rating: 4.3,
-        reviewCount: 500,
-        price: 3000,
+        rating: 1.3,
+        reviewCount: 100,
+        price: 6000,
         discountPercent: 40,
         imageUrl: 'https://picsum.photos/200',
       ),
-      ServiceModel(
-        title: "title",
-        workerName: "workerName",
-        rating: 4.3,
-        reviewCount: 500,
-        price: 3000,
-        discountPercent: 40,
+    ];
+  }
+
+  static List<BookmarkModel> getBookmarks() {
+    return [
+      BookmarkModel(
+        id: 1,
+        serviceType: 'Service',
+        serviceName: 'House Cleaning',
+        providerName: 'John',
         imageUrl: 'https://picsum.photos/200',
+        date: DateTime.now(),
+        status: 'completed',
+      ),
+
+      BookmarkModel(
+        id: 2,
+        serviceType: 'Service',
+        serviceName: 'Home Security Installation Services',
+        providerName: 'David',
+        imageUrl: 'https://picsum.photos/200',
+        date: DateTime.now(),
+        status: 'completed',
+      ),
+
+      BookmarkModel(
+        id: 3,
+        serviceType: 'Service',
+        serviceName: 'Roof Cleaning Services',
+        providerName: 'David',
+        imageUrl: 'https://picsum.photos/200',
+        date: DateTime.now(),
+        status: 'completed',
       ),
     ];
   }

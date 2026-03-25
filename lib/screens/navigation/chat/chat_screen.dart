@@ -40,14 +40,14 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<Map<String, dynamic>> _mockMessages = [
     {
       'id': 1,
-      'sender_id': 2,  // current user
+      'sender_id': 2, // current user
       'content': 'Hello! I need a house cleaning service.',
       'is_read': true,
       'created_at': '2026-03-17T10:30:00.000Z',
     },
     {
       'id': 2,
-      'sender_id': 1,  // worker
+      'sender_id': 1, // worker
       'content': 'Hi! Sure, when would you like it done?',
       'is_read': true,
       'created_at': '2026-03-17T10:31:00.000Z',
@@ -108,8 +108,8 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _initPusher() async {
     try {
       await _pusher.init(
-        apiKey:  AppConfig.pusherKey,     // 👈 add to AppConfig
-        cluster: AppConfig.pusherCluster, // 👈 add to AppConfig
+        apiKey: AppConfig.pusherKey,
+        cluster: AppConfig.pusherCluster,
       );
 
       await _pusher.connect();
@@ -159,7 +159,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final message = await ChatService.sendMessage(
       receiverId: widget.workerId,
-      content:    content,
+      content: content,
     );
 
     if (message != null) {
@@ -260,19 +260,19 @@ class _ChatScreenState extends State<ChatScreen> {
                         final msg = _mockMessages[index];
                         final isMe = msg['sender_id'] == _currentUserId;
                         return _buildMessageBubble(
-                          content:   msg['content'],
-                          isMe:      isMe,
-                          isRead:    msg['is_read'],
-                          time:      DateTime.parse(msg['created_at']),
+                          content: msg['content'],
+                          isMe: isMe,
+                          isRead: msg['is_read'],
+                          time: DateTime.parse(msg['created_at']),
                         );
                       }
                       final msg = _messages[index];
                       final isMe = msg.senderId == _currentUserId;
                       return _buildMessageBubble(
                         content: msg.content,
-                        isMe:    isMe,
-                        isRead:  msg.isRead,
-                        time:    msg.createdAt,
+                        isMe: isMe,
+                        isRead: msg.isRead,
+                        time: msg.createdAt,
                       );
                     },
                   ),
@@ -305,16 +305,13 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             // Bubble
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 10,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: isMe ? AppColors.primaryColor : Colors.grey[100],
                 borderRadius: BorderRadius.only(
-                  topLeft:     const Radius.circular(16),
-                  topRight:    const Radius.circular(16),
-                  bottomLeft:  Radius.circular(isMe ? 16 : 4),
+                  topLeft: const Radius.circular(16),
+                  topRight: const Radius.circular(16),
+                  bottomLeft: Radius.circular(isMe ? 16 : 4),
                   bottomRight: Radius.circular(isMe ? 4 : 16),
                 ),
               ),
@@ -365,7 +362,7 @@ class _ChatScreenState extends State<ChatScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -406,7 +403,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.primaryColor,
+                color: AppColors.secondaryColor,
                 shape: BoxShape.circle,
               ),
               child: _isSending

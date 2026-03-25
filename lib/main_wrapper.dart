@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsffend/global%20variable/colors.dart';
+import 'package:lsffend/screens/navigation/bookmark/bookmark_screen.dart';
 import 'package:lsffend/screens/navigation/chat/conversation_list_screen.dart';
 import 'package:lsffend/screens/navigation/explore/explore_screen.dart';
 import 'package:lsffend/screens/navigation/home/home_screen.dart';
@@ -19,7 +20,7 @@ class MainWrapperState extends State<MainWrapper> {
     const HomeScreen(),
     const ExploreScreen(),
     const ConversationListScreen(),
-    const Placeholder(),
+    const BookmarkScreen(),
     const Placeholder(),
   ];
 
