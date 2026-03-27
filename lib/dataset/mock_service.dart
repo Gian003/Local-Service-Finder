@@ -1,4 +1,5 @@
 import 'package:lsffend/screens/navigation/bookmark/bookmark_model.dart';
+import 'package:lsffend/screens/navigation/home/notification/notification_model.dart';
 import 'package:lsffend/templates/service%20card/service_model.dart';
 
 class MockService {
@@ -96,6 +97,46 @@ class MockService {
         imageUrl: 'https://picsum.photos/200',
         date: DateTime.now(),
         status: 'completed',
+      ),
+    ];
+  }
+
+  static List<NotificationModel> getNotifications() {
+    return [
+      NotificationModel(
+        id: 1,
+        title: 'Payment Successful',
+        message: 'You have made a service payment',
+        type: 'payment',
+        isRead: false,
+        createdAt: DateTime.now(),
+      ),
+
+      NotificationModel(
+        id: 2,
+        title: 'Reminder',
+        message: 'Your Booked service starts tomorrow',
+        type: 'reminder',
+        isRead: false,
+        createdAt: DateTime.now(),
+      ),
+
+      NotificationModel(
+        id: 3,
+        title: 'Booking Confirmed',
+        message: 'John accepted your booking request',
+        type: 'booking',
+        isRead: true,
+        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      ),
+
+      NotificationModel(
+        id: 4,
+        title: 'Service Completed',
+        message: 'How was your experience with Joseph?',
+        type: 'review',
+        isRead: true,
+        createdAt: DateTime.now().subtract(const Duration(days: 1)),
       ),
     ];
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide ImageInfo;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsffend/dataset/mock_service.dart';
 import 'package:lsffend/global%20variable/colors.dart';
+import 'package:lsffend/screens/navigation/home/notification/notification_screen.dart';
 import 'package:lsffend/services/service_services.dart';
 import 'package:lsffend/templates/category.dart';
 import 'package:lsffend/templates/hero_layout_card.dart';
@@ -118,11 +119,36 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
 
                             IconButton(
-                              onPressed: () {},
-                              icon: FaIcon(
-                                FontAwesomeIcons.bell,
-                                color: Colors.black,
-                                size: 20,
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const NotificationScreen(),
+                                  ),
+                                );
+                              },
+                              icon: Stack(
+                                children: [
+                                  FaIcon(
+                                    FontAwesomeIcons.bell,
+                                    color: Colors.black,
+                                    size: 20,
+                                  ),
+                                  Positioned(
+                                    right: 0,
+                                    top: 0,
+                                    child: SizedBox(
+                                      height: 8,
+                                      width: 8,
+                                      child: DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
