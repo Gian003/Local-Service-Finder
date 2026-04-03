@@ -5,6 +5,7 @@ import 'package:lsffend/screens/navigation/bookmark/bookmark_screen.dart';
 import 'package:lsffend/screens/navigation/chat/conversation_list_screen.dart';
 import 'package:lsffend/screens/navigation/explore/explore_screen.dart';
 import 'package:lsffend/screens/navigation/home/home_screen.dart';
+import 'package:lsffend/screens/navigation/profile/profile_screen.dart';
 
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
@@ -21,7 +22,7 @@ class MainWrapperState extends State<MainWrapper> {
     const ExploreScreen(),
     const ConversationListScreen(),
     const BookmarkScreen(),
-    const Placeholder(),
+    const ProfileScreen(),
   ];
 
   @override
@@ -58,7 +59,7 @@ class MainWrapperState extends State<MainWrapper> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.black,
+        selectedItemColor: AppColors.primaryColor,
         onTap: (index) {
           setState(() {
             _selectedIndex = index;

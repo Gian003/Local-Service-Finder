@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/screens/navigation/profile/change_password.dart';
+import 'package:lsffend/screens/authentication/change_password.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
