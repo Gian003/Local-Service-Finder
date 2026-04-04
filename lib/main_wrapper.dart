@@ -35,27 +35,27 @@ class MainWrapperState extends State<MainWrapper> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             label: 'Home',
-            icon: FaIcon(FontAwesomeIcons.house, color: Colors.black),
+            icon: Icon(Icons.house_outlined, color: Colors.black),
           ),
 
           BottomNavigationBarItem(
             label: 'Explore',
-            icon: FaIcon(FontAwesomeIcons.compass, color: Colors.black),
+            icon: Icon(Icons.explore_off_outlined, color: Colors.black),
           ),
 
           BottomNavigationBarItem(
             label: 'Chat',
-            icon: FaIcon(FontAwesomeIcons.comment, color: Colors.black),
+            icon: Icon(Icons.chat_bubble_outline_rounded, color: Colors.black),
           ),
 
           BottomNavigationBarItem(
             label: 'Bookmark',
-            icon: FaIcon(FontAwesomeIcons.bookmark, color: Colors.black),
+            icon: Icon(Icons.bookmark_outline_rounded, color: Colors.black),
           ),
 
           BottomNavigationBarItem(
             label: 'Profile',
-            icon: FaIcon(FontAwesomeIcons.user, color: Colors.black),
+            icon: Icon(Icons.person_off_rounded, color: Colors.black),
           ),
         ],
         currentIndex: _selectedIndex,

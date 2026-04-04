@@ -187,34 +187,33 @@ class ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
-      
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+
+          Expanded(
             child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+              scrollDirection: Axis.vertical,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [ 
+                children: [
                   _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildUserHeader(),
+                      ? const Center(child: CircularProgressIndicator())
+                      : SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildUserHeader(),
 
-                          const Divider(thickness: 1, height:1),
+                              const Divider(thickness: 1, height: 1),
 
-                          const SizedBox(height: 10),
+                              const SizedBox(height: 10),
 
-                          ..._profileSections.map(
-                            (section) => _buildMenuSection(section)
+                              ..._profileSections.map(
+                                (section) => _buildMenuSection(section),
+                              ),
+
+                              const SizedBox(height: 30),
+                            ],
                           ),
-
-                          const SizedBox(height: 30),
-                        ],
-                      ),
-                    )
+                        ),
                 ],
               ),
             ),
@@ -301,7 +300,7 @@ class ProfileScreenState extends State<ProfileScreen> {
 
         ...List<Map<String, dynamic>>.from(
           section['items'],
-        ).map((item) => _buildMenuSection(section)),
+        ).map((item) => _buildMenuItem(item)),
       ],
     );
   }
