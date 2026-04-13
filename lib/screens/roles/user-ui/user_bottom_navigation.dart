@@ -7,14 +7,14 @@ import 'package:lsffend/screens/roles/user-ui/navigation/explore/explore_screen.
 import 'package:lsffend/screens/roles/user-ui/navigation/home/home_screen.dart';
 import 'package:lsffend/screens/roles/user-ui/navigation/profile/profile_screen.dart';
 
-class MainWrapper extends StatefulWidget {
-  const MainWrapper({super.key});
+class UserBottomNavigation extends StatefulWidget {
+  const UserBottomNavigation({super.key});
 
   @override
-  MainWrapperState createState() => MainWrapperState();
+  UserBottomNavigationState createState() => UserBottomNavigationState();
 }
 
-class MainWrapperState extends State<MainWrapper> {
+class UserBottomNavigationState extends State<UserBottomNavigation> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
@@ -35,27 +35,27 @@ class MainWrapperState extends State<MainWrapper> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             label: 'Home',
-            icon: Icon(Icons.house_outlined),
+            icon: FaIcon(FontAwesomeIcons.house),
           ),
 
           BottomNavigationBarItem(
             label: 'Explore',
-            icon: Icon(Icons.explore_off_outlined),
+            icon: FaIcon(FontAwesomeIcons.binoculars),
           ),
 
           BottomNavigationBarItem(
             label: 'Chat',
-            icon: Icon(Icons.chat_bubble_outline_rounded),
+            icon: FaIcon(FontAwesomeIcons.comment),
           ),
 
           BottomNavigationBarItem(
             label: 'Bookmark',
-            icon: Icon(Icons.bookmark_outline_rounded),
+            icon: FaIcon(FontAwesomeIcons.bookmark),
           ),
 
           BottomNavigationBarItem(
             label: 'Profile',
-            icon: Icon(Icons.person_off_rounded),
+            icon: FaIcon(FontAwesomeIcons.user),
           ),
         ],
         currentIndex: _selectedIndex,

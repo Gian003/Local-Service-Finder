@@ -50,7 +50,7 @@ class LoginScreenState extends State<LoginScreen> {
               key: _formKey,
               child: Center(
                 widthFactor: 3.0,
-                heightFactor: 1.4,
+                heightFactor: 1.2,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -384,7 +384,7 @@ class LoginScreenState extends State<LoginScreen> {
                 ),
                 child: Center(
                   child: Text(
-                    role == 'customer' ? 'Customer' : 'worker',
+                    role == 'customer' ? 'Customer' : 'Worker',
                     style: TextStyle(
                       fontFamily: 'Montserrat',
                       fontSize: 15,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lsffend/screens/roles/user-ui/user_bottom_navigation.dart';
+import 'package:lsffend/screens/roles/worker-ui/worker_bottom_navigation.dart';
 import 'package:lsffend/screens/verification/auth_otp_email.dart';
 import 'package:lsffend/screens/authentication/change_password.dart';
 import 'package:lsffend/screens/authentication/forgot_password.dart';
@@ -34,10 +35,13 @@ class MyApp extends StatelessWidget {
         '/onBoarding': (context) => const OnBoardingScreen(),
         '/login': (context) => const LoginScreen(),
         '/register': (context) => RegisterScreen(),
-        '/home': (context) => const MainWrapper(),
+        '/home': (context) => const UserBottomNavigation(),
         '/verify': (context) => const AuthOtpEmail(),
         '/forgot-password': (context) => const ForgotPassword(),
         '/change-password': (context) => const ChangePassword(),
+
+        // Worker routes
+        '/worker-home': (context) => const WorkerBottomNavigation(),
       },
     );
   }

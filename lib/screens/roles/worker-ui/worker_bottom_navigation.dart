@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:lsffend/global%20variable/colors.dart';
 import 'package:lsffend/screens/roles/user-ui/navigation/chat/conversation_list_screen.dart';
+import 'package:lsffend/screens/roles/worker-ui/navigation/Booking/booking_screen.dart';
+import 'package:lsffend/screens/roles/worker-ui/navigation/Dashboard/dashboard_screen.dart';
+import 'package:lsffend/screens/roles/worker-ui/navigation/Profile/profile_screen.dart';
+import 'package:lsffend/screens/roles/worker-ui/navigation/Services/services_screen.dart';
 
 class WorkerBottomNavigation extends StatefulWidget {
   const WorkerBottomNavigation({super.key});
@@ -12,51 +18,53 @@ class WorkerBottomNavigationState extends State<WorkerBottomNavigation> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    const Placeholder(),
-    const Placeholder(),
-    const Placeholder(),
+    const DashBoardScreen(),
+    const WorkerBookingsScreen(),
+    const WorkerServicesScreen(),
     const ConversationListScreen(),
-    const Placeholder(),
+    const WorkerProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens.elementAt(_selectedIndex),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            label: 'Dashboard',
+            icon: FaIcon(FontAwesomeIcons.chartLine),
+          ),
+
+          BottomNavigationBarItem(
+            label: 'Bookings',
+            icon: FaIcon(FontAwesomeIcons.calendarCheck),
+          ),
+
+          BottomNavigationBarItem(
+            label: 'Services',
+            icon: FaIcon(FontAwesomeIcons.briefcase),
+          ),
+
+          BottomNavigationBarItem(
+            label: 'Chat',
+            icon: FaIcon(FontAwesomeIcons.comment),
+          ),
+
+          BottomNavigationBarItem(
+            label: 'Profile',
+            icon: FaIcon(FontAwesomeIcons.user),
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: AppColors.primaryColor,
+        unselectedItemColor: Colors.black,
+        onTap: (index) {
           setState(() {
             _selectedIndex = index;
           });
         },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.house_outlined),
-            selectedIcon: Icon(Icons.house_outlined),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.explore_off_outlined),
-            selectedIcon: Icon(Icons.explore_off_outlined),
-            label: 'Explore',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.chat_bubble_outline_rounded),
-            selectedIcon: Icon(Icons.chat_bubble_outline_rounded),
-            label: 'Chat',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bookmark_outline_rounded),
-            selectedIcon: Icon(Icons.bookmark_outline_rounded),
-            label: 'Bookmark',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_off_rounded),
-            selectedIcon: Icon(Icons.person_off_rounded),
-            label: 'Profile',
-          ),
-        ],
       ),
     );
   }
