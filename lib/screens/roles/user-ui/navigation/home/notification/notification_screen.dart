@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsffend/dataset/mock_service.dart';
 import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/screens/navigation/home/notification/notification_model.dart';
+import 'package:lsffend/screens/roles/user-ui/navigation/home/notification/notification_model.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});

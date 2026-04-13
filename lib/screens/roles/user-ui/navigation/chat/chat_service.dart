@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:lsffend/services/api_service.dart';
-import 'package:lsffend/screens/navigation/chat/message_model.dart';
+import 'package:lsffend/screens/roles/user-ui/navigation/chat/message_model.dart';
 
 class ChatService {
   // Get all conversations

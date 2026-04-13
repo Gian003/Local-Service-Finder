@@ -73,4 +73,23 @@ class ApiService {
 
     return result;
   }
+
+  //Save Role
+  static Future<void> saveRole(String role) async {
+    final preference = await SharedPreferences.getInstance();
+    await preference.setString('role', role);
+  }
+
+  //Get Role
+  static Future<String?> getRole() async {
+    final preference = await SharedPreferences.getInstance();
+    return preference.getString('role');
+  }
+
+  //Clear Role on Logout
+  static Future<void> clearRole() async {
+    final preference = await SharedPreferences.getInstance();
+    await preference.remove('token');
+    await preference.remove('role');
+  }
 }

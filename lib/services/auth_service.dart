@@ -52,6 +52,7 @@ class AuthService {
   static Future<Map<String, dynamic>> customerLogin({
     required String email,
     required String password,
+    required String role,
   }) async {
     //OfflineMode
     if (AppConfig.offlineMode) {
@@ -59,11 +60,16 @@ class AuthService {
       final result = MockService.mockLogin(email, password);
 
       await ApiService.saveToken(result['token']);
+      await ApiService.saveRole(role);
 
       return result;
     }
 
-    //OnlineMode
+    //Online Mode
+    final endPoint = role == 'worker'
+        ? '/worker-auth/login'
+        : '/user-auth/login';
+
     final response = await ApiService.postRequest('user-auth/login', {
       'email': email,
       'password': password,
@@ -73,6 +79,7 @@ class AuthService {
 
     if (response.statusCode == 200) {
       await ApiService.saveToken(data['token']);
+      await ApiService.saveRole('role');
     }
 
     return {'status': response.statusCode, ...data};

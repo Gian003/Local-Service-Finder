@@ -16,6 +16,8 @@ class LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
+  bool _isLoading = false;
+  String _selectedRole = 'customer';
 
   @override
   void dispose() {
@@ -75,6 +77,11 @@ class LoginScreenState extends State<LoginScreen> {
                         ),
                       ],
                     ),
+
+                    const SizedBox(height: 30),
+
+                    //Role Toggle
+                    _buildRoleToggle(),
 
                     const SizedBox(height: 30),
 
@@ -169,31 +176,7 @@ class LoginScreenState extends State<LoginScreen> {
 
                             //Login Button
                             ElevatedButton(
-                              onPressed: () async {
-                                final result = await AuthService.customerLogin(
-                                  email: _emailController.text,
-                                  password: _passwordController.text,
-                                );
-
-                                if (result['status'] == 200) {
-                                  if (context.mounted) {
-                                    Navigator.pushReplacementNamed(
-                                      context,
-                                      '/home',
-                                    );
-                                  }
-                                } else {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          result['message'] ?? 'Login Failed',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                }
-                              },
+                              onPressed: _isLoading ? null : _handelLogin,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryColor,
                                 foregroundColor: Colors.white,
@@ -369,5 +352,83 @@ class LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildRoleToggle() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.horizontal(
+          left: Radius.circular(12),
+          right: Radius.circular(12),
+        ),
+      ),
+      child: Row(
+        children: ['customer', 'worker'].map((role) {
+          final isSelected = _selectedRole == role;
+
+          return Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedRole = role;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColors.primaryColor
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Text(
+                    role == 'customer' ? 'Customer' : 'worker',
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.white : Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Future<void> _handelLogin() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final result = await AuthService.customerLogin(
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+      role: _selectedRole,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (!mounted) return;
+
+    if (result['status'] == 200) {
+      //Navigate based on Role
+      if (_selectedRole == 'worker') {
+        Navigator.pushReplacementNamed(context, '/worker-home');
+      } else {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result['message'] ?? 'Login Failed')),
+      );
+    }
   }
 }

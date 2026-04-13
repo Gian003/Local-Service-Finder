@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lsffend/dataset/mock_service.dart';
 import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/screens/navigation/bookmark/bookmark_card.dart';
-import 'package:lsffend/screens/navigation/bookmark/bookmark_model.dart';
+import 'package:lsffend/screens/roles/user-ui/navigation/bookmark/bookmark_card.dart';
+import 'package:lsffend/screens/roles/user-ui/navigation/bookmark/bookmark_model.dart';
 import 'package:lsffend/templates/service%20card/service_card.dart';
 
 class BookmarkScreen extends StatefulWidget {

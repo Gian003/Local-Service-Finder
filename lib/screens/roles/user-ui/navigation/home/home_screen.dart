@@ -4,7 +4,7 @@ import 'package:flutter/material.dart' hide ImageInfo;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsffend/dataset/mock_service.dart';
 import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/screens/navigation/home/notification/notification_screen.dart';
+import 'package:lsffend/screens/roles/user-ui/navigation/home/notification/notification_screen.dart';
 import 'package:lsffend/services/service_services.dart';
 import 'package:lsffend/templates/category.dart';
 import 'package:lsffend/templates/hero_layout_card.dart';

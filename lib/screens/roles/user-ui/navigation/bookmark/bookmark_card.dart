@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lsffend/screens/navigation/bookmark/bookmark_model.dart';
+import 'package:lsffend/screens/roles/user-ui/navigation/bookmark/bookmark_model.dart';
 import 'package:lsffend/global variable/colors.dart';
 
 class BookmarkCard extends StatelessWidget {

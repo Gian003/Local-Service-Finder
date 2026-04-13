@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lsffend/config/app_config.dart';
-import 'package:lsffend/screens/navigation/chat/chat_service.dart';
-import 'package:lsffend/screens/navigation/chat/message_model.dart';
-import 'package:lsffend/screens/navigation/chat/chat_screen.dart';
+import 'package:lsffend/screens/roles/user-ui/navigation/chat/chat_service.dart';
+import 'package:lsffend/screens/roles/user-ui/navigation/chat/message_model.dart';
+import 'package:lsffend/screens/roles/user-ui/navigation/chat/chat_screen.dart';
 import 'package:lsffend/global%20variable/colors.dart';
 
 class ConversationListScreen extends StatefulWidget {

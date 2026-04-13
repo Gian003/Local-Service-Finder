@@ -1,5 +1,5 @@
-import 'package:lsffend/screens/navigation/bookmark/bookmark_model.dart';
-import 'package:lsffend/screens/navigation/home/notification/notification_model.dart';
+import 'package:lsffend/screens/roles/user-ui/navigation/bookmark/bookmark_model.dart';
+import 'package:lsffend/screens/roles/user-ui/navigation/home/notification/notification_model.dart';
 import 'package:lsffend/templates/service%20card/service_model.dart';
 
 class MockService {

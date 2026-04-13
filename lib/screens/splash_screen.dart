@@ -49,13 +49,19 @@ class SplashScreenWrapperState extends State<SplashScreenWrapper> {
   }
 
   Future<void> _navigateBasedOnAuth() async {
+    //role checker
     final token = await ApiService.getToken();
+    final role = await ApiService.getRole();
 
     if (!mounted) return;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (token != null) {
-        Navigator.pushReplacementNamed(context, '/home');
+        if (role == 'worker') {
+          Navigator.pushReplacementNamed(context, '/worker-home');
+        } else {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       } else {
         Navigator.pushReplacementNamed(context, '/onBoarding');
       }
