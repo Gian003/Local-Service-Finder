@@ -6,64 +6,142 @@ class MockService {
   static List<ServiceModel> getServices() {
     return [
       ServiceModel(
-        title: "title",
-        workerName: "workerName",
+        id: 1,
+        title: "House Cleaning",
+        workerName: "John Reyes",
         rating: 6.3,
         reviewCount: 600,
         price: 1000,
-        discountPercent: 40,
         imageUrl: 'https://picsum.photos/200',
+        discountPercent: 40,
+        category: 'cleaning',
+        description: 'This is a description of the service.',
+        galleryImages: [
+          'https://picsum.photos/200',
+          'https://picsum.photos/200',
+          'https://picsum.photos/200',
+        ],
       ),
 
       ServiceModel(
-        title: "title",
-        workerName: "workerName",
+        id: 2,
+        title: "Plumbing Repair",
+        workerName: "Joseph Santos",
         rating: 5.3,
         reviewCount: 500,
         price: 2000,
-        discountPercent: 40,
         imageUrl: 'https://picsum.photos/200',
+        discountPercent: 40,
+        category: 'cleaning',
+        description: 'This is a description of the service.',
+        galleryImages: [
+          'https://picsum.photos/200',
+          'https://picsum.photos/200',
+          'https://picsum.photos/200',
+        ],
       ),
 
       ServiceModel(
-        title: "title",
-        workerName: "workerName",
+        id: 3,
+        title: "House Painting",
+        workerName: "Michael Brown",
         rating: 4.3,
         reviewCount: 400,
         price: 3000,
-        discountPercent: 40,
         imageUrl: 'https://picsum.photos/200',
+        discountPercent: 40,
+        category: 'cleaning',
+        description: 'This is a description of the service.',
+        galleryImages: [
+          'https://picsum.photos/200',
+          'https://picsum.photos/200',
+          'https://picsum.photos/200',
+        ],
       ),
 
       ServiceModel(
-        title: "title",
-        workerName: "workerName",
+        id: 4,
+        title: "Janitorial Services",
+        workerName: "Emily Davis",
         rating: 3.3,
         reviewCount: 300,
         price: 4000,
-        discountPercent: 40,
         imageUrl: 'https://picsum.photos/200',
+        discountPercent: 40,
+        category: 'cleaning',
+        description: 'This is a description of the service.',
+        galleryImages: [
+          'https://picsum.photos/200',
+          'https://picsum.photos/200',
+          'https://picsum.photos/200',
+        ],
       ),
 
       ServiceModel(
-        title: "title",
-        workerName: "workerName",
+        id: 5,
+        title: "Gardening Services",
+        workerName: "Jessica Wilson",
         rating: 2.3,
         reviewCount: 200,
         price: 5000,
-        discountPercent: 40,
         imageUrl: 'https://picsum.photos/200',
+        discountPercent: 40,
+        category: 'cleaning',
+        description: 'This is a description of the service.',
+        galleryImages: [
+          'https://picsum.photos/200',
+          'https://picsum.photos/200',
+          'https://picsum.photos/200',
+        ],
       ),
 
       ServiceModel(
-        title: "title",
-        workerName: "workerName",
+        id: 6,
+        title: "Roof Cleaning Services",
+        workerName: "David Lee",
         rating: 1.3,
         reviewCount: 100,
         price: 6000,
-        discountPercent: 40,
         imageUrl: 'https://picsum.photos/200',
+        discountPercent: 40,
+        category: 'cleaning',
+        description: 'This is a description of the service.',
+        galleryImages: [
+          'https://picsum.photos/200',
+          'https://picsum.photos/200',
+          'https://picsum.photos/200',
+        ],
       ),
+    ];
+  }
+
+  static List<Map<String, dynamic>> getReviews(int serviceId) {
+    return [
+      {
+        'id': 1,
+        'user_name': 'John Doe',
+        'user_image': 'https://picsum.photos/200',
+        'rating': 4.5,
+        'comment': 'Great service! Highly recommend.',
+        'date': DateTime.now().subtract(const Duration(days: 1)),
+      },
+      {
+        'id': 2,
+        'user_name': 'Jane Smith',
+        'user_image': 'https://picsum.photos/200',
+        'rating': 4.0,
+        'comment': 'Good service, but could be faster.',
+        'date': DateTime.now().subtract(const Duration(days: 2)),
+      },
+
+      {
+        'id': 3,
+        'user_name': 'Michael Brown',
+        'user_image': 'https://picsum.photos/200',
+        'rating': 5.0,
+        'comment': 'Excellent service! Will use again.',
+        'date': DateTime.now().subtract(const Duration(days: 3)),
+      },
     ];
   }
 

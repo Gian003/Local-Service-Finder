@@ -8,6 +8,10 @@ class ServiceModel {
   final String imageUrl;
   final double? discountPercent;
   final String? category;
+  final String? description;
+  final List<String>? galleryImages;
+  final int? workerId;
+  final String? workerImage;
 
   const ServiceModel({
     this.id,
@@ -19,6 +23,10 @@ class ServiceModel {
     required this.imageUrl,
     this.discountPercent,
     this.category,
+    this.description,
+    this.galleryImages,
+    this.workerId,
+    this.workerImage,
   });
 
   factory ServiceModel.fromJson(Map<String, dynamic> json) {
@@ -34,6 +42,9 @@ class ServiceModel {
           ? double.parse(json['discount_person'].toString())
           : null,
       category: json['category'],
+      description: json['description'],
+      workerId: json['worker_id'],
+      workerImage: json['worker']?['profile_photo'],
     );
   }
 }

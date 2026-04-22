@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsffend/dataset/mock_service.dart';
 import 'package:lsffend/global%20variable/colors.dart';
+import 'package:lsffend/screens/roles/user-ui/service%20details/service_details_screen.dart';
 import 'package:lsffend/templates/searh_bar.dart';
 import 'package:lsffend/templates/service%20card/service_card.dart';
 import 'package:lsffend/templates/service%20card/service_model.dart';
@@ -322,7 +323,14 @@ class ExploreScreenState extends State<ExploreScreen> {
                       itemBuilder: (context, index) {
                         return ServiceCard(
                           serviceModel: _serviceList[index],
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ServiceDetailsScreen(serviceModel: _serviceList[index])
+                              )
+                            );
+                          },
                           onBookMark: () {},
                         );
                       },
