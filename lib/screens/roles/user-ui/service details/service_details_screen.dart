@@ -474,7 +474,7 @@ class ServiceDetailsScreenState extends State<ServiceDetailsScreen>
                         ),
 
                         Text(
-                          review['date'],
+                          review['date'].toString(),
                           style: TextStyle(
                             fontFamily: 'Montserrat',
                             fontSize: 12,
