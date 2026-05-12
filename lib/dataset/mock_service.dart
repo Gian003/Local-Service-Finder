@@ -1,3 +1,4 @@
+import 'package:lsffend/models/booking_model.dart';
 import 'package:lsffend/screens/roles/user-ui/navigation/bookmark/bookmark_model.dart';
 import 'package:lsffend/screens/roles/user-ui/navigation/home/notification/notification_model.dart';
 import 'package:lsffend/templates/service%20card/service_model.dart';
@@ -240,5 +241,13 @@ class MockService {
       'token': 'mock_token_register',
       'user': {'id': 1, 'first_name': 'John', 'last_name': 'Doe'},
     };
+  }
+
+  static final List<BookingModel> _bookings = [];
+
+  static List<BookingModel> getBookings() => _bookings;
+
+  static void addBooking(BookingModel booking) {
+    _bookings.add(booking);
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:lsffend/config/app_config.dart';
 import 'package:lsffend/screens/roles/user-ui/user_bottom_navigation.dart';
 import 'package:lsffend/screens/roles/worker-ui/worker_bottom_navigation.dart';
 import 'package:lsffend/screens/verification/auth_otp_email.dart';
@@ -12,6 +14,9 @@ import 'package:lsffend/screens/authentication/register_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  Stripe.publishableKey = AppConfig.stripePublishableKey;
+  await Stripe.instance.applySettings();
 
   runApp(const MyApp());
 }
