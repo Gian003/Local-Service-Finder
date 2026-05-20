@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/screens/roles/user-ui/service%20details/service_details_screen.dart';
-import 'package:lsffend/templates/service%20card/service_model.dart';
+import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/screens/roles/user-ui/service%20details/service_details_screen.dart';
+import 'package:lsf/templates/service%20card/service_model.dart';
 
 class ServiceCard extends StatelessWidget {
   final ServiceModel serviceModel;
@@ -11,7 +11,8 @@ class ServiceCard extends StatelessWidget {
   const ServiceCard({
     super.key,
     required this.serviceModel,
-    this.onBookMark, required Null Function() onTap,
+    this.onBookMark,
+    required Null Function() onTap,
   });
 
   @override
@@ -21,8 +22,8 @@ class ServiceCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => ServiceDetailsScreen(serviceModel: serviceModel)
-          )
+            builder: (_) => ServiceDetailsScreen(serviceModel: serviceModel),
+          ),
         );
       },
       child: Container(

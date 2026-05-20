@@ -1,46 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:lsffend/config/app_config.dart';
-import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/models/booking_model.dart';
-import 'package:lsffend/screens/booking/tracking_screen.dart';
+import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/models/booking_model.dart';
+import 'package:lsf/screens/booking/tracking_screen.dart';
+import 'package:lsf/templates/service%20card/service_model.dart';
+import 'package:lsf/widgets/app_map.dart';
 
 class UpcomingBookingScreen extends StatefulWidget {
   final BookingModel booking;
+  final ServiceModel? serviceModel;
 
   const UpcomingBookingScreen({
     super.key,
     required this.booking,
+    this.serviceModel,
   });
 
   @override
-  State<UpcomingBookingScreen> createState() =>
-      _UpcomingBookingScreenState();
+  State<UpcomingBookingScreen> createState() => _UpcomingBookingScreenState();
 }
 
-class _UpcomingBookingScreenState
-    extends State<UpcomingBookingScreen> {
-  GoogleMapController? _mapController;
-
-  // Mock/default location — Urdaneta City
-  late LatLng _destination;
-
-  @override
-  void initState() {
-    super.initState();
-    _destination = LatLng(
-      widget.booking.latitude  ?? 15.9754, // Urdaneta default
-      widget.booking.longitude ?? 120.5720,
-    );
-  }
-
+class _UpcomingBookingScreenState extends State<UpcomingBookingScreen> {
   void _showCancelDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           'Cancel Booking',
           style: TextStyle(
@@ -68,9 +52,7 @@ class _UpcomingBookingScreenState
                 ),
               );
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text(
               'Yes, Cancel',
               style: TextStyle(color: Colors.white),
@@ -199,10 +181,7 @@ class _UpcomingBookingScreenState
     );
   }
 
-  Widget _buildDetailItem({
-    required String label,
-    required String value,
-  }) {
+  Widget _buildDetailItem({required String label, required String value}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -235,7 +214,7 @@ class _UpcomingBookingScreenState
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withValues(alpha: .06),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -274,67 +253,24 @@ class _UpcomingBookingScreenState
 
           const SizedBox(height: 12),
 
-          // Mini map
+          // Mini map — non-interactive
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: SizedBox(
               height: 150,
-              child: AppConfig.offlineMode
-                  // Offline: show placeholder
-                  ? Container(
-                      color: Colors.grey[200],
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.map_outlined,
-                              size: 40,
-                              color: Colors.grey[400],
-                            ),
-                            Text(
-                              'Map Preview\n(Urdaneta City)',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontFamily: 'Montserrat',
-                                color: Colors.grey[500],
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  // Online: real Google Map
-                  : GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: _destination,
-                        zoom: 15,
-                      ),
-                      onMapCreated: (controller) {
-                        _mapController = controller;
-                      },
-                      markers: {
-                        Marker(
-                          markerId: const MarkerId('destination'),
-                          position: _destination,
-                          icon: BitmapDescriptor.defaultMarkerWithHue(
-                            BitmapDescriptor.hueOrange,
-                          ),
-                        ),
-                      },
-                      zoomControlsEnabled:   false,
-                      myLocationEnabled:     false,
-                      mapToolbarEnabled:     false,
-                      scrollGesturesEnabled: false,
-                      zoomGesturesEnabled:   false,
-                    ),
+              child: AppMap(
+                latitude: widget.booking.latitude ?? 15.9754,
+                longitude: widget.booking.longitude ?? 120.5720,
+                zoom: 15,
+                interactive: false, // mini map, no touch
+                showPin: true,
+              ),
             ),
           ),
 
           const SizedBox(height: 12),
 
-          // Need Help + Track buttons
+          // Buttons
           Row(
             children: [
               Expanded(
@@ -365,6 +301,7 @@ class _UpcomingBookingScreenState
                       MaterialPageRoute(
                         builder: (_) => TrackingScreen(
                           booking: widget.booking,
+                          serviceModel: widget.serviceModel,
                         ),
                       ),
                     );

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lsffend/dataset/mock_service.dart';
-import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/screens/roles/user-ui/service%20details/service_details_screen.dart';
-import 'package:lsffend/templates/searh_bar.dart';
-import 'package:lsffend/templates/service%20card/service_card.dart';
-import 'package:lsffend/templates/service%20card/service_model.dart';
+import 'package:lsf/dataset/mock_service.dart';
+import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/screens/roles/user-ui/service%20details/service_details_screen.dart';
+import 'package:lsf/templates/searh_bar.dart';
+import 'package:lsf/templates/service%20card/service_card.dart';
+import 'package:lsf/templates/service%20card/service_model.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -267,33 +267,18 @@ class ExploreScreenState extends State<ExploreScreen> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: Icon(Icons.arrow_back),
-                  ),
-
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        'Explore',
-                        style: TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.secondaryColor,
-                        ),
-                      ),
+                Center(
+                  child: Text(
+                    'Explore',
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.secondaryColor,
                     ),
                   ),
-                  const SizedBox(width: 48),
-                ],
-              ),
+                ),
+              const SizedBox(width: 48),
 
               _buildSearchBar(),
 
@@ -327,8 +312,10 @@ class ExploreScreenState extends State<ExploreScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ServiceDetailsScreen(serviceModel: _serviceList[index])
-                              )
+                                builder: (_) => ServiceDetailsScreen(
+                                  serviceModel: _serviceList[index],
+                                ),
+                              ),
                             );
                           },
                           onBookMark: () {},

@@ -1,5 +1,5 @@
-name: lsffend
-description: "A new Flutter project."
+name: lsf
+description: "Location Service Finder."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
@@ -42,9 +42,18 @@ dependencies:
   pusher_channels_flutter: 2.6.0
   cached_network_image: 3.4.1
   flutter_stripe: ^12.6.0
-  google_maps_flutter: ^2.17.0
+  # google_maps_flutter: ^2.17.0
   geolocator: ^14.0.2
   geocoding: ^4.0.0
+  flutter_map: ^8.3.0
+  latlong2: ^0.9.1
+  flutter_map_cache: ^2.1.0
+  dio: ^5.9.2
+  path_provider: ^2.1.5
+  dio_cache_interceptor: ^4.0.6
+  http_cache_file_store: ^2.0.1
+  http_cache_client: ^1.0.5
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +65,11 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/icon.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

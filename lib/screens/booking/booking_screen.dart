@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:lsffend/config/app_config.dart';
-import 'package:lsffend/dataset/mock_service.dart';
-import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/models/booking_model.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/bookmark/bookmark_screen.dart';
-import 'package:lsffend/services/booking_service.dart';
-import 'package:lsffend/templates/service%20card/service_model.dart';
+import 'package:lsf/config/app_config.dart';
+import 'package:lsf/dataset/mock_service.dart';
+import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/models/booking_model.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/bookmark/bookmark_screen.dart';
+import 'package:lsf/services/booking_service.dart';
+import 'package:lsf/templates/service%20card/service_model.dart';
 
 class BookingScreen extends StatefulWidget {
   final ServiceModel service;

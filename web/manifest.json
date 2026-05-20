@@ -1,6 +1,6 @@
 {
-    "name": "lsffend",
-    "short_name": "lsffend",
+    "name": "lsf",
+    "short_name": "lsf",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

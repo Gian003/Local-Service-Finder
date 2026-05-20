@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart';
-import 'package:lsffend/config/app_config.dart';
-import 'package:lsffend/dataset/mock_service.dart';
+import 'package:lsf/config/app_config.dart';
+import 'package:lsf/dataset/mock_service.dart';
 
 import 'api_service.dart';
 

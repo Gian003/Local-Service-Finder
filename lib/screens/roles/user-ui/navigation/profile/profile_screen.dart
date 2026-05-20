@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:lsffend/config/app_config.dart';
-import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/services/api_service.dart';
+import 'package:lsf/config/app_config.dart';
+import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/services/api_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -164,27 +164,16 @@ class ProfileScreenState extends State<ProfileScreen> {
           //Header
           Padding(
             padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.arrow_back),
+            child: Center(
+              child: Text(
+                'My Profile',
+                style: TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.secondaryColor,
                 ),
-                const Expanded(
-                  child: Center(
-                    child: Text(
-                      'My Profile',
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.secondaryColor,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 50),
-              ],
+              ),
             ),
           ),
 

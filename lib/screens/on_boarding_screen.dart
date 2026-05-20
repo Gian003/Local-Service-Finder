@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lsffend/global%20variable/colors.dart';
+import 'package:lsf/global%20variable/colors.dart';
 
 class OnBoardingScreen extends StatefulWidget {
   const OnBoardingScreen({super.key});

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
-import 'package:lsffend/global%20variable/colors.dart';
+import 'package:lsf/global%20variable/colors.dart';
 
 class AuthOtpEmail extends StatefulWidget {
   const AuthOtpEmail({super.key});

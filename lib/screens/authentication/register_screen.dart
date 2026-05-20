@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/services/api_service.dart';
-import 'package:lsffend/services/auth_service.dart';
+import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/services/api_service.dart';
+import 'package:lsf/services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

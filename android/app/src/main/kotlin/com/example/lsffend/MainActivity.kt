@@ -1,4 +1,4 @@
-package com.example.lsffend
+package com.example.lsf
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

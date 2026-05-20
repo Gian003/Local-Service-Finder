@@ -1,100 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:lsffend/config/app_config.dart';
-import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/models/booking_model.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/chat/chat_screen.dart';
+import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/models/booking_model.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/chat/chat_screen.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/profile/profile_screen.dart';
+import 'package:lsf/screens/roles/user-ui/service%20details/service_details_screen.dart';
+import 'package:lsf/templates/service%20card/service_model.dart';
+import 'package:lsf/widgets/app_map.dart';
 
 class TrackingScreen extends StatefulWidget {
   final BookingModel booking;
+  final ServiceModel? serviceModel;
 
-  const TrackingScreen({super.key, required this.booking});
+  const TrackingScreen({super.key, required this.booking, this.serviceModel});
 
   @override
   State<TrackingScreen> createState() => _TrackingScreenState();
 }
 
 class _TrackingScreenState extends State<TrackingScreen> {
-  GoogleMapController? _mapController;
-  late LatLng _destination;
-
-  @override
-  void initState() {
-    super.initState();
-    _destination = LatLng(
-      widget.booking.latitude ?? 15.9754,
-      widget.booking.longitude ?? 120.5720,
-    );
-  }
-
-  @override
-  void dispose() {
-    _mapController?.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Full screen map
-          AppConfig.offlineMode
-              ? Container(
-                  color: Colors.grey[200],
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.map_outlined,
-                          size: 80,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Google Maps\n(Tracking Detail)',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            color: Colors.grey[500],
-                            fontSize: 14,
-                          ),
-                        ),
-                        Text(
-                          widget.booking.address ?? 'Urdaneta City',
-                          style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: _destination,
-                    zoom: 15,
-                  ),
-                  onMapCreated: (controller) {
-                    _mapController = controller;
-                  },
-                  markers: {
-                    // Destination pin
-                    Marker(
-                      markerId: const MarkerId('destination'),
-                      position: _destination,
-                      icon: BitmapDescriptor.defaultMarkerWithHue(
-                        BitmapDescriptor.hueOrange,
-                      ),
-                    ),
-                  },
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: false,
-                  zoomControlsEnabled: true,
-                ),
+          // Full screen interactive map
+          AppMap(
+            latitude: widget.booking.latitude ?? 15.9754,
+            longitude: widget.booking.longitude ?? 120.5720,
+            zoom: 15,
+            interactive: true, // full screen, allow touch
+            showPin: true,
+          ),
 
           // Back button
           Positioned(
@@ -115,13 +51,29 @@ class _TrackingScreenState extends State<TrackingScreen> {
             left: 0,
             right: 0,
             child: Center(
-              child: Text(
-                'Tracking Detail',
-                style: TextStyle(
-                  fontFamily: 'Montserrat',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.secondaryColor,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+                child: Text(
+                  'Tracking Detail',
+                  style: TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.secondaryColor,
+                  ),
                 ),
               ),
             ),
@@ -203,7 +155,27 @@ class _TrackingScreenState extends State<TrackingScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               // Profile button
-              _buildActionButton(icon: Icons.person_outline, onTap: () {}),
+              _buildActionButton(
+                icon: Icons.person_outline,
+                onTap: () {
+                  if (widget.serviceModel != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ServiceDetailsScreen(
+                          serviceModel: widget.serviceModel!,
+                        ),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Service details not available'),
+                      ),
+                    );
+                  }
+                },
+              ),
 
               // Chat button
               _buildActionButton(

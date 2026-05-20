@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:lsffend/dataset/mock_service.dart';
-import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/screens/booking/booking_screen.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/chat/chat_screen.dart';
-import 'package:lsffend/templates/service%20card/service_model.dart';
+import 'package:lsf/dataset/mock_service.dart';
+import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/screens/booking/booking_screen.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/chat/chat_screen.dart';
+import 'package:lsf/templates/service%20card/service_model.dart';
 
 class ServiceDetailsScreen extends StatefulWidget {
   final ServiceModel serviceModel;

@@ -1,7 +1,7 @@
-import 'package:lsffend/models/booking_model.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/bookmark/bookmark_model.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/home/notification/notification_model.dart';
-import 'package:lsffend/templates/service%20card/service_model.dart';
+import 'package:lsf/models/booking_model.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/bookmark/bookmark_model.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/home/notification/notification_model.dart';
+import 'package:lsf/templates/service%20card/service_model.dart';
 
 class MockService {
   static List<ServiceModel> getServices() {

@@ -2,16 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart' hide ImageInfo;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lsffend/dataset/mock_service.dart';
-import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/home/notification/notification_screen.dart';
-import 'package:lsffend/screens/roles/user-ui/service%20details/service_details_screen.dart';
-import 'package:lsffend/services/service_services.dart';
-import 'package:lsffend/templates/category.dart';
-import 'package:lsffend/templates/hero_layout_card.dart';
-import 'package:lsffend/templates/searh_bar.dart';
-import 'package:lsffend/templates/service%20card/service_card.dart';
-import 'package:lsffend/templates/service%20card/service_model.dart';
+import 'package:lsf/dataset/mock_service.dart';
+import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/bookmark/bookmark_screen.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/home/notification/notification_screen.dart';
+import 'package:lsf/screens/roles/user-ui/service%20details/service_details_screen.dart';
+import 'package:lsf/services/service_services.dart';
+import 'package:lsf/templates/category.dart';
+import 'package:lsf/templates/hero_layout_card.dart';
+import 'package:lsf/templates/searh_bar.dart';
+import 'package:lsf/templates/service%20card/service_card.dart';
+import 'package:lsf/templates/service%20card/service_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -111,7 +112,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const BookmarkScreen(),
+                                  ),
+                                );
+                              },
                               icon: FaIcon(
                                 FontAwesomeIcons.cartFlatbed,
                                 color: Colors.black,
@@ -316,10 +324,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               serviceModel: _serviceList[index],
                               onTap: () {
                                 Navigator.push(
-                                  context, 
+                                  context,
                                   MaterialPageRoute(
-                                    builder: (_) => ServiceDetailsScreen(serviceModel: _serviceList[index])
-                                  )
+                                    builder: (_) => ServiceDetailsScreen(
+                                      serviceModel: _serviceList[index],
+                                    ),
+                                  ),
                                 );
                               },
                               onBookMark: () {},

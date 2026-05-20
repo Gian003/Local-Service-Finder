@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:lsffend/config/app_config.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/chat/chat_service.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/chat/message_model.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/chat/chat_screen.dart';
-import 'package:lsffend/global%20variable/colors.dart';
+import 'package:lsf/config/app_config.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/chat/chat_service.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/chat/message_model.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/chat/chat_screen.dart';
+import 'package:lsf/global%20variable/colors.dart';
 
 class ConversationListScreen extends StatefulWidget {
   const ConversationListScreen({super.key});
@@ -79,18 +79,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               children: [
                 Expanded(
                   child: Center(
-                    child: Row(
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: Icon(Icons.arrow_back),
-                        ),
-
-                        const SizedBox(width: 55),
-
-                        const Text(
+                    child:  Text(
                           'Chat & Calls',
                           style: TextStyle(
                             fontFamily: 'Montserrat',
@@ -99,8 +88,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                             color: AppColors.secondaryColor,
                           ),
                         ),
-                      ],
-                    ),
                   ),
                 ),
               ],

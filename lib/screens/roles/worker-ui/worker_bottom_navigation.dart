@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/chat/conversation_list_screen.dart';
-import 'package:lsffend/screens/roles/worker-ui/navigation/Booking/booking_screen.dart';
-import 'package:lsffend/screens/roles/worker-ui/navigation/Dashboard/dashboard_screen.dart';
-import 'package:lsffend/screens/roles/worker-ui/navigation/Profile/profile_screen.dart';
-import 'package:lsffend/screens/roles/worker-ui/navigation/Services/services_screen.dart';
+import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/chat/conversation_list_screen.dart';
+import 'package:lsf/screens/roles/worker-ui/navigation/Booking/booking_screen.dart';
+import 'package:lsf/screens/roles/worker-ui/navigation/Dashboard/dashboard_screen.dart';
+import 'package:lsf/screens/roles/worker-ui/navigation/Profile/profile_screen.dart';
+import 'package:lsf/screens/roles/worker-ui/navigation/Services/services_screen.dart';
 
 class WorkerBottomNavigation extends StatefulWidget {
   const WorkerBottomNavigation({super.key});

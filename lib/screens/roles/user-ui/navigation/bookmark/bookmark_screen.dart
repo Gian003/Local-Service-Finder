@@ -1,14 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:lsffend/dataset/mock_service.dart';
-import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/models/booking_model.dart';
-import 'package:lsffend/screens/booking/upcoming_booking_screen.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/bookmark/bookmark_card.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/bookmark/bookmark_model.dart';
-import 'package:lsffend/services/api_service.dart';
-import 'package:lsffend/templates/service%20card/service_card.dart';
+import 'package:lsf/dataset/mock_service.dart';
+import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/models/booking_model.dart';
+import 'package:lsf/screens/booking/upcoming_booking_screen.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/bookmark/bookmark_card.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/bookmark/bookmark_model.dart';
+import 'package:lsf/services/api_service.dart';
+import 'package:lsf/templates/service%20card/service_card.dart';
 
 class BookmarkScreen extends StatefulWidget {
   const BookmarkScreen({super.key});
@@ -81,27 +81,16 @@ class BookmarkScreenState extends State<BookmarkScreen> {
           //Header
           Padding(
             padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.arrow_back),
+            child: Center(
+              child: Text(
+                'My Bookings',
+                style: TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.secondaryColor,
                 ),
-                const Expanded(
-                  child: Center(
-                    child: Text(
-                      'My Bookings',
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.secondaryColor,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 50),
-              ],
+              ),
             ),
           ),
 
@@ -128,7 +117,7 @@ class BookmarkScreenState extends State<BookmarkScreen> {
                         decoration: BoxDecoration(
                           color: isSelected
                               ? AppColors.primaryColor
-                              : Colors.transparent,
+                              : Colors.white,
                           borderRadius: BorderRadius.horizontal(
                             left: Radius.circular(8),
                             right: Radius.circular(8),
@@ -203,6 +192,11 @@ class BookmarkScreenState extends State<BookmarkScreen> {
     return ListView.builder(
       itemCount: bookmarks.length,
       itemBuilder: (context, index) {
+        final service = MockService.getServices().firstWhere(
+          (service) => service.title == bookmarks[index].serviceName,
+          orElse: () => MockService.getServices().first,
+        );
+
         return BookmarkCard(
           bookmark: bookmarks[index],
           onTap: () {
@@ -223,6 +217,7 @@ class BookmarkScreenState extends State<BookmarkScreen> {
                       latitude: 15.9754,
                       longitude: 120.5720,
                     ),
+                    serviceModel: service,
                   ),
                 ),
               );

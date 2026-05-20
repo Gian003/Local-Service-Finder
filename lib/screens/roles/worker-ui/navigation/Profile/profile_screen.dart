@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:lsffend/config/app_config.dart';
-import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/services/api_service.dart';
+import 'package:lsf/config/app_config.dart';
+import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/services/api_service.dart';
 
 class WorkerProfileScreen extends StatefulWidget {
   const WorkerProfileScreen({super.key});

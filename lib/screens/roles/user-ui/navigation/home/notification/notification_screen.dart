@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lsffend/dataset/mock_service.dart';
-import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/home/notification/notification_model.dart';
+import 'package:lsf/dataset/mock_service.dart';
+import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/home/notification/notification_model.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -197,9 +197,7 @@ class NotificationScreenState extends State<NotificationScreen> {
             Container(
               width: 45,
               height: 45,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(shape: BoxShape.circle),
               child: Center(
                 child: FaIcon(
                   _getNotificationIcon((notificationModel.type)),

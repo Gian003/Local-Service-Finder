@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:lsffend/services/api_service.dart';
+import 'package:lsf/services/api_service.dart';
+import 'package:lsf/services/map_service.dart';
 
 class SplashScreenWrapper extends StatefulWidget {
   const SplashScreenWrapper({super.key});
@@ -28,6 +29,8 @@ class SplashScreenWrapperState extends State<SplashScreenWrapper> {
       // Simulate some initialization time
       await Future.delayed(const Duration(seconds: 5));
 
+      await _preCacheMapTiles();
+
       if (mounted) {
         setState(() {
           _isInitialized = true;
@@ -45,6 +48,16 @@ class SplashScreenWrapperState extends State<SplashScreenWrapper> {
           _isInitialized = true;
         });
       }
+    }
+  }
+
+  Future<void> _preCacheMapTiles() async {
+    try {
+      // Pre-cache map tiles for the default location (e.g., Manila)
+      await MapService.getCacheStore();
+      debugPrint('Map tiles cache initialized successfully');
+    } catch (e) {
+      debugPrint('Error occurred while pre-caching map tiles: $e');
     }
   }
 

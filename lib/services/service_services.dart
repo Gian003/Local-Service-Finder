@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:lsffend/config/app_config.dart';
-import 'package:lsffend/dataset/mock_service.dart';
-import 'package:lsffend/templates/service card/service_model.dart';
+import 'package:lsf/config/app_config.dart';
+import 'package:lsf/dataset/mock_service.dart';
+import 'package:lsf/templates/service card/service_model.dart';
 import 'api_service.dart';
 
 class ServiceServices {

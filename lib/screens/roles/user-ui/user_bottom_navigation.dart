@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lsffend/global%20variable/colors.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/bookmark/bookmark_screen.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/chat/conversation_list_screen.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/explore/explore_screen.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/home/home_screen.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/profile/profile_screen.dart';
+import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/bookmark/bookmark_screen.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/chat/conversation_list_screen.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/explore/explore_screen.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/home/home_screen.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/profile/profile_screen.dart';
 
 class UserBottomNavigation extends StatefulWidget {
   const UserBottomNavigation({super.key});

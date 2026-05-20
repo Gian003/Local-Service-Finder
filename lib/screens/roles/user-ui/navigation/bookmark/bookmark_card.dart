@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:lsffend/screens/roles/user-ui/navigation/bookmark/bookmark_model.dart';
-import 'package:lsffend/global variable/colors.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/bookmark/bookmark_model.dart';
+import 'package:lsf/global variable/colors.dart';
 
 class BookmarkCard extends StatelessWidget {
   final BookmarkModel bookmark;
@@ -48,13 +48,7 @@ class BookmarkCard extends StatelessWidget {
             left: Radius.circular(12),
             right: Radius.circular(12),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.5),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          
         ),
         child: Row(
           children: [
