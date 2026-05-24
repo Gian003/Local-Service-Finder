@@ -9,7 +9,7 @@ class BookingService {
     required int amount, // in centavos e.g. 150000
     required int serviceId,
   }) async {
-    final response = await ApiService.postRequest('/payment/intent', {
+    final response = await ApiService.postRequest('payment/intent', {
       'amount': amount,
       'service_id': serviceId,
     }, auth: true);
@@ -51,7 +51,7 @@ class BookingService {
     required String paymentMethod,
     String? paymentIntentId,
   }) async {
-    final response = await ApiService.postRequest('/booking/confirm', {
+    final response = await ApiService.postRequest('booking/confirm', {
       'service_id': serviceId,
       'worker_id': workerId,
       'address_id': addressId,

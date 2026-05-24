@@ -28,7 +28,7 @@ class AuthService {
       'password_confirmation': password,
     });
 
-    final contentType = response.headers['content-Type'] ?? '';
+    final contentType = response.headers['content-type'] ?? '';
 
     if (!contentType.contains('application/json')) {
       return {
@@ -66,11 +66,9 @@ class AuthService {
     }
 
     //Online Mode
-    final endPoint = role == 'worker'
-        ? '/worker-auth/login'
-        : '/user-auth/login';
+    final endPoint = role == 'worker' ? 'worker-auth/login' : 'user-auth/login';
 
-    final response = await ApiService.postRequest('user-auth/login', {
+    final response = await ApiService.postRequest(endPoint, {
       'email': email,
       'password': password,
     });
@@ -79,7 +77,7 @@ class AuthService {
 
     if (response.statusCode == 200) {
       await ApiService.saveToken(data['token']);
-      await ApiService.saveRole('role');
+      await ApiService.saveRole(role);
     }
 
     return {'status': response.statusCode, ...data};
@@ -104,8 +102,9 @@ class AuthService {
     return {'status': response.statusCode, ...data};
   }
 
-  static Future<void> logout() async {
+  static Future<void> workerLogout() async {
     await ApiService.postRequest('worker-auth/logout', {}, auth: true);
     await ApiService.clearToken();
+    await ApiService.clearRole();
   }
 }

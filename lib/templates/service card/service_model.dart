@@ -32,19 +32,35 @@ class ServiceModel {
   factory ServiceModel.fromJson(Map<String, dynamic> json) {
     return ServiceModel(
       id: json['id'],
-      title: json['title'],
-      workerName: json['worker']?['name'] ?? 'Unknwon Worker',
-      rating: double.parse(json['worker']?['rating'].toString() ?? '0.0'),
+      title: json['title'] ?? 'Unknown',
+      workerName: json['worker']?['first_name'] != null
+          ? '${json['worker']['first_name']} ${json['worker']['last_name']}'
+          : json['worker']?? 'Unknown',
+
+      rating: json['worker']?['rating'] != null
+          ? double.tryParse(json['worker']['rating'].toString()) ?? 0.0
+          : 0.0,
+
       reviewCount: json['worker']?['review_count'] ?? 0,
-      price: double.parse(json['price'].toString()),
+
+      price: json['price'] != null
+          ? double.tryParse(json['price'].toString()) ?? 0.0
+          : 0.0,
+
       imageUrl: json['image_url'] ?? '',
+
       discountPercent: json['discount_percent'] != null
-          ? double.parse(json['discount_person'].toString())
+          ? double.tryParse(json['discount_percent'].toString())
           : null,
+
       category: json['category'],
       description: json['description'],
       workerId: json['worker_id'],
       workerImage: json['worker']?['profile_photo'],
+
+      galleryImages: json['gallery_images'] != null
+          ? List<String>.from(json['gallery_images'])
+          : [],
     );
   }
 }

@@ -39,6 +39,13 @@ class ExploreScreenState extends State<ExploreScreen> {
     super.initState();
     _fullServiceList = List.from(MockService.getServices());
     _serviceList = List.from(_fullServiceList);
+
+    if (widget.initialCategory != null) {
+      _selectedCategories = [widget.initialCategory!];
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _applyFiltering();
+      });
+    }
   }
 
   @override

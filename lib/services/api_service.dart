@@ -31,7 +31,7 @@ class ApiService {
     bool auth = false,
   }) async {
     final headers = {
-      'Content-type': 'application/json',
+      'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
 
@@ -50,7 +50,7 @@ class ApiService {
     bool auth = false,
   }) async {
     final headers = {
-      'Content-type': 'application/json',
+      'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
 

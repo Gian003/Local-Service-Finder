@@ -1,9 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:lsf/config/app_config.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/services/api_service.dart';
+import 'package:lsf/services/auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -13,18 +13,24 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class ProfileScreenState extends State<ProfileScreen> {
-  Map<String, dynamic>? _userPRofile;
+  Map<String, dynamic>? _userProfile;
   bool _isLoading = true;
 
-  Future<void> _loadUSer() async {
-    // Simulate loading user profile data
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
     if (AppConfig.offlineMode) {
-      await Future.delayed(const Duration(seconds: 3));
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (!mounted) return;
       setState(() {
-        _userPRofile = {
-          'first_name': 'John',
-          'last_name': 'Doe',
-          'email': 'user@gmail.com',
+        _userProfile = {
+          'first_name'   : 'John',
+          'last_name'    : 'Doe',
+          'email'        : 'user@gmail.com',
           'profile_photo': null,
         };
         _isLoading = false;
@@ -32,82 +38,76 @@ class ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
-    //Real API call to load user profile data
     final response = await ApiService.getRequest(
       'user-auth/get-current-user',
       auth: true,
     );
+
+    if (!mounted) return;
+
     if (response.statusCode == 200) {
       setState(() {
-        _userPRofile = jsonDecode(response.body);
-        _isLoading = false;
+        _userProfile = jsonDecode(response.body);
+        _isLoading   = false;
       });
+    } else {
+      setState(() => _isLoading = false);
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadUSer();
-  }
-
-  //Profile sections
   final List<Map<String, dynamic>> _profileSections = [
     {
       'section': 'General',
       'items': [
         {
-          'icon': Icons.person_outline,
+          'icon' : Icons.person_outline,
           'label': 'My Profile',
           'route': '/edit-profile',
         },
         {
-          'icon': Icons.notifications_outlined,
+          'icon' : Icons.notifications_outlined,
           'label': 'Notifications',
           'route': '/notifications',
         },
         {
-          'icon': Icons.bookmark_outline,
+          'icon' : Icons.bookmark_outline,
           'label': 'Bookmarks',
           'route': '/bookmarks',
         },
       ],
     },
-
     {
       'section': 'Legal',
       'items': [
         {
-          'icon': Icons.description_outlined,
+          'icon' : Icons.description_outlined,
           'label': 'Terms of Service',
           'route': '/terms-of-service',
         },
         {
-          'icon': Icons.privacy_tip_outlined,
+          'icon' : Icons.privacy_tip_outlined,
           'label': 'Privacy Policy',
           'route': '/privacy-policy',
         },
         {
-          'icon': Icons.help_outline,
+          'icon' : Icons.help_outline,
           'label': 'Help & Support',
           'route': '/help-support',
         },
       ],
     },
-
     {
       'section': 'Personal',
       'items': [
         {
-          'icon': Icons.bug_report_outlined,
+          'icon' : Icons.bug_report_outlined,
           'label': 'Report a Bug',
           'route': '/report-bug',
         },
-
         {
-          'icon': Icons.logout_outlined,
-          'label': 'Logout',
-          'route': null,
+          'icon'    : Icons.logout_outlined,
+          'label'   : 'Logout',
+          'route'   : null,
           'isLogout': true,
         },
       ],
@@ -118,36 +118,38 @@ class ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         title: const Text(
           'Logout',
           style: TextStyle(
             fontFamily: 'Montserrat',
-            fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
         content: const Text(
           'Are you sure you want to logout?',
-          style: TextStyle(fontFamily: 'Montserrat', fontSize: 16),
+          style: TextStyle(fontFamily: 'Montserrat'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(fontFamily: 'Montserrat', fontSize: 16),
-            ),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              Navigator.pop(context);
+              await AuthService.workerLogout();
+              if (!mounted) return;
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
             child: const Text(
               'Logout',
-              style: TextStyle(
-                fontFamily: 'Montserrat',
-                fontSize: 16,
-                color: Colors.white,
-              ),
+              style: TextStyle(color: Colors.white),
             ),
           ),
         ],
@@ -161,7 +163,7 @@ class ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //Header
+          // Header
           Padding(
             padding: const EdgeInsets.all(20),
             child: Center(
@@ -177,35 +179,24 @@ class ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
 
+          // ✅ Clean single scroll — no nesting
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildUserHeader(),
-
-                              const Divider(thickness: 1, height: 1),
-
-                              const SizedBox(height: 10),
-
-                              ..._profileSections.map(
-                                (section) => _buildMenuSection(section),
-                              ),
-
-                              const SizedBox(height: 30),
-                            ],
-                          ),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildUserHeader(),
+                        const Divider(thickness: 1, height: 1),
+                        const SizedBox(height: 10),
+                        ..._profileSections.map(
+                          (section) => _buildMenuSection(section),
                         ),
-                ],
-              ),
-            ),
+                        const SizedBox(height: 30),
+                      ],
+                    ),
+                  ),
           ),
         ],
       ),
@@ -213,10 +204,10 @@ class ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildUserHeader() {
-    final firstName = _userPRofile?['first_name'] ?? 'User';
-    final lastName = _userPRofile?['last_name'] ?? '';
-    final email = _userPRofile?['email'] ?? '';
-    final profilePhoto = _userPRofile?['profile_photo'];
+    final firstName    = _userProfile?['first_name']    ?? 'User';
+    final lastName     = _userProfile?['last_name']     ?? '';
+    final email        = _userProfile?['email']         ?? '';
+    final profilePhoto = _userProfile?['profile_photo'];
 
     return Padding(
       padding: const EdgeInsets.all(20),
@@ -230,7 +221,9 @@ class ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Colors.grey[200],
             child: profilePhoto == null
                 ? Text(
-                    firstName.isNotEmpty ? firstName[0].toUpperCase() : 'User',
+                    firstName.isNotEmpty
+                        ? firstName[0].toUpperCase()
+                        : 'U',
                     style: TextStyle(
                       fontFamily: 'Montserrat',
                       fontSize: 24,
@@ -243,27 +236,31 @@ class ProfileScreenState extends State<ProfileScreen> {
 
           const SizedBox(width: 16),
 
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '$firstName $lastName',
-                style: TextStyle(
-                  fontFamily: 'Montserrat',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$firstName $lastName',
+                  style: const TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                email,
-                style: TextStyle(
-                  fontFamily: 'Montserrat',
-                  fontSize: 16,
-                  color: Colors.grey[600],
+                const SizedBox(height: 4),
+                Text(
+                  email,
+                  style: TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -280,16 +277,13 @@ class ProfileScreenState extends State<ProfileScreen> {
             section['section'],
             style: TextStyle(
               fontFamily: 'Montserrat',
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[600],
+              fontSize: 13,
+              color: Colors.grey[500],
             ),
           ),
         ),
-
-        ...List<Map<String, dynamic>>.from(
-          section['items'],
-        ).map((item) => _buildMenuItem(item)),
+        ...List<Map<String, dynamic>>.from(section['items'])
+            .map((item) => _buildMenuItem(item)),
       ],
     );
   }
@@ -316,8 +310,7 @@ class ProfileScreenState extends State<ProfileScreen> {
             item['label'],
             style: TextStyle(
               fontFamily: 'Montserrat',
-              fontSize: 16,
-              fontWeight: FontWeight.normal,
+              fontSize: 15,
               color: isLogout ? Colors.red : Colors.black,
             ),
           ),

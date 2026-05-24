@@ -33,10 +33,10 @@ class ServiceServices {
     }
 
     //Online Mode
-    String endpoint = '/services';
+    String endpoint = 'services';
     final parameters = <String>[];
 
-    if (category != null) parameters.add('cateoory=$category');
+    if (category != null) parameters.add('category=$category');
     if (sort != null) parameters.add('sort=$sort');
 
     if (parameters.isNotEmpty) endpoint += '?${parameters.join('&')}';
@@ -53,7 +53,7 @@ class ServiceServices {
 
   //Get single Service
   static Future<ServiceModel?> getSingleService(int id) async {
-    final response = await ApiService.getRequest('/services/$id');
+    final response = await ApiService.getRequest('services/$id');
 
     if (response.statusCode == 200) {
       return ServiceModel.fromJson(jsonDecode(response.body));
