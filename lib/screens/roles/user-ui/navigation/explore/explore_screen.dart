@@ -8,7 +8,9 @@ import 'package:lsf/templates/service%20card/service_card.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
 
 class ExploreScreen extends StatefulWidget {
-  const ExploreScreen({super.key});
+  final String? initialCategory;
+
+  const ExploreScreen({super.key, this.initialCategory});
 
   @override
   ExploreScreenState createState() => ExploreScreenState();
@@ -115,36 +117,41 @@ class ExploreScreenState extends State<ExploreScreen> {
 
                   const SizedBox(height: 15),
 
-                  Text('Catefory'),
+                  Text('Category'),
 
                   const SizedBox(height: 5),
 
                   Wrap(
                     spacing: 8,
-                    children: ['Cleaning', 'PLumbing', 'Repair', 'Laundry'].map(
-                      (category) {
-                        final isSelected = _selectedCategories.contains(
-                          category,
-                        );
+                    children:
+                        [
+                          'cleaning',
+                          'plumbing',
+                          'repair',
+                          'electrician',
+                          'roofing',
+                        ].map((category) {
+                          final isSelected = _selectedCategories.contains(
+                            category,
+                          );
 
-                        return FilterChip(
-                          label: Text(category),
-                          selected: isSelected,
-                          selectedColor: AppColors.primaryColor.withValues(
-                            alpha: 0.2,
-                          ),
-                          onSelected: (value) {
-                            setModalState(() {
-                              if (value) {
-                                _selectedCategories.add(category);
-                              } else {
-                                _selectedCategories.remove(category);
-                              }
-                            });
-                          },
-                        );
-                      },
-                    ).toList(),
+                          return FilterChip(
+                            label: Text(category),
+                            selected: isSelected,
+                            selectedColor: AppColors.primaryColor.withValues(
+                              alpha: 0.2,
+                            ),
+                            onSelected: (value) {
+                              setModalState(() {
+                                if (value) {
+                                  _selectedCategories.add(category);
+                                } else {
+                                  _selectedCategories.remove(category);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
                   ),
 
                   const SizedBox(height: 20),
@@ -267,17 +274,17 @@ class ExploreScreenState extends State<ExploreScreen> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-                Center(
-                  child: Text(
-                    'Explore',
-                    style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.secondaryColor,
-                    ),
+              Center(
+                child: Text(
+                  'Explore',
+                  style: TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.secondaryColor,
                   ),
                 ),
+              ),
               const SizedBox(width: 48),
 
               _buildSearchBar(),

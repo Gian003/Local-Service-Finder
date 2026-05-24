@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lsf/screens/roles/user-ui/navigation/explore/explore_screen.dart';
 
 enum CategoryInfo {
   camera('Cameras', Icons.video_call, Colors.white, Color(0xffECEFFD)),
@@ -27,11 +28,25 @@ enum CategoryInfo {
   final Color backgroundColor;
 }
 
-Widget buildCategoryIcon(IconData icon) {
+Widget buildCategoryIcon(
+  BuildContext context,
+  IconData icon,
+  String label,
+  String category
+) {
   return Padding(
     padding: const EdgeInsets.all(5.0),
     child: TextButton(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ExploreScreen(
+              initialCategory: category,
+            )
+          )
+        );
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.white,
         iconSize: 30,

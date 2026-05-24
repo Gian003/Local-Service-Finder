@@ -80,11 +80,6 @@ class LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 30),
 
-                    //Role Toggle
-                    _buildRoleToggle(),
-
-                    const SizedBox(height: 30),
-
                     //Email Field
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
