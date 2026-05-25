@@ -46,12 +46,12 @@ class ServiceModel {
 
     return ServiceModel(
       id: TypeConverter.toInt(json['id']),
-      title: TypeConverter.toString(json['title'], defaultValue: 'Unknown'),
+      title: TypeConverter.makeString(json['title'], defaultValue: 'Unknown'),
       workerName: workerName,
       rating: TypeConverter.toDouble(worker?['rating'], defaultValue: 0.0),
       reviewCount: TypeConverter.toInt(worker?['review_count'], defaultValue: 0),
       price: TypeConverter.toDouble(json['price'], defaultValue: 0.0),
-      imageUrl: TypeConverter.toString(json['image_url'], defaultValue: ''),
+      imageUrl: TypeConverter.makeString(json['image_url'], defaultValue: ''),
       discountPercent: json['discount_percent'] != null
           ? TypeConverter.toDouble(json['discount_percent'])
           : null,

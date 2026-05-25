@@ -29,10 +29,10 @@ class BookingService {
       }
       return null;
     } on AuthException catch (e) {
-      debugPrint('🔐 Auth error: ${e.message}');
+      debugPrint('Auth error: ${e.message}');
       return null;
     } catch (e) {
-      debugPrint('❌ Payment intent creation failed: $e');
+      debugPrint('Payment intent creation failed: $e');
       return null;
     }
   }
@@ -53,7 +53,7 @@ class BookingService {
       await Stripe.instance.presentPaymentSheet();
       return true; // payment success
     } catch (e) {
-      debugPrint('❌ Stripe payment failed: $e');
+      debugPrint('Stripe payment failed: $e');
       return false; // payment cancelled or failed
     }
   }
@@ -85,18 +85,18 @@ class BookingService {
           debugPrint('✅ Booking confirmed: ${data['id'] ?? 'unknown'}');
           return true;
         } on ApiException catch (e) {
-          debugPrint('❌ Parse error: ${e.message}');
+          debugPrint('Parse error: ${e.message}');
           return false;
         }
       }
 
-      debugPrint('❌ Booking confirmation failed: status ${response.statusCode}');
+      debugPrint('Booking confirmation failed: status ${response.statusCode}');
       return false;
     } on AuthException catch (e) {
-      debugPrint('🔐 Auth error: ${e.message}');
+      debugPrint('Auth error: ${e.message}');
       return false;
     } catch (e) {
-      debugPrint('❌ Booking confirmation failed: $e');
+      debugPrint('Booking confirmation failed: $e');
       return false;
     }
   }

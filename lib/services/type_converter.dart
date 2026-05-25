@@ -11,7 +11,7 @@ class TypeConverter {
       final parsed = double.tryParse(value);
       return parsed ?? defaultValue;
     }
-    debugPrint('⚠️ Cannot convert $value (${value.runtimeType}) to double');
+    debugPrint('Cannot convert $value (${value.runtimeType}) to double');
     return defaultValue;
   }
 
@@ -24,12 +24,12 @@ class TypeConverter {
       final parsed = int.tryParse(value);
       return parsed ?? defaultValue;
     }
-    debugPrint('⚠️ Cannot convert $value (${value.runtimeType}) to int');
+    debugPrint('Cannot convert $value (${value.runtimeType}) to int');
     return defaultValue;
   }
 
   /// Safely convert to string
-  static String toString(dynamic value, {String defaultValue = ''}) {
+  static String makeString(dynamic value, {String defaultValue = ''}) {
     if (value == null) return defaultValue;
     return value.toString();
   }
@@ -43,7 +43,7 @@ class TypeConverter {
       return lower == 'true' || lower == '1' || lower == 'yes';
     }
     if (value is int) return value != 0;
-    debugPrint('⚠️ Cannot convert $value (${value.runtimeType}) to bool');
+    debugPrint('Cannot convert $value (${value.runtimeType}) to bool');
     return defaultValue;
   }
 
@@ -64,7 +64,7 @@ class TypeConverter {
         // Try YYYY-MM-DD HH:mm:ss
         return DateTime.parse(str.replaceAll(' ', 'T'));
       } catch (_) {
-        debugPrint('⚠️ Cannot parse datetime: $str');
+        debugPrint('Cannot parse datetime: $str');
         return null;
       }
     }

@@ -17,19 +17,19 @@ class ApiService {
   static Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', token);
-    debugPrint('✅ Token saved');
+    debugPrint('Token saved');
   }
 
   static Future<void> clearToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
-    debugPrint('✅ Token cleared');
+    debugPrint('Token cleared');
   }
 
   static Future<void> saveRole(String role) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('role', role);
-    debugPrint('✅ Role saved: $role');
+    debugPrint('Role saved: $role');
   }
 
   static Future<String?> getRole() async {
@@ -40,14 +40,14 @@ class ApiService {
   static Future<void> clearRole() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('role');
-    debugPrint('✅ Role cleared');
+    debugPrint('Role cleared');
   }
 
   static Future<void> clearAll() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
     await prefs.remove('role');
-    debugPrint('✅ Token and role cleared');
+    debugPrint('Token and role cleared');
   }
 
   static Future<dynamic> getRequest(
@@ -76,7 +76,7 @@ class ApiService {
 
       return response;
     } catch (e, st) {
-      debugPrint('❌ GET request failed: $e');
+      debugPrint('GET request failed: $e');
       debugPrintStack(stackTrace: st);
       rethrow;
     }

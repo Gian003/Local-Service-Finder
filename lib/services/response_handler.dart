@@ -16,7 +16,7 @@ class ResponseHandler {
       }
       return decoded;
     } on FormatException catch (e) {
-      debugPrint('❌ JSON Parse Error: $e');
+      debugPrint('JSON Parse Error: $e');
       throw ApiException(
         message: 'Failed to parse response: ${e.message}',
         statusCode: 0,
@@ -36,7 +36,7 @@ class ResponseHandler {
       }
       return decoded;
     } on FormatException catch (e) {
-      debugPrint('❌ JSON Array Parse Error: $e');
+      debugPrint('JSON Array Parse Error: $e');
       throw ApiException(
         message: 'Failed to parse response array: ${e.message}',
         statusCode: 0,

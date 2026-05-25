@@ -122,14 +122,14 @@ class HttpClient {
 
     while (attempt <= retries) {
       try {
-        debugPrint('📡 $method $url (attempt ${attempt + 1}/${ retries + 1})');
+        debugPrint('$method $url (attempt ${attempt + 1}/${ retries + 1})');
         final response = await request();
-        debugPrint('✅ $method $url → ${response.statusCode}');
+        debugPrint('$method $url → ${response.statusCode}');
         return response;
       } on TimeoutException catch (e) {
-        debugPrint('⏱️  $e');
+        debugPrint('$e');
         if (attempt < retries) {
-          debugPrint('🔄 Retrying after ${delay.inMilliseconds}ms...');
+          debugPrint('Retrying after ${delay.inMilliseconds}ms...');
           await Future.delayed(delay);
           delay *= 2; // Exponential backoff
           attempt++;
@@ -137,7 +137,7 @@ class HttpClient {
           rethrow;
         }
       } on NetworkException catch (e) {
-        debugPrint('❌ $e');
+        debugPrint('$e');
         if (attempt < retries) {
           debugPrint('🔄 Retrying after ${delay.inMilliseconds}ms...');
           await Future.delayed(delay);
@@ -147,7 +147,7 @@ class HttpClient {
           rethrow;
         }
       } catch (e, st) {
-        debugPrint('❌ Unexpected error: $e');
+        debugPrint('Unexpected error: $e');
         debugPrintStack(stackTrace: st);
         throw NetworkException(
           message: 'Request failed: $e',

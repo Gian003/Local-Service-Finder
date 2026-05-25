@@ -60,13 +60,13 @@ class ServiceServices {
         }
       }
 
-      debugPrint('⚠️ Failed to fetch services: status ${response.statusCode}');
+      debugPrint('Failed to fetch services: status ${response.statusCode}');
       return [];
     } on AuthException catch (e) {
-      debugPrint('🔐 Auth error: ${e.message}');
+      debugPrint('Auth error: ${e.message}');
       return [];
     } catch (e) {
-      debugPrint('❌ Failed to fetch services: $e');
+      debugPrint('Failed to fetch services: $e');
       return [];
     }
   }
@@ -86,13 +86,13 @@ class ServiceServices {
         }
       }
 
-      debugPrint('⚠️ Service not found: status ${response.statusCode}');
+      debugPrint('Service not found: status ${response.statusCode}');
       return null;
     } on AuthException catch (e) {
-      debugPrint('🔐 Auth error: ${e.message}');
+      debugPrint('Auth error: ${e.message}');
       return null;
     } catch (e) {
-      debugPrint('❌ Failed to fetch service: $e');
+      debugPrint('Failed to fetch service: $e');
       return null;
     }
   }
