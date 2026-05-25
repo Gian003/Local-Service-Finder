@@ -1,16 +1,18 @@
+import 'package:lsf/services/type_converter.dart';
+
 class BookingModel {
-  final int     id;
-  final String  serviceName;
-  final String  workerName;
+  final int id;
+  final String serviceName;
+  final String workerName;
   final String? workerImage;
-  final String  date;
-  final String  time;
-  final double  totalPrice;
-  final String  status;
+  final String date;
+  final String time;
+  final double totalPrice;
+  final String status;
   final String? address;
   final double? latitude;
   final double? longitude;
-  final int?    workerId;
+  final int? workerId;
 
   const BookingModel({
     required this.id,
@@ -28,23 +30,26 @@ class BookingModel {
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
+    final scheduledAt = json['scheduled_at'];
+    final date = TypeConverter.extractDate(scheduledAt, defaultValue: '');
+    final time = TypeConverter.extractTime(scheduledAt, defaultValue: '');
+
+    final latitude = json['latitude'];
+    final longitude = json['longitude'];
+
     return BookingModel(
-      id:          json['id'],
-      serviceName: json['service']?['title'] ?? '',
-      workerName:  json['worker']?['name']   ?? '',
-      workerImage: json['worker']?['profile_photo'],
-      date:        json['scheduled_at']?.toString().split(' ')[0] ?? '',
-      time:        json['scheduled_at']?.toString().split(' ')[1] ?? '',
-      totalPrice:  double.parse(json['total_price'].toString()),
-      status:      json['status'] ?? 'pending',
-      address:     json['address']?['address'],
-      latitude:    json['latitude']  != null
-          ? double.parse(json['latitude'].toString())
-          : null,
-      longitude:   json['longitude'] != null
-          ? double.parse(json['longitude'].toString())
-          : null,
-      workerId:    json['worker_id'],
+      id: TypeConverter.toInt(json['id']),
+      serviceName: json['service']?['title']?.toString() ?? '',
+      workerName: json['worker']?['name']?.toString() ?? '',
+      workerImage: json['worker']?['profile_photo']?.toString(),
+      date: date,
+      time: time,
+      totalPrice: TypeConverter.toDouble(json['total_price'], defaultValue: 0.0),
+      status: json['status']?.toString() ?? 'pending',
+      address: json['address']?['address']?.toString(),
+      latitude: latitude != null ? TypeConverter.toDouble(latitude) : null,
+      longitude: longitude != null ? TypeConverter.toDouble(longitude) : null,
+      workerId: TypeConverter.toInt(json['worker_id']),
     );
   }
 }

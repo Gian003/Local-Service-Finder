@@ -1,3 +1,5 @@
+import 'package:lsf/services/type_converter.dart';
+
 class ServiceModel {
   final int? id;
   final String title;
@@ -30,37 +32,34 @@ class ServiceModel {
   });
 
   factory ServiceModel.fromJson(Map<String, dynamic> json) {
+    final worker = json['worker'] as Map<String, dynamic>?;
+    final firstName = worker?['first_name']?.toString() ?? '';
+    final lastName = worker?['last_name']?.toString() ?? '';
+    final workerName = firstName.isNotEmpty || lastName.isNotEmpty
+        ? '$firstName $lastName'.trim()
+        : 'Unknown';
+
+    final galleryImages = json['gallery_images'];
+    final gallery = galleryImages is List
+        ? galleryImages.map((e) => e.toString()).toList()
+        : <String>[];
+
     return ServiceModel(
-      id: json['id'],
-      title: json['title'] ?? 'Unknown',
-      workerName: json['worker']?['first_name'] != null
-          ? '${json['worker']['first_name']} ${json['worker']['last_name']}'
-          : json['worker'] ?? 'Unknown',
-
-      rating: json['worker']?['rating'] != null
-          ? double.tryParse(json['worker']['rating'].toString()) ?? 0.0
-          : 0.0,
-
-      reviewCount: json['worker']?['review_count'] ?? 0,
-
-      price: json['price'] != null
-          ? double.tryParse(json['price'].toString()) ?? 0.0
-          : 0.0,
-
-      imageUrl: json['image_url'] ?? '',
-
+      id: TypeConverter.toInt(json['id']),
+      title: TypeConverter.toString(json['title'], defaultValue: 'Unknown'),
+      workerName: workerName,
+      rating: TypeConverter.toDouble(worker?['rating'], defaultValue: 0.0),
+      reviewCount: TypeConverter.toInt(worker?['review_count'], defaultValue: 0),
+      price: TypeConverter.toDouble(json['price'], defaultValue: 0.0),
+      imageUrl: TypeConverter.toString(json['image_url'], defaultValue: ''),
       discountPercent: json['discount_percent'] != null
-          ? double.tryParse(json['discount_percent'].toString())
+          ? TypeConverter.toDouble(json['discount_percent'])
           : null,
-
-      category: json['category'],
-      description: json['description'],
-      workerId: json['worker_id'],
-      workerImage: json['worker']?['profile_photo'],
-
-      galleryImages: json['gallery_images'] != null
-          ? List<String>.from(json['gallery_images'])
-          : [],
+      category: json['category']?.toString(),
+      description: json['description']?.toString(),
+      workerId: TypeConverter.toInt(json['worker_id']),
+      workerImage: worker?['profile_photo']?.toString(),
+      galleryImages: gallery.isNotEmpty ? gallery : null,
     );
   }
 }

@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:lsf/config/app_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'http_client.dart';
+import 'response_handler.dart';
+import 'auth_exception.dart';
 
 class ApiService {
   static const String baseUrl = AppConfig.baseUrl;
@@ -15,10 +17,9 @@ class ApiService {
   static Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', token);
-    debugPrint('✅ Token saved: $token');
+    debugPrint('✅ Token saved');
   }
 
-  // Only removes token
   static Future<void> clearToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
@@ -36,14 +37,12 @@ class ApiService {
     return prefs.getString('role');
   }
 
-  // Only removes role — NOT token!
   static Future<void> clearRole() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('role');
     debugPrint('✅ Role cleared');
   }
 
-  // Clear both token and role together
   static Future<void> clearAll() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
@@ -55,22 +54,32 @@ class ApiService {
     String endpoint, {
     bool auth = false,
   }) async {
-    final headers = {
-      'Content-Type': 'application/json',
-      'Accept':       'application/json',
-    };
+    try {
+      final headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
 
-    if (auth) {
-      final token = await getToken();
-      if (token != null) {
-        headers['Authorization'] = 'Bearer $token';
+      if (auth) {
+        final token = await getToken();
+        if (token != null) {
+          headers['Authorization'] = 'Bearer $token';
+        }
       }
-    }
 
-    return await http.get(
-      Uri.parse('$baseUrl/$endpoint'),
-      headers: headers,
-    );
+      final response = await HttpClient.get(
+        Uri.parse('$baseUrl/$endpoint'),
+        headers: headers,
+      );
+
+      _handleAuthError(response.statusCode);
+
+      return response;
+    } catch (e, st) {
+      debugPrint('❌ GET request failed: $e');
+      debugPrintStack(stackTrace: st);
+      rethrow;
+    }
   }
 
   static Future<dynamic> postRequest(
@@ -78,28 +87,47 @@ class ApiService {
     Map<String, dynamic> body, {
     bool auth = false,
   }) async {
-    final headers = {
-      'Content-Type': 'application/json',
-      'Accept':       'application/json',
-    };
+    try {
+      final headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
 
-    if (auth) {
-      final token = await getToken();
-      if (token != null) {
-        headers['Authorization'] = 'Bearer $token';
+      if (auth) {
+        final token = await getToken();
+        if (token != null) {
+          headers['Authorization'] = 'Bearer $token';
+        }
       }
+
+      final response = await HttpClient.post(
+        Uri.parse('$baseUrl/$endpoint'),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      debugPrint('URL: $baseUrl/$endpoint');
+      debugPrint('Status: ${response.statusCode}');
+
+      _handleAuthError(response.statusCode);
+
+      return response;
+    } catch (e, st) {
+      debugPrint('❌ POST request failed: $e');
+      debugPrintStack(stackTrace: st);
+      rethrow;
     }
+  }
 
-    final result = await http.post(
-      Uri.parse('$baseUrl/$endpoint'),
-      headers: headers,
-      body: jsonEncode(body),
-    );
-
-    debugPrint('URL: $baseUrl/$endpoint');
-    debugPrint('Status: ${result.statusCode}');
-    debugPrint('Response: ${result.body}');
-
-    return result;
+  /// Handle authentication errors (401/403)
+  static void _handleAuthError(int statusCode) {
+    if (statusCode == 401 || statusCode == 403) {
+      debugPrint('🔐 Auth error detected ($statusCode), clearing credentials');
+      clearAll();
+      throw AuthException(
+        message: 'Authentication failed. Please login again.',
+        statusCode: statusCode,
+      );
+    }
   }
 }
