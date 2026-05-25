@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:lsf/config/app_config.dart';
 import 'package:lsf/dataset/mock_service.dart';
@@ -56,11 +57,14 @@ class AuthService {
   }) async {
     //OfflineMode
     if (AppConfig.offlineMode) {
-      await Future.delayed(Duration(seconds: 5));
+      await Future.delayed(Duration(milliseconds: 500));
       final result = MockService.mockLogin(email, password);
 
       await ApiService.saveToken(result['token']);
       await ApiService.saveRole(role);
+
+      final saved = await ApiService.getToken();
+      debugPrint('Token saved after login: $saved');
 
       return result;
     }
@@ -78,6 +82,9 @@ class AuthService {
     if (response.statusCode == 200) {
       await ApiService.saveToken(data['token']);
       await ApiService.saveRole(role);
+
+      final saved = await ApiService.getToken();
+      debugPrint('Token saved after login: $saved');
     }
 
     return {'status': response.statusCode, ...data};
@@ -106,5 +113,22 @@ class AuthService {
     await ApiService.postRequest('worker-auth/logout', {}, auth: true);
     await ApiService.clearToken();
     await ApiService.clearRole();
+  }
+
+  //Logout
+  static Future<void> logout({String role = 'customer'}) async {
+    if (!AppConfig.offlineMode) {
+      final endpoint = role == 'worker'
+          ? 'worker-auth/logout'
+          : 'user-auth/logout';
+      try {
+        await ApiService.postRequest(endpoint, {}, auth: true);
+      } catch (e) {
+        debugPrint('Logout API error: $e');
+      }
+    }
+
+    // Use clearAll instead of clearToken + clearRole separately
+    await ApiService.clearAll();
   }
 }

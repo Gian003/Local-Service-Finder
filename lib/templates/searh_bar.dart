@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 class CustomSearchBar extends StatefulWidget {
   final TextEditingController controller;
   final String hintText;
@@ -16,52 +14,28 @@ class CustomSearchBar extends StatefulWidget {
   });
 
   @override
-  CustomSearchBarState createState() => CustomSearchBarState();
+  State<CustomSearchBar> createState() => CustomSearchBarState();
 }
 
 class CustomSearchBarState extends State<CustomSearchBar> {
-  String _searchQuery = '';
-  final TextEditingController _searchController = TextEditingController();
-  bool _hasText = false;
-
-  void _onTextChanged() {
-    setState(() {
-      _hasText = widget.controller.text.isNotEmpty;
-    });
-    widget.onSearch(widget.controller.text);
-  }
-
-  void _clearText() {
-    widget.controller.clear();
-    widget.onClear();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.addListener(_onTextChanged);
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_onTextChanged);
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
+    // ✅ Wrap with Material to fix TextField ancestor error
+    return Material(
+      color: Colors.transparent,
+      child: buildSearchBar(),
+    );
+  }
+
+  Widget buildSearchBar() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: 50,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.horizontal(
-          left: Radius.circular(15),
-          right: Radius.circular(15),
-        ),
+        borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: Colors.grey.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -69,44 +43,41 @@ class CustomSearchBarState extends State<CustomSearchBar> {
       ),
       child: Row(
         children: [
-          FaIcon(
-            FontAwesomeIcons.magnifyingGlass,
-            color: Colors.grey[500],
-            size: 20,
-          ),
-
-          const SizedBox(width: 10),
-
+          const SizedBox(width: 16),
+          Icon(Icons.search, color: Colors.grey[400], size: 20),
+          const SizedBox(width: 8),
           Expanded(
             child: TextField(
               controller: widget.controller,
+              onChanged: widget.onSearch,
+              style: const TextStyle(
+                fontFamily: 'Montserrat',
+                color: Color.fromRGBO(66, 66, 66, 1),
+                fontSize: 15,
+              ),
               decoration: InputDecoration(
                 hintText: widget.hintText,
                 hintStyle: TextStyle(
                   fontFamily: 'Montserrat',
-                  color: Colors.grey[500],
+                  color: Colors.grey[400],
+                  fontSize: 15,
                 ),
-                border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
+                border: InputBorder.none,
               ),
-
-              style: TextStyle(
-                fontFamily: 'Montserrat',
-                fontSize: 15,
-                color: Colors.grey[800],
-              ),
-
-              onChanged: (value) {
-                widget.onSearch(value);
-              },
             ),
           ),
-          if (_hasText)
+          // Clear button
+          if (widget.controller.text.isNotEmpty)
             IconButton(
-              icon: Icon(Icons.clear, color: Colors.grey[500], size: 20),
-              onPressed: _clearText,
-              splashRadius: 20,
-            ),
+              onPressed: () {
+                widget.controller.clear();
+                widget.onClear();
+              },
+              icon: Icon(Icons.close, color: Colors.grey[400], size: 20),
+            )
+          else
+            const SizedBox(width: 16),
         ],
       ),
     );

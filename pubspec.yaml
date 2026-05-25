@@ -85,7 +85,6 @@ flutter:
   assets:
     - assets/fonts/
     - assets/images/
-    - assets/animations/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

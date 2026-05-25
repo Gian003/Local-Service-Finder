@@ -4,6 +4,7 @@ import 'package:lsf/dataset/mock_service.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/models/booking_model.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/bookmark/bookmark_screen.dart';
+import 'package:lsf/services/api_service.dart';
 import 'package:lsf/services/booking_service.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
 
@@ -861,10 +862,10 @@ class _BookingScreenState extends State<BookingScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _selectedAddress == null
-                ? null 
-                : () {
-                  setState(() => _currentStep = 2);
-                },
+                    ? null
+                    : () {
+                        setState(() => _currentStep = 2);
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -944,108 +945,139 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   Future<void> _handleNextButton() async {
-  // Step 1 validation
-  if (_currentStep == 0) {
-    if (_selectedTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a time slot')),
-      );
-      return;
-    }
-    setState(() => _currentStep = 1);
-    return;
-  }
-
-  // Step 3 — Confirm & Pay
-  if (_currentStep == 2) {
-    if (_selectedPayment == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a payment method')),
-      );
+    // Step 1 validation
+    if (_currentStep == 0) {
+      if (_selectedTime == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a time slot')),
+        );
+        return;
+      }
+      setState(() => _currentStep = 1);
       return;
     }
 
-    setState(() => _isLoading = true);
+    // Step 3 — Confirm & Pay
+    if (_currentStep == 2) {
+      final token = await ApiService.getToken();
+      debugPrint('Token before booking: $token');
 
-    if (AppConfig.offlineMode) {
-      await Future.delayed(const Duration(seconds: 1));
-      
-      final newBooking = BookingModel(
-        id:          DateTime.now().millisecondsSinceEpoch,
-        serviceName: widget.service.title,
-        workerName:  widget.service.workerName,
-        workerImage: widget.service.workerImage,
-        date:        '${_selectedDate.day}-${_selectedDate.month}-${_selectedDate.year}',
-        time:        _selectedTime ?? '',
-        totalPrice:  widget.service.price,
-        status:      'upcoming',
-        address:     _selectedAddress?['address'] ?? 'Urdaneta City',
-        latitude:    15.9754,
-        longitude:   120.5720,
-        workerId:    widget.service.workerId ?? 1,
-      );
+      if (token == null && !AppConfig.offlineMode) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Session expired. Please login again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        // Redirect to login
+        Navigator.pushReplacementNamed(context, '/login');
+        return;
+      }
+      if (_selectedPayment == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a payment method')),
+        );
+        return;
+      }
 
-      MockService.addBooking(newBooking);
+      setState(() => _isLoading = true);
 
-      setState(() => _isLoading = false);
-      if (!mounted) return;
-      _showSuccessDialog();
-      return;
-    }
+      if (AppConfig.offlineMode) {
+        await Future.delayed(const Duration(seconds: 1));
 
-    // Online — Stripe flow
-    if (_selectedPayment == 'card') {
-      final amountInCentavos = (widget.service.price * 100).toInt();
-      final clientSecret = await BookingService.createPaymentIntent(
-        amount:    amountInCentavos,
+        final newBooking = BookingModel(
+          id: DateTime.now().millisecondsSinceEpoch,
+          serviceName: widget.service.title,
+          workerName: widget.service.workerName,
+          workerImage: widget.service.workerImage,
+          date:
+              '${_selectedDate.day}-${_selectedDate.month}-${_selectedDate.year}',
+          time: _selectedTime ?? '',
+          totalPrice: widget.service.price,
+          status: 'upcoming',
+          address: _selectedAddress?['address'] ?? 'Urdaneta City',
+          latitude: 15.9754,
+          longitude: 120.5720,
+          workerId: widget.service.workerId ?? 1,
+        );
+
+        MockService.addBooking(newBooking);
+
+        setState(() => _isLoading = false);
+        if (!mounted) return;
+        _showSuccessDialog();
+        return;
+      }
+
+      // Online — Stripe flow
+      if (_selectedPayment == 'card') {
+        final amountInCentavos = (widget.service.price * 100).toInt();
+        final clientSecret = await BookingService.createPaymentIntent(
+          amount: amountInCentavos,
+          serviceId: widget.service.id ?? 1,
+        );
+
+        if (!mounted) return;
+
+        if (clientSecret == null) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Payment setup failed')));
+          return;
+        }
+
+        final success = await BookingService.processStripePayment(
+          clientSecret: clientSecret,
+        );
+
+        if (!mounted) return;
+
+        if (!success) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Payment cancelled')));
+          return;
+        }
+      }
+
+      String _convertTo24Hour(String time12h) {
+        final parts = time12h.split(' ');
+        final timePart = parts[0];
+        final period = parts[1];
+
+        var [hours, minutes] = timePart.split(':');
+        int hour = int.parse(hours);
+
+        if (period == 'PM' && hour != 12) hour += 12;
+        if (period == 'AM' && hour == 12) hour = 0;
+
+        return '${hour.toString().padLeft(2, '0')}:$minutes:00';
+      }
+
+      // Confirm booking in DB
+      final scheduled =
+          '${_selectedDate.year.toString()}-'
+          '${_selectedDate.month.toString().padLeft(2, '0')}-'
+          '${_selectedDate.day.toString().padLeft(2, '0')} '
+          '${_convertTo24Hour(_selectedTime ?? '')}';
+
+      final booked = await BookingService.confirmBooking(
         serviceId: widget.service.id ?? 1,
+        workerId: widget.service.workerId ?? 1,
+        addressId: _selectedAddress?['id'] ?? 1,
+        scheduledAt: scheduled,
+        totalPrice: widget.service.price,
+        paymentMethod: _selectedPayment!,
       );
 
       if (!mounted) return;
+      setState(() => _isLoading = false);
 
-      if (clientSecret == null) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment setup failed')),
-        );
-        return;
-      }
-
-      final success = await BookingService.processStripePayment(
-        clientSecret: clientSecret,
-      );
-
-      if (!mounted) return;
-
-      if (!success) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment cancelled')),
-        );
-        return;
-      }
+      if (booked) _showSuccessDialog();
     }
-
-    // Confirm booking in DB
-    final scheduled =
-        '${_selectedDate.year}-${_selectedDate.month}'
-        '-${_selectedDate.day} $_selectedTime';
-
-    final booked = await BookingService.confirmBooking(
-      serviceId:     widget.service.id ?? 1,
-      workerId:      widget.service.workerId ?? 1,
-      addressId:     _selectedAddress?['id'] ?? 1,
-      scheduledAt:   scheduled,
-      totalPrice:    widget.service.price,
-      paymentMethod: _selectedPayment!,
-    );
-
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
-    if (booked) _showSuccessDialog();
   }
-}
 
   void _showSuccessDialog() {
     showDialog(

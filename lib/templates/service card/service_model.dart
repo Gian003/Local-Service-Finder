@@ -35,7 +35,7 @@ class ServiceModel {
       title: json['title'] ?? 'Unknown',
       workerName: json['worker']?['first_name'] != null
           ? '${json['worker']['first_name']} ${json['worker']['last_name']}'
-          : json['worker']?? 'Unknown',
+          : json['worker'] ?? 'Unknown',
 
       rating: json['worker']?['rating'] != null
           ? double.tryParse(json['worker']['rating'].toString()) ?? 0.0

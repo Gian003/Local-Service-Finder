@@ -28,9 +28,9 @@ class ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       setState(() {
         _userProfile = {
-          'first_name'   : 'John',
-          'last_name'    : 'Doe',
-          'email'        : 'user@gmail.com',
+          'first_name': 'John',
+          'last_name': 'Doe',
+          'email': 'user@gmail.com',
           'profile_photo': null,
         };
         _isLoading = false;
@@ -48,7 +48,7 @@ class ProfileScreenState extends State<ProfileScreen> {
     if (response.statusCode == 200) {
       setState(() {
         _userProfile = jsonDecode(response.body);
-        _isLoading   = false;
+        _isLoading = false;
       });
     } else {
       setState(() => _isLoading = false);
@@ -60,17 +60,17 @@ class ProfileScreenState extends State<ProfileScreen> {
       'section': 'General',
       'items': [
         {
-          'icon' : Icons.person_outline,
+          'icon': Icons.person_outline,
           'label': 'My Profile',
           'route': '/edit-profile',
         },
         {
-          'icon' : Icons.notifications_outlined,
+          'icon': Icons.notifications_outlined,
           'label': 'Notifications',
           'route': '/notifications',
         },
         {
-          'icon' : Icons.bookmark_outline,
+          'icon': Icons.bookmark_outline,
           'label': 'Bookmarks',
           'route': '/bookmarks',
         },
@@ -80,17 +80,17 @@ class ProfileScreenState extends State<ProfileScreen> {
       'section': 'Legal',
       'items': [
         {
-          'icon' : Icons.description_outlined,
+          'icon': Icons.description_outlined,
           'label': 'Terms of Service',
           'route': '/terms-of-service',
         },
         {
-          'icon' : Icons.privacy_tip_outlined,
+          'icon': Icons.privacy_tip_outlined,
           'label': 'Privacy Policy',
           'route': '/privacy-policy',
         },
         {
-          'icon' : Icons.help_outline,
+          'icon': Icons.help_outline,
           'label': 'Help & Support',
           'route': '/help-support',
         },
@@ -100,14 +100,14 @@ class ProfileScreenState extends State<ProfileScreen> {
       'section': 'Personal',
       'items': [
         {
-          'icon' : Icons.bug_report_outlined,
+          'icon': Icons.bug_report_outlined,
           'label': 'Report a Bug',
           'route': '/report-bug',
         },
         {
-          'icon'    : Icons.logout_outlined,
-          'label'   : 'Logout',
-          'route'   : null,
+          'icon': Icons.logout_outlined,
+          'label': 'Logout',
+          'route': null,
           'isLogout': true,
         },
       ],
@@ -115,47 +115,49 @@ class ProfileScreenState extends State<ProfileScreen> {
   ];
 
   void _handleLogout() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+  final navigator = Navigator.of(context);
+
+  showDialog(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Logout',
+        style: TextStyle(
+          fontFamily: 'Montserrat',
+          fontWeight: FontWeight.bold,
         ),
-        title: const Text(
-          'Logout',
-          style: TextStyle(
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: const Text(
-          'Are you sure you want to logout?',
-          style: TextStyle(fontFamily: 'Montserrat'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await AuthService.workerLogout();
-              if (!mounted) return;
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text(
-              'Logout',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
       ),
-    );
-  }
+      content: const Text(
+        'Are you sure you want to logout?',
+        style: TextStyle(fontFamily: 'Montserrat'),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            Navigator.pop(dialogContext); // close dialog
+
+            // Get role before clearing
+            final role = await ApiService.getRole() ?? 'customer';
+
+            await AuthService.logout(role: role);
+
+            navigator.pushReplacementNamed('/login');
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+          ),
+          child: const Text(
+            'Logout',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +181,6 @@ class ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
 
-          // ✅ Clean single scroll — no nesting
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -204,9 +205,9 @@ class ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildUserHeader() {
-    final firstName    = _userProfile?['first_name']    ?? 'User';
-    final lastName     = _userProfile?['last_name']     ?? '';
-    final email        = _userProfile?['email']         ?? '';
+    final firstName = _userProfile?['first_name'] ?? 'User';
+    final lastName = _userProfile?['last_name'] ?? '';
+    final email = _userProfile?['email'] ?? '';
     final profilePhoto = _userProfile?['profile_photo'];
 
     return Padding(
@@ -221,9 +222,7 @@ class ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Colors.grey[200],
             child: profilePhoto == null
                 ? Text(
-                    firstName.isNotEmpty
-                        ? firstName[0].toUpperCase()
-                        : 'U',
+                    firstName.isNotEmpty ? firstName[0].toUpperCase() : 'U',
                     style: TextStyle(
                       fontFamily: 'Montserrat',
                       fontSize: 24,
@@ -282,8 +281,9 @@ class ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ),
-        ...List<Map<String, dynamic>>.from(section['items'])
-            .map((item) => _buildMenuItem(item)),
+        ...List<Map<String, dynamic>>.from(
+          section['items'],
+        ).map((item) => _buildMenuItem(item)),
       ],
     );
   }

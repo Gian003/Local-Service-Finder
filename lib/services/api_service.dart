@@ -7,43 +7,72 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiService {
   static const String baseUrl = AppConfig.baseUrl;
 
-  //Get Stored Token
   static Future<String?> getToken() async {
-    final preferences = await SharedPreferences.getInstance();
-    return preferences.getString('token');
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
   }
 
-  //Save Token
   static Future<void> saveToken(String token) async {
-    final preferences = await SharedPreferences.getInstance();
-    await preferences.setString('token', token);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token);
+    debugPrint('✅ Token saved: $token');
   }
 
-  //Clear Token on logout
+  // Only removes token
   static Future<void> clearToken() async {
-    final preferences = await SharedPreferences.getInstance();
-    await preferences.remove('token');
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    debugPrint('✅ Token cleared');
   }
 
-  //Get Request
+  static Future<void> saveRole(String role) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('role', role);
+    debugPrint('✅ Role saved: $role');
+  }
+
+  static Future<String?> getRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('role');
+  }
+
+  // Only removes role — NOT token!
+  static Future<void> clearRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('role');
+    debugPrint('✅ Role cleared');
+  }
+
+  // Clear both token and role together
+  static Future<void> clearAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await prefs.remove('role');
+    debugPrint('✅ Token and role cleared');
+  }
+
   static Future<dynamic> getRequest(
     String endpoint, {
     bool auth = false,
   }) async {
     final headers = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      'Accept':       'application/json',
     };
 
     if (auth) {
       final token = await getToken();
-      headers['Authorization'] = 'Bearer $token';
+      if (token != null) {
+        headers['Authorization'] = 'Bearer $token';
+      }
     }
 
-    return await http.get(Uri.parse('$baseUrl/$endpoint'), headers: headers);
+    return await http.get(
+      Uri.parse('$baseUrl/$endpoint'),
+      headers: headers,
+    );
   }
 
-  //Post Request
   static Future<dynamic> postRequest(
     String endpoint,
     Map<String, dynamic> body, {
@@ -51,12 +80,14 @@ class ApiService {
   }) async {
     final headers = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      'Accept':       'application/json',
     };
 
     if (auth) {
       final token = await getToken();
-      headers['Authorization'] = 'Bearer $token';
+      if (token != null) {
+        headers['Authorization'] = 'Bearer $token';
+      }
     }
 
     final result = await http.post(
@@ -66,30 +97,9 @@ class ApiService {
     );
 
     debugPrint('URL: $baseUrl/$endpoint');
-    debugPrint('Headers: $headers');
-    debugPrint('Body: ${jsonEncode(body)})');
-    debugPrint('Status Code: ${result.statusCode}');
-    debugPrint('Response Body: ${result.body}');
+    debugPrint('Status: ${result.statusCode}');
+    debugPrint('Response: ${result.body}');
 
     return result;
-  }
-
-  //Save Role
-  static Future<void> saveRole(String role) async {
-    final preference = await SharedPreferences.getInstance();
-    await preference.setString('role', role);
-  }
-
-  //Get Role
-  static Future<String?> getRole() async {
-    final preference = await SharedPreferences.getInstance();
-    return preference.getString('role');
-  }
-
-  //Clear Role on Logout
-  static Future<void> clearRole() async {
-    final preference = await SharedPreferences.getInstance();
-    await preference.remove('token');
-    await preference.remove('role');
   }
 }

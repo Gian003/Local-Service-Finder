@@ -1,5 +1,5 @@
 class AppConfig {
-  static const String baseUrl = 'http://192.168.1.2:8000/api';
+  static const String baseUrl = 'http://192.168.1.6:8000/api';
   static const bool offlineMode = false;
 
   static const String pusherKey = '9a9f9541c5b08ea96ad7';
