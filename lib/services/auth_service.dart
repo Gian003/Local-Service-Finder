@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import 'package:lsf/config/app_config.dart';
 import 'package:lsf/dataset/mock_service.dart';
-
 import 'api_service.dart';
+import 'response_handler.dart';
+import 'auth_exception.dart';
 
 class AuthService {
   //Customer Register
@@ -21,32 +21,54 @@ class AuthService {
     }
 
     //OnlineMode
-    final response = await ApiService.postRequest('user-auth/register', {
-      'first_name': firstName,
-      'last_name': lastName,
-      'email': email,
-      'password': password,
-      'password_confirmation': password,
-    });
+    try {
+      final response = await ApiService.postRequest('user-auth/register', {
+        'first_name': firstName,
+        'last_name': lastName,
+        'email': email,
+        'password': password,
+        'password_confirmation': password,
+      });
 
-    final contentType = response.headers['content-type'] ?? '';
+      final contentType = response.headers['content-type'] ?? '';
 
-    if (!contentType.contains('application/json')) {
+      if (!contentType.contains('application/json')) {
+        return {
+          'status': response.statusCode,
+          'message':
+              'Server error: received HTML instead of JSON. '
+              'Check if Laravel is running correctly.',
+        };
+      }
+
+      try {
+        final data = ResponseHandler.parseJson(response.body);
+
+        if (response.statusCode == 200) {
+          final token = ResponseHandler.getString(data, 'token');
+          if (token.isNotEmpty) {
+            await ApiService.saveToken(token);
+          }
+        }
+
+        return {'status': response.statusCode, ...data};
+      } on ApiException catch (e) {
+        return {
+          'status': response.statusCode,
+          'message': 'Failed to parse response: ${e.message}',
+        };
+      }
+    } on AuthException catch (e) {
       return {
-        'status': response.statusCode,
-        'message':
-            'Server error _ recieved HTML instead of JSON. '
-            'Chech if Laravel is running correctly.',
+        'status': e.statusCode ?? 0,
+        'message': e.message,
+      };
+    } catch (e) {
+      return {
+        'status': 0,
+        'message': 'Registration failed: $e',
       };
     }
-
-    final data = jsonDecode(response.body);
-
-    if (response.statusCode == 200) {
-      await ApiService.saveToken(data['token']);
-    }
-
-    return {'status': response.statusCode, ...data};
   }
 
   //Customer Login
@@ -70,24 +92,46 @@ class AuthService {
     }
 
     //Online Mode
-    final endPoint = role == 'worker' ? 'worker-auth/login' : 'user-auth/login';
+    try {
+      final endPoint = role == 'worker' ? 'worker-auth/login' : 'user-auth/login';
 
-    final response = await ApiService.postRequest(endPoint, {
-      'email': email,
-      'password': password,
-    });
+      final response = await ApiService.postRequest(endPoint, {
+        'email': email,
+        'password': password,
+      });
 
-    final data = jsonDecode(response.body);
+      try {
+        final data = ResponseHandler.parseJson(response.body);
 
-    if (response.statusCode == 200) {
-      await ApiService.saveToken(data['token']);
-      await ApiService.saveRole(role);
+        if (response.statusCode == 200) {
+          final token = ResponseHandler.getString(data, 'token');
+          if (token.isNotEmpty) {
+            await ApiService.saveToken(token);
+            await ApiService.saveRole(role);
 
-      final saved = await ApiService.getToken();
-      debugPrint('Token saved after login: $saved');
+            final saved = await ApiService.getToken();
+            debugPrint('Token saved after login: $saved');
+          }
+        }
+
+        return {'status': response.statusCode, ...data};
+      } on ApiException catch (e) {
+        return {
+          'status': response.statusCode,
+          'message': 'Failed to parse response: ${e.message}',
+        };
+      }
+    } on AuthException catch (e) {
+      return {
+        'status': e.statusCode ?? 0,
+        'message': e.message,
+      };
+    } catch (e) {
+      return {
+        'status': 0,
+        'message': 'Login failed: $e',
+      };
     }
-
-    return {'status': response.statusCode, ...data};
   }
 
   //Worker Login
@@ -95,22 +139,48 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    final response = await ApiService.postRequest('worker-auth/login', {
-      'email': email,
-      'password': password,
-    });
+    try {
+      final response = await ApiService.postRequest('worker-auth/login', {
+        'email': email,
+        'password': password,
+      });
 
-    final data = jsonDecode(response.body);
+      try {
+        final data = ResponseHandler.parseJson(response.body);
 
-    if (response.statusCode == 200) {
-      await ApiService.saveToken(data['token']);
+        if (response.statusCode == 200) {
+          final token = ResponseHandler.getString(data, 'token');
+          if (token.isNotEmpty) {
+            await ApiService.saveToken(token);
+          }
+        }
+
+        return {'status': response.statusCode, ...data};
+      } on ApiException catch (e) {
+        return {
+          'status': response.statusCode,
+          'message': 'Failed to parse response: ${e.message}',
+        };
+      }
+    } on AuthException catch (e) {
+      return {
+        'status': e.statusCode ?? 0,
+        'message': e.message,
+      };
+    } catch (e) {
+      return {
+        'status': 0,
+        'message': 'Worker login failed: $e',
+      };
     }
-
-    return {'status': response.statusCode, ...data};
   }
 
   static Future<void> workerLogout() async {
-    await ApiService.postRequest('worker-auth/logout', {}, auth: true);
+    try {
+      await ApiService.postRequest('worker-auth/logout', {}, auth: true);
+    } catch (e) {
+      debugPrint('Logout API error: $e');
+    }
     await ApiService.clearToken();
     await ApiService.clearRole();
   }
@@ -128,7 +198,6 @@ class AuthService {
       }
     }
 
-    // Use clearAll instead of clearToken + clearRole separately
     await ApiService.clearAll();
   }
 }

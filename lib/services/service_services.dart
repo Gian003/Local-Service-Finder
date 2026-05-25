@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:lsf/config/app_config.dart';
 import 'package:lsf/dataset/mock_service.dart';
 import 'package:lsf/templates/service card/service_model.dart';
 import 'api_service.dart';
+import 'response_handler.dart';
+import 'auth_exception.dart';
 
 class ServiceServices {
   //Get All Services
@@ -16,7 +19,7 @@ class ServiceServices {
       var list = MockService.getServices();
 
       if (category != null) {
-        list = list.where((sort) => sort.category == category).toList();
+        list = list.where((service) => service.category == category).toList();
       }
 
       if (sort == 'popular') {
@@ -33,32 +36,64 @@ class ServiceServices {
     }
 
     //Online Mode
-    String endpoint = 'services';
-    final parameters = <String>[];
+    try {
+      String endpoint = 'services';
+      final parameters = <String>[];
 
-    if (category != null) parameters.add('category=$category');
-    if (sort != null) parameters.add('sort=$sort');
+      if (category != null) parameters.add('category=$category');
+      if (sort != null) parameters.add('sort=$sort');
 
-    if (parameters.isNotEmpty) endpoint += '?${parameters.join('&')}';
+      if (parameters.isNotEmpty) endpoint += '?${parameters.join('&')}';
 
-    final response = await ApiService.getRequest(endpoint);
+      final response = await ApiService.getRequest(endpoint);
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
-      return data.map((json) => ServiceModel.fromJson(json)).toList();
+      if (response.statusCode == 200) {
+        try {
+          final data = ResponseHandler.parseJsonArray(response.body);
+          return data
+              .whereType<Map<String, dynamic>>()
+              .map((json) => ServiceModel.fromJson(json))
+              .toList();
+        } on ApiException catch (e) {
+          debugPrint('❌ Parse error: ${e.message}');
+          return [];
+        }
+      }
+
+      debugPrint('⚠️ Failed to fetch services: status ${response.statusCode}');
+      return [];
+    } on AuthException catch (e) {
+      debugPrint('🔐 Auth error: ${e.message}');
+      return [];
+    } catch (e) {
+      debugPrint('❌ Failed to fetch services: $e');
+      return [];
     }
-
-    return [];
   }
 
   //Get single Service
   static Future<ServiceModel?> getSingleService(int id) async {
-    final response = await ApiService.getRequest('services/$id');
+    try {
+      final response = await ApiService.getRequest('services/$id');
 
-    if (response.statusCode == 200) {
-      return ServiceModel.fromJson(jsonDecode(response.body));
+      if (response.statusCode == 200) {
+        try {
+          final data = ResponseHandler.parseJson(response.body);
+          return ServiceModel.fromJson(data);
+        } on ApiException catch (e) {
+          debugPrint('❌ Parse error: ${e.message}');
+          return null;
+        }
+      }
+
+      debugPrint('⚠️ Service not found: status ${response.statusCode}');
+      return null;
+    } on AuthException catch (e) {
+      debugPrint('🔐 Auth error: ${e.message}');
+      return null;
+    } catch (e) {
+      debugPrint('❌ Failed to fetch service: $e');
+      return null;
     }
-
-    return null;
   }
 }
