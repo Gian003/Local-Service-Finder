@@ -55,7 +55,7 @@ class ServiceServices {
               .map((json) => ServiceModel.fromJson(json))
               .toList();
         } on ApiException catch (e) {
-          debugPrint('❌ Parse error: ${e.message}');
+          debugPrint('Parse error: ${e.message}');
           return [];
         }
       }
@@ -81,7 +81,7 @@ class ServiceServices {
           final data = ResponseHandler.parseJson(response.body);
           return ServiceModel.fromJson(data);
         } on ApiException catch (e) {
-          debugPrint('❌ Parse error: ${e.message}');
+          debugPrint('Parse error: ${e.message}');
           return null;
         }
       }
