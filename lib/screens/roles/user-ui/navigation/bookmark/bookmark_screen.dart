@@ -22,55 +22,55 @@ class BookmarkScreenState extends State<BookmarkScreen> {
 
   final List<String> _tabs = ['Upcoming', 'Completed', 'Cancelled', 'Saved'];
 
-  // List<BookmarkModel> _filteredBookmarks = [];
+  List<BookmarkModel> _filteredBookmarks = [];
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _loadBookings();
-  // }
-
-  // Future<void> _loadBookings() async {
-  //   final response = await ApiService.getRequest('/bookings/user', auth: true);
-  //   if (response.statusCode == 200) {
-  //     final data = jsonDecode(response.body) as List;
-  //     setState(() {
-  //       _filteredBookmarks = data
-  //           .map((json) => BookingModel.fromJson(json))
-  //           .where((booking) => booking.status == _selectedTab.toLowerCase())
-  //           .map(
-  //             (booking) => BookmarkModel(
-  //               id: booking.id,
-  //               serviceType: 'Service',
-  //               serviceName: booking.serviceName,
-  //               providerName: booking.workerName,
-  //               imageUrl: booking.workerImage ?? 'https://picsum.photos/200',
-  //               date: DateTime.now(),
-  //               status: booking.status,
-  //             ),
-  //           )
-  //           .toList();
-  //     });
-  //   }
-  // }
-
-  //Filter Bookmark by status
-  List<BookmarkModel> get _filteredBookmarks {
-    return MockService.getBookings()
-        .where((booking) => booking.status == _selectedTab.toLowerCase())
-        .map(
-          (booking) => BookmarkModel(
-            id: booking.id,
-            serviceType: 'Service',
-            serviceName: booking.serviceName,
-            providerName: booking.workerName,
-            imageUrl: 'https://picsum.photos/200',
-            date: DateTime.now(),
-            status: booking.status,
-          ),
-        )
-        .toList();
+  @override
+  void initState() {
+    super.initState();
+    _loadBookings();
   }
+
+  Future<void> _loadBookings() async {
+    final response = await ApiService.getRequest('/bookings/user', auth: true);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as List;
+      setState(() {
+        _filteredBookmarks = data
+            .map((json) => BookingModel.fromJson(json))
+            .where((booking) => booking.status == _selectedTab.toLowerCase())
+            .map(
+              (booking) => BookmarkModel(
+                id: booking.id,
+                serviceType: 'Service',
+                serviceName: booking.serviceName,
+                providerName: booking.workerName,
+                imageUrl: booking.workerImage ?? 'https://picsum.photos/200',
+                date: DateTime.now(),
+                status: booking.status,
+              ),
+            )
+            .toList();
+      });
+    }
+  }
+
+  // //Filter Bookmark by status
+  // List<BookmarkModel> get _filteredBookmarks {
+  //   return MockService.getBookings()
+  //       .where((booking) => booking.status == _selectedTab.toLowerCase())
+  //       .map(
+  //         (booking) => BookmarkModel(
+  //           id: booking.id,
+  //           serviceType: 'Service',
+  //           serviceName: booking.serviceName,
+  //           providerName: booking.workerName,
+  //           imageUrl: 'https://picsum.photos/200',
+  //           date: DateTime.now(),
+  //           status: booking.status,
+  //         ),
+  //       )
+  //       .toList();
+  // }
 
   @override
   Widget build(BuildContext context) {

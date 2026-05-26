@@ -14,4 +14,17 @@ class NotificationModel {
     required this.isRead,
     required this.createdAt,
   });
+
+  factory NotificationModel.fromJson(Map<String, dynamic> map) {
+    return NotificationModel(
+      id: map['id'] ?? 0,
+      title: map['title'] ?? '',
+      message: map['message'] ?? '',
+      type: map['type'] ?? '',
+      isRead: map['is_read'] ?? false,
+      createdAt: DateTime.parse(
+        map['created_at'] ?? DateTime.now().toIso8601String(),
+      ),
+    );
+  }
 }

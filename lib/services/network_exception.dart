@@ -1,4 +1,3 @@
-/// Exception for network-related errors
 class NetworkException implements Exception {
   final String message;
   final dynamic originalError;

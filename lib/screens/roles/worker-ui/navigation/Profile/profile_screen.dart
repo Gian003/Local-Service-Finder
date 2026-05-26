@@ -40,7 +40,7 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
       return;
     }
 
-    final response = await ApiService.getRequest('/worker/me', auth: true);
+    final response = await ApiService.getRequest('/worker-auth/me', auth: true);
     if (response.statusCode == 200) {
       setState(() {
         _worker = jsonDecode(response.body);
