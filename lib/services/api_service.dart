@@ -113,7 +113,7 @@ class ApiService {
 
       return response;
     } catch (e, st) {
-      debugPrint('❌ POST request failed: $e');
+      debugPrint('POST request failed: $e');
       debugPrintStack(stackTrace: st);
       rethrow;
     }
@@ -122,7 +122,7 @@ class ApiService {
   /// Handle authentication errors (401/403)
   static void _handleAuthError(int statusCode) {
     if (statusCode == 401 || statusCode == 403) {
-      debugPrint('🔐 Auth error detected ($statusCode), clearing credentials');
+      debugPrint('Auth error detected ($statusCode), clearing credentials');
       clearAll();
       throw AuthException(
         message: 'Authentication failed. Please login again.',

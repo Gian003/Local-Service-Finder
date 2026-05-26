@@ -1,3 +1,5 @@
+// import 'package:flutter_secure_dotenv/flutter_secure_dotenv.dart';
+
 class AppConfig {
   static const String baseUrl = 'http://192.168.1.6:8000/api';
   static const bool offlineMode = false;

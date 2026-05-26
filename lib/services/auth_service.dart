@@ -59,15 +59,9 @@ class AuthService {
         };
       }
     } on AuthException catch (e) {
-      return {
-        'status': e.statusCode ?? 0,
-        'message': e.message,
-      };
+      return {'status': e.statusCode ?? 0, 'message': e.message};
     } catch (e) {
-      return {
-        'status': 0,
-        'message': 'Registration failed: $e',
-      };
+      return {'status': 0, 'message': 'Registration failed: $e'};
     }
   }
 
@@ -93,7 +87,9 @@ class AuthService {
 
     //Online Mode
     try {
-      final endPoint = role == 'worker' ? 'worker-auth/login' : 'user-auth/login';
+      final endPoint = role == 'worker'
+          ? 'worker-auth/login'
+          : 'user-auth/login';
 
       final response = await ApiService.postRequest(endPoint, {
         'email': email,
@@ -122,15 +118,9 @@ class AuthService {
         };
       }
     } on AuthException catch (e) {
-      return {
-        'status': e.statusCode ?? 0,
-        'message': e.message,
-      };
+      return {'status': e.statusCode ?? 0, 'message': e.message};
     } catch (e) {
-      return {
-        'status': 0,
-        'message': 'Login failed: $e',
-      };
+      return {'status': 0, 'message': 'Login failed: $e'};
     }
   }
 
@@ -163,15 +153,9 @@ class AuthService {
         };
       }
     } on AuthException catch (e) {
-      return {
-        'status': e.statusCode ?? 0,
-        'message': e.message,
-      };
+      return {'status': e.statusCode ?? 0, 'message': e.message};
     } catch (e) {
-      return {
-        'status': 0,
-        'message': 'Worker login failed: $e',
-      };
+      return {'status': 0, 'message': 'Worker login failed: $e'};
     }
   }
 
