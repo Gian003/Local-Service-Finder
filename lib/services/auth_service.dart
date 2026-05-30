@@ -47,7 +47,7 @@ class AuthService {
         if (response.statusCode == 200 || response.statusCode == 201) {
           final token = ResponseHandler.getString(data, 'token');
           if (token.isNotEmpty) {
-            await ApiService.saveToken(token);
+            await ApiService.saveToken(token, role: 'customer');
           }
         }
 
@@ -76,7 +76,7 @@ class AuthService {
       await Future.delayed(Duration(milliseconds: 500));
       final result = MockService.mockLogin(email, password);
 
-      await ApiService.saveToken(result['token']);
+      await ApiService.saveToken(result['token'], role: role);
       await ApiService.saveRole(role);
 
       return result;
@@ -99,7 +99,7 @@ class AuthService {
         if (response.statusCode == 200) {
           final token = ResponseHandler.getString(data, 'token');
           if (token.isNotEmpty) {
-            await ApiService.saveToken(token);
+            await ApiService.saveToken(token, role: role);
             await ApiService.saveRole(role);
           }
         }

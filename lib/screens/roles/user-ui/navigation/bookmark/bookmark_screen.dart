@@ -64,6 +64,9 @@ class BookmarkScreenState extends State<BookmarkScreen> {
       if (_selectedTab == 'Upcoming') {
         return b.status == 'pending' || b.status == 'accepted';
       }
+      if (_selectedTab == 'Cancelled') {
+        return b.status == 'cancelled' || b.status == 'rejected';
+      }
       return b.status == _selectedTab.toLowerCase();
     }).toList();
   }

@@ -1050,7 +1050,7 @@ class _BookingScreenState extends State<BookingScreen> {
               '${_selectedDate.day}-${_selectedDate.month}-${_selectedDate.year}',
           time: _selectedTime ?? '',
           totalPrice: widget.service.price,
-          status: 'upcoming',
+          status: 'pending',
           address: _selectedAddress?['address'] ?? 'Urdaneta City',
           latitude: 15.9754,
           longitude: 120.5720,

@@ -13,10 +13,21 @@ class ApiService {
 
   // ── Token / Role storage (encrypted) ────────────────────────────────────
 
-  static Future<String?> getToken() => _storage.read(key: 'token');
+  static Future<String?> getToken() async {
+    final role = await getRole();
+    if (role != null) {
+      final roleToken = await _storage.read(key: '${role}_token');
+      if (roleToken != null) return roleToken;
+    }
+    return _storage.read(key: 'token');
+  }
 
-  static Future<void> saveToken(String token) =>
-      _storage.write(key: 'token', value: token);
+  static Future<void> saveToken(String token, {String? role}) async {
+    await _storage.write(key: 'token', value: token);
+    if (role != null) {
+      await _storage.write(key: '${role}_token', value: token);
+    }
+  }
 
   static Future<void> clearToken() => _storage.delete(key: 'token');
 

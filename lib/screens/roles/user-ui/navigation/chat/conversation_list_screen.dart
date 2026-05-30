@@ -208,6 +208,13 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
 
   // Online mode tile
   Widget _buildConversationTile(MessageModel message) {
+    final firstName = message.receiver?['first_name'] ?? '';
+    final lastName = message.receiver?['last_name'] ?? '';
+    final combined = '$firstName $lastName'.trim();
+    final workerName = combined.isNotEmpty ? combined : 'Worker';
+    final workerPhoto = message.receiver?['profile_photo'] as String?;
+    final minute = message.createdAt.minute.toString().padLeft(2, '0');
+
     return ListTile(
       onTap: () {
         Navigator.push(
@@ -215,20 +222,34 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
           MaterialPageRoute(
             builder: (_) => ChatScreen(
               workerId: message.receiverId,
-              workerName: 'Worker',
-              workerImage: null,
+              workerName: workerName,
+              workerImage: workerPhoto,
             ),
           ),
         );
       },
-      leading: const CircleAvatar(child: Icon(Icons.person)),
-      title: Text('Worker ${message.receiverId}'),
+      leading: CircleAvatar(
+        backgroundImage: workerPhoto != null ? NetworkImage(workerPhoto) : null,
+        child: workerPhoto == null ? const Icon(Icons.person) : null,
+      ),
+      title: Text(
+        workerName,
+        style: const TextStyle(
+          fontFamily: 'Montserrat',
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+        ),
+      ),
       subtitle: Text(
         message.content,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontFamily: 'Montserrat', fontSize: 12, color: Colors.grey[600]),
       ),
-      trailing: Text('${message.createdAt.hour}:${message.createdAt.minute}'),
+      trailing: Text(
+        '${message.createdAt.hour}:$minute',
+        style: TextStyle(fontFamily: 'Montserrat', fontSize: 11, color: Colors.grey[500]),
+      ),
     );
   }
 }

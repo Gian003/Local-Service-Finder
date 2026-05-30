@@ -28,7 +28,8 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
       if (!mounted) return;
       setState(() {
         _worker = {
-          'name': 'John Reyes',
+          'first_name': 'John',
+          'last_name': 'Reyes',
           'email': 'john@lsf.com',
           'category': 'Cleaning',
           'rating': 4.8,
@@ -209,7 +210,10 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
   }
 
   Widget _buildWorkerHeader() {
-    final name = _worker?['name'] ?? 'Worker';
+    final firstName = _worker?['first_name'] ?? '';
+    final lastName = _worker?['last_name'] ?? '';
+    final combined = '$firstName $lastName'.trim();
+    final name = combined.isNotEmpty ? combined : 'Worker';
     final email = _worker?['email'] ?? '';
     final category = _worker?['category'] ?? '';
     final photo = _worker?['profile_photo'];

@@ -5,7 +5,7 @@ import 'package:lsf/screens/roles/user-ui/navigation/chat/message_model.dart';
 class ChatService {
   // Get all conversations
   static Future<List<MessageModel>> getConversations() async {
-    final response = await ApiService.getRequest('/conversations', auth: true);
+    final response = await ApiService.getRequest('conversations', auth: true);
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
@@ -17,7 +17,7 @@ class ChatService {
   // Get conversation with a specific worker
   static Future<List<MessageModel>> getConversation(int workerId) async {
     final response = await ApiService.getRequest(
-      '/conversations/$workerId',
+      'conversations/$workerId',
       auth: true,
     );
 
@@ -33,7 +33,7 @@ class ChatService {
     required int receiverId,
     required String content,
   }) async {
-    final response = await ApiService.postRequest('/messages', {
+    final response = await ApiService.postRequest('messages', {
       'receiver_id': receiverId,
       'content': content,
     }, auth: true);

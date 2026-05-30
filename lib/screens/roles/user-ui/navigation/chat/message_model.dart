@@ -6,6 +6,7 @@ class MessageModel {
   final bool isRead;
   final DateTime createdAt;
   final Map<String, dynamic>? sender;
+  final Map<String, dynamic>? receiver;
 
   const MessageModel({
     required this.id,
@@ -15,6 +16,7 @@ class MessageModel {
     required this.isRead,
     required this.createdAt,
     this.sender,
+    this.receiver,
   });
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class MessageModel {
       isRead:     json['is_read'] ?? false,
       createdAt:  DateTime.parse(json['created_at']),
       sender:     json['sender'],
+      receiver:   json['receiver'],
     );
   }
 }
