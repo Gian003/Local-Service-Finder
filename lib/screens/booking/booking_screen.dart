@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:lsf/config/app_config.dart';
 import 'package:lsf/dataset/mock_service.dart';
@@ -6,6 +8,7 @@ import 'package:lsf/models/booking_model.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/bookmark/bookmark_screen.dart';
 import 'package:lsf/services/api_service.dart';
 import 'package:lsf/services/booking_service.dart';
+import 'package:lsf/services/response_handler.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
 
 class BookingScreen extends StatefulWidget {
@@ -38,14 +41,7 @@ class _BookingScreenState extends State<BookingScreen> {
 
   // Step 2 state
   Map<String, dynamic>? _selectedAddress;
-  final List<Map<String, dynamic>> _addresses = [
-    {
-      'id': 1,
-      'label': 'Home',
-      'address': 'Urdaneta City',
-      'city': 'Pangasinan',
-    },
-  ];
+  final List<Map<String, dynamic>> _addresses = [];
 
   // Step 3 state
   String? _selectedPayment;
@@ -57,6 +53,50 @@ class _BookingScreenState extends State<BookingScreen> {
     {'id': 'google_pay', 'label': 'Google Pay', 'icon': '🔵'},
     {'id': 'card', 'label': 'Credit/Debit Card', 'icon': '💳'},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAddresses();
+  }
+
+  void _saveAddress(String label, String address, String city) async {
+    final response = await ApiService.postRequest('addresses', {
+      'label': label,
+      'address': address,
+      'city': city,
+      'is_default': false,
+    }, auth: true);
+
+    if (response.statusCode == 201) {
+      final data = ResponseHandler.parseJson(response.body);
+      setState(() {
+        _addresses.add(data['address']);
+      });
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to save address')));
+      debugPrint('Failed to save address: ${response.statusCode}');
+    }
+  }
+
+  void _fetchAddresses() async {
+    final response = await ApiService.getRequest('addresses', auth: true);
+    if (response.statusCode == 200) {
+      final List<dynamic> data = ResponseHandler.parseJsonArray(response.body);
+      setState(() {
+        _addresses.clear();
+        _addresses.addAll(data.cast<Map<String, dynamic>>());
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to fetch addresses')),
+      );
+      debugPrint('Failed to fetch addresses: ${response.statusCode}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -503,7 +543,7 @@ class _BookingScreenState extends State<BookingScreen> {
                         ),
                         const SizedBox(width: 16),
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () async {},
                           child: Text(
                             'Edit',
                             style: TextStyle(
@@ -515,9 +555,7 @@ class _BookingScreenState extends State<BookingScreen> {
                         ),
                         const SizedBox(width: 16),
                         GestureDetector(
-                          onTap: () {
-                            setState(() => _addresses.remove(addr));
-                          },
+                          onTap: () async {},
                           child: const Text(
                             'Delete',
                             style: TextStyle(
@@ -728,15 +766,11 @@ class _BookingScreenState extends State<BookingScreen> {
                       addressController.text.isEmpty) {
                     return;
                   }
-                  setState(() {
-                    _addresses.add({
-                      'id': _addresses.length + 1,
-                      'label': labelController.text,
-                      'address': addressController.text,
-                      'city': cityController.text,
-                    });
-                  });
-                  Navigator.pop(context);
+                  _saveAddress(
+                    labelController.text,
+                    addressController.text,
+                    cityController.text,
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
@@ -944,6 +978,23 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
+  Future<int?> _ensureAddressExists() async {
+    if (_selectedAddress == null) return null;
+
+    // Try to create address in DB
+    final response = await ApiService.postRequest('addresses', {
+      'label': _selectedAddress!['label'] ?? 'Home',
+      'address': _selectedAddress!['address'] ?? 'Urdaneta City',
+      'city': _selectedAddress!['city'] ?? 'Pangasinan',
+    }, auth: true);
+
+    if (response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      return data['address']['id'];
+    }
+    return null;
+  }
+
   Future<void> _handleNextButton() async {
     // Step 1 validation
     if (_currentStep == 0) {
@@ -961,6 +1012,8 @@ class _BookingScreenState extends State<BookingScreen> {
     if (_currentStep == 2) {
       final token = await ApiService.getToken();
       debugPrint('Token before booking: $token');
+
+      if (!mounted) return;
 
       if (token == null && !AppConfig.offlineMode) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1063,16 +1116,19 @@ class _BookingScreenState extends State<BookingScreen> {
           '${_selectedDate.day.toString().padLeft(2, '0')} '
           '${_convertTo24Hour(_selectedTime ?? '')}';
 
+      final addressId = await _ensureAddressExists();
+
       final booked = await BookingService.confirmBooking(
         serviceId: widget.service.id ?? 1,
         workerId: widget.service.workerId ?? 1,
-        addressId: _selectedAddress?['id'] ?? 1,
+        addressId: addressId ?? 1,
         scheduledAt: scheduled,
         totalPrice: widget.service.price,
         paymentMethod: _selectedPayment!,
       );
 
       if (!mounted) return;
+
       setState(() => _isLoading = false);
 
       if (booked) _showSuccessDialog();

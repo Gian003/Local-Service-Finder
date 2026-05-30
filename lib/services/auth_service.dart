@@ -44,7 +44,7 @@ class AuthService {
       try {
         final data = ResponseHandler.parseJson(response.body);
 
-        if (response.statusCode == 200) {
+        if (response.statusCode == 200 || response.statusCode == 201) {
           final token = ResponseHandler.getString(data, 'token');
           if (token.isNotEmpty) {
             await ApiService.saveToken(token);
@@ -165,8 +165,7 @@ class AuthService {
     } catch (e) {
       debugPrint('Logout API error: $e');
     }
-    await ApiService.clearToken();
-    await ApiService.clearRole();
+    await ApiService.clearAll();
   }
 
   //Logout

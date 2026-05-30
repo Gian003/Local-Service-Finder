@@ -23,7 +23,7 @@ class BookingService {
           final clientSecret = ResponseHandler.getString(data, 'client_secret');
           return clientSecret.isNotEmpty ? clientSecret : null;
         } on ApiException catch (e) {
-          debugPrint('❌ Parse error: ${e.message}');
+          debugPrint('Parse error: ${e.message}');
           return null;
         }
       }
@@ -82,8 +82,8 @@ class BookingService {
       if (response.statusCode == 201) {
         try {
           final data = ResponseHandler.parseJson(response.body);
-          debugPrint('✅ Booking confirmed: ${data['id'] ?? 'unknown'}');
-          return true;
+          debugPrint('Booking confirmed: ${data['id'] ?? 'unknown'}');
+          return data['booking'];
         } on ApiException catch (e) {
           debugPrint('Parse error: ${e.message}');
           return false;
