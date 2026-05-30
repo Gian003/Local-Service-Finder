@@ -29,7 +29,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
       final bookingsRes =
           await ApiService.getRequest('bookings/worker', auth: true);
       final profileRes =
-          await ApiService.getRequest('worker-auth/profile', auth: true);
+          await ApiService.getRequest('worker-auth/me', auth: true);
 
       if (!mounted) return;
 

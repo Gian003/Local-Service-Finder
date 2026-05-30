@@ -72,14 +72,23 @@ class _BookingScreenState extends State<BookingScreen> {
     if (!mounted) return;
 
     if (response.statusCode == 201) {
+      Map<String, dynamic>? addr;
       try {
         final decoded = jsonDecode(response.body);
-        final addr = (decoded['address'] ?? decoded['data']) as Map<String, dynamic>?;
-        if (addr != null) {
-          setState(() => _addresses.add(addr));
-        }
+        addr = (decoded['address'] ?? decoded['data']) as Map<String, dynamic>?;
       } catch (_) {}
-      navigator.pop();
+
+      if (addr != null) {
+        setState(() {
+          _addresses.add(addr!);
+          _selectedAddress = addr;
+        });
+        navigator.pop();
+      } else {
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(content: Text('Address saved but could not be loaded. Please refresh.')),
+        );
+      }
     } else {
       scaffoldMessenger.showSnackBar(
         const SnackBar(content: Text('Failed to save address')),
@@ -1134,7 +1143,16 @@ class _BookingScreenState extends State<BookingScreen> {
 
       setState(() => _isLoading = false);
 
-      if (booked) _showSuccessDialog();
+      if (booked) {
+        _showSuccessDialog();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Booking failed. Please check your address and try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

@@ -40,7 +40,7 @@ class BookingModel {
     return BookingModel(
       id: TypeConverter.toInt(json['id']),
       serviceName: json['service']?['title']?.toString() ?? '',
-      workerName: json['worker']?['name']?.toString() ?? '',
+      workerName: '${json['worker']?['first_name'] ?? ''} ${json['worker']?['last_name'] ?? ''}'.trim(),
       workerImage: json['worker']?['profile_photo']?.toString(),
       date: date,
       time: time,

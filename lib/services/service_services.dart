@@ -41,7 +41,14 @@ class ServiceServices {
       final parameters = <String>[];
 
       if (category != null) parameters.add('category=$category');
-      if (sort != null) parameters.add('sort=$sort');
+      if (sort != null) {
+        final apiSort = sort == 'most_expensive'
+            ? 'price-desc'
+            : sort == 'lowest_price'
+                ? 'price-asc'
+                : sort;
+        parameters.add('sort=$apiSort');
+      }
 
       if (parameters.isNotEmpty) endpoint += '?${parameters.join('&')}';
 
