@@ -25,6 +25,7 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
   Future<void> _loadWorker() async {
     if (AppConfig.offlineMode) {
       await Future.delayed(const Duration(milliseconds: 300));
+      if (!mounted) return;
       setState(() {
         _worker = {
           'name': 'John Reyes',

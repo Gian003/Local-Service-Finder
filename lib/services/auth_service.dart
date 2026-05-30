@@ -118,50 +118,6 @@ class AuthService {
     }
   }
 
-  //Worker Login
-  static Future<Map<String, dynamic>> workerLogin({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      final response = await ApiService.postRequest('worker-auth/login', {
-        'email': email,
-        'password': password,
-      });
-
-      try {
-        final data = ResponseHandler.parseJson(response.body);
-
-        if (response.statusCode == 200) {
-          final token = ResponseHandler.getString(data, 'token');
-          if (token.isNotEmpty) {
-            await ApiService.saveToken(token);
-          }
-        }
-
-        return {'status': response.statusCode, ...data};
-      } on ApiException catch (e) {
-        return {
-          'status': response.statusCode,
-          'message': 'Failed to parse response: ${e.message}',
-        };
-      }
-    } on AuthException catch (e) {
-      return {'status': e.statusCode ?? 0, 'message': e.message};
-    } catch (e) {
-      return {'status': 0, 'message': 'Worker login failed: $e'};
-    }
-  }
-
-  static Future<void> workerLogout() async {
-    try {
-      await ApiService.postRequest('worker-auth/logout', {}, auth: true);
-    } catch (e) {
-      debugPrint('Logout API error: $e');
-    }
-    await ApiService.clearAll();
-  }
-
   //Logout
   static Future<void> logout({String role = 'customer'}) async {
     if (!AppConfig.offlineMode) {

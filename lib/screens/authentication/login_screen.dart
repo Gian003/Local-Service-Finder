@@ -397,6 +397,8 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handelLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() {
       _isLoading = true;
     });
