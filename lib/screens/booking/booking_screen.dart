@@ -8,7 +8,6 @@ import 'package:lsf/models/booking_model.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/bookmark/bookmark_screen.dart';
 import 'package:lsf/services/api_service.dart';
 import 'package:lsf/services/booking_service.dart';
-import 'package:lsf/services/response_handler.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
 
 class BookingScreen extends StatefulWidget {
@@ -61,6 +60,9 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   void _saveAddress(String label, String address, String city) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
     final response = await ApiService.postRequest('addresses', {
       'label': label,
       'address': address,
@@ -68,33 +70,47 @@ class _BookingScreenState extends State<BookingScreen> {
       'is_default': false,
     }, auth: true);
 
+    if (!mounted) return;
+
     if (response.statusCode == 201) {
-      final data = ResponseHandler.parseJson(response.body);
-      setState(() {
-        _addresses.add(data['address']);
-      });
-      Navigator.pop(context);
+      try {
+        final decoded = jsonDecode(response.body);
+        final addr = (decoded['address'] ?? decoded['data']) as Map<String, dynamic>?;
+        if (addr != null) {
+          setState(() => _addresses.add(addr));
+        }
+      } catch (_) {}
+      navigator.pop();
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to save address')));
-      debugPrint('Failed to save address: ${response.statusCode}');
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Failed to save address')),
+      );
     }
   }
 
   void _fetchAddresses() async {
     final response = await ApiService.getRequest('addresses', auth: true);
+    if (!mounted) return;
     if (response.statusCode == 200) {
-      final List<dynamic> data = ResponseHandler.parseJsonArray(response.body);
-      setState(() {
-        _addresses.clear();
-        _addresses.addAll(data.cast<Map<String, dynamic>>());
-      });
+      try {
+        final decoded = jsonDecode(response.body);
+        List<dynamic> list;
+        if (decoded is List) {
+          list = decoded;
+        } else if (decoded is Map<String, dynamic>) {
+          list = (decoded['data'] ?? decoded['addresses'] ?? []) as List<dynamic>;
+        } else {
+          list = [];
+        }
+        setState(() {
+          _addresses.clear();
+          _addresses.addAll(list.whereType<Map<String, dynamic>>());
+        });
+      } catch (_) {}
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to fetch addresses')),
       );
-      debugPrint('Failed to fetch addresses: ${response.statusCode}');
     }
   }
 
@@ -653,14 +669,11 @@ class _BookingScreenState extends State<BookingScreen> {
 
           const SizedBox(height: 8),
 
-          _buildDetailRow('Tips (Helpers)', '₱ 100'),
-          _buildDetailRow('Coupon Discount', '₱ 200'),
-
           const Divider(),
 
           _buildDetailRow(
             'Total',
-            '₱ ${(widget.service.price + 100 - 200).toStringAsFixed(0)}',
+            '₱ ${widget.service.price.toStringAsFixed(0)}',
             isBold: true,
           ),
 
@@ -978,23 +991,6 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
-  Future<int?> _ensureAddressExists() async {
-    if (_selectedAddress == null) return null;
-
-    // Try to create address in DB
-    final response = await ApiService.postRequest('addresses', {
-      'label': _selectedAddress!['label'] ?? 'Home',
-      'address': _selectedAddress!['address'] ?? 'Urdaneta City',
-      'city': _selectedAddress!['city'] ?? 'Pangasinan',
-    }, auth: true);
-
-    if (response.statusCode == 201) {
-      final data = jsonDecode(response.body);
-      return data['address']['id'];
-    }
-    return null;
-  }
-
   Future<void> _handleNextButton() async {
     // Step 1 validation
     if (_currentStep == 0) {
@@ -1011,7 +1007,6 @@ class _BookingScreenState extends State<BookingScreen> {
     // Step 3 — Confirm & Pay
     if (_currentStep == 2) {
       final token = await ApiService.getToken();
-      debugPrint('Token before booking: $token');
 
       if (!mounted) return;
 
@@ -1064,7 +1059,7 @@ class _BookingScreenState extends State<BookingScreen> {
 
       // Online — Stripe flow
       if (_selectedPayment == 'card') {
-        final amountInCentavos = (widget.service.price * 100).toInt();
+        final amountInCentavos = (widget.service.price * 100).round();
         final clientSecret = await BookingService.createPaymentIntent(
           amount: amountInCentavos,
           serviceId: widget.service.id ?? 1,
@@ -1095,7 +1090,7 @@ class _BookingScreenState extends State<BookingScreen> {
         }
       }
 
-      String _convertTo24Hour(String time12h) {
+      String convertTo24Hour(String time12h) {
         final parts = time12h.split(' ');
         final timePart = parts[0];
         final period = parts[1];
@@ -1114,14 +1109,23 @@ class _BookingScreenState extends State<BookingScreen> {
           '${_selectedDate.year.toString()}-'
           '${_selectedDate.month.toString().padLeft(2, '0')}-'
           '${_selectedDate.day.toString().padLeft(2, '0')} '
-          '${_convertTo24Hour(_selectedTime ?? '')}';
+          '${convertTo24Hour(_selectedTime ?? '')}';
 
-      final addressId = await _ensureAddressExists();
+      // Use the id of the already-saved selected address — no need to re-POST it.
+      final rawId = _selectedAddress?['id'];
+      final addressId = rawId is int ? rawId : int.tryParse(rawId?.toString() ?? '');
+      if (addressId == null) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a valid address')),
+        );
+        return;
+      }
 
       final booked = await BookingService.confirmBooking(
         serviceId: widget.service.id ?? 1,
         workerId: widget.service.workerId ?? 1,
-        addressId: addressId ?? 1,
+        addressId: addressId,
         scheduledAt: scheduled,
         totalPrice: widget.service.price,
         paymentMethod: _selectedPayment!,

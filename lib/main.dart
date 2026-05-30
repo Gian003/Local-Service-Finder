@@ -6,6 +6,7 @@ import 'package:lsf/screens/roles/worker-ui/worker_bottom_navigation.dart';
 import 'package:lsf/screens/verification/auth_otp_email.dart';
 import 'package:lsf/screens/authentication/change_password.dart';
 import 'package:lsf/screens/authentication/forgot_password.dart';
+import 'package:lsf/services/navigation_service.dart';
 
 import 'screens/splash_screen.dart';
 import 'package:lsf/screens/on_boarding_screen.dart';
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Local Service Finder',
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color.fromRGBO(47, 88, 153, 100),

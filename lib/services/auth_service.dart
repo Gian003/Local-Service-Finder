@@ -79,9 +79,6 @@ class AuthService {
       await ApiService.saveToken(result['token']);
       await ApiService.saveRole(role);
 
-      final saved = await ApiService.getToken();
-      debugPrint('Token saved after login: $saved');
-
       return result;
     }
 
@@ -104,9 +101,6 @@ class AuthService {
           if (token.isNotEmpty) {
             await ApiService.saveToken(token);
             await ApiService.saveRole(role);
-
-            final saved = await ApiService.getToken();
-            debugPrint('Token saved after login: $saved');
           }
         }
 

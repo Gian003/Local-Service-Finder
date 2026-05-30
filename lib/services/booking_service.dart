@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:lsf/services/api_service.dart';
@@ -80,17 +79,9 @@ class BookingService {
       }, auth: true);
 
       if (response.statusCode == 201) {
-        try {
-          final data = ResponseHandler.parseJson(response.body);
-          debugPrint('Booking confirmed: ${data['id'] ?? 'unknown'}');
-          return data['booking'];
-        } on ApiException catch (e) {
-          debugPrint('Parse error: ${e.message}');
-          return false;
-        }
+        return true;
       }
 
-      debugPrint('Booking confirmation failed: status ${response.statusCode}');
       return false;
     } on AuthException catch (e) {
       debugPrint('Auth error: ${e.message}');

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lsf/config/app_config.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/services/api_service.dart';
+import 'package:lsf/services/auth_service.dart';
 
 class WorkerProfileScreen extends StatefulWidget {
   const WorkerProfileScreen({super.key});
@@ -40,12 +41,15 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
       return;
     }
 
-    final response = await ApiService.getRequest('/worker-auth/me', auth: true);
+    final response = await ApiService.getRequest('worker-auth/me', auth: true);
+    if (!mounted) return;
     if (response.statusCode == 200) {
       setState(() {
         _worker = jsonDecode(response.body);
         _isLoading = false;
       });
+    } else {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -114,9 +118,11 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
   ];
 
   void _handleLogout() {
+    final navigator = Navigator.of(context);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text(
           'Log Out',
           style: TextStyle(
@@ -130,11 +136,15 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              await AuthService.logout(role: 'worker');
+              navigator.pushReplacementNamed('/login');
+            },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Log Out', style: TextStyle(color: Colors.white)),
           ),
@@ -303,8 +313,13 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
               Switch(
                 value: isAvail,
                 activeThumbColor: Colors.green,
-                onChanged: (val) {
+                onChanged: (val) async {
                   setState(() => _worker?['is_available'] = val);
+                  await ApiService.putRequest(
+                    'worker-auth/availability',
+                    {'is_available': val},
+                    auth: true,
+                  );
                 },
               ),
             ],

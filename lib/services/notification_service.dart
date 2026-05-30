@@ -1,14 +1,12 @@
 import 'package:lsf/services/api_service.dart';
 import 'package:lsf/services/response_handler.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/home/notification/notification_model.dart';
-import 'package:lsf/services/api_service.dart';
-import 'package:lsf/services/response_handler.dart';
 
 class NotificationService {
   static Future<List<NotificationModel>> getNotifications() async {
     try {
       final response = await ApiService.getRequest(
-        '/notifications',
+        'notifications',
         auth: true,
       );
       if (response.statusCode == 200) {
@@ -22,10 +20,11 @@ class NotificationService {
     }
   }
 
+  // Backend route: PUT /notifications/{id}/read
   static Future<bool> markAsRead(int notificationId) async {
     try {
-      final response = await ApiService.postRequest(
-        '/notifications/$notificationId/read',
+      final response = await ApiService.putRequest(
+        'notifications/$notificationId/read',
         {},
         auth: true,
       );
@@ -35,10 +34,11 @@ class NotificationService {
     }
   }
 
+  // Backend route: PUT /notifications/read-all
   static Future<bool> markAllAsRead() async {
     try {
-      final response = await ApiService.postRequest(
-        '/notifications/read-all',
+      final response = await ApiService.putRequest(
+        'notifications/read-all',
         {},
         auth: true,
       );

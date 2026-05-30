@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/services/api_service.dart';
 
 class ChangePassword extends StatefulWidget {
   const ChangePassword({super.key});
@@ -27,6 +28,45 @@ class ChangePasswordState extends State<ChangePassword> {
 
   bool _isPasswordValid(String value) {
     return value.length >= 8;
+  }
+
+  Future<void> _handleSubmit() async {
+    if (!_formkey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await ApiService.putRequest(
+        'user-auth/profile/password',
+        {'password': _newPasswordController.text.trim()},
+        auth: true,
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password changed successfully.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to change password. Please try again.'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Network error. Please try again.')),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -64,7 +104,6 @@ class ChangePasswordState extends State<ChangePassword> {
 
                     const SizedBox(height: 50),
 
-                    //New Password Field
                     TextFormField(
                       controller: _newPasswordController,
                       obscureText: _obscureNewPassword,
@@ -89,6 +128,7 @@ class ChangePasswordState extends State<ChangePassword> {
                           ),
                         ),
                       ),
+                      onChanged: (_) => setState(() {}),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your new password';
@@ -101,7 +141,6 @@ class ChangePasswordState extends State<ChangePassword> {
 
                     const SizedBox(height: 25),
 
-                    //Confirm Password Field
                     TextFormField(
                       controller: _confirmPasswordController,
                       obscureText: _obscureConfirmPassword,
@@ -127,6 +166,7 @@ class ChangePasswordState extends State<ChangePassword> {
                           ),
                         ),
                       ),
+                      onChanged: (_) => setState(() {}),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please confirm your new password';
@@ -139,7 +179,6 @@ class ChangePasswordState extends State<ChangePassword> {
 
                     const SizedBox(height: 30),
 
-                    //Password Requirements
                     Card(
                       elevation: 1,
                       color: Colors.white,
@@ -166,7 +205,7 @@ class ChangePasswordState extends State<ChangePassword> {
                             const SizedBox(height: 5),
 
                             _newPasswordRequirements(
-                              met: _newPasswordController.text.length >= 6,
+                              met: _newPasswordController.text.length >= 8,
                               text: 'At least 8 characters long',
                             ),
 
@@ -198,14 +237,8 @@ class ChangePasswordState extends State<ChangePassword> {
 
                     const SizedBox(height: 50),
 
-                    //Password Submisson Button
                     ElevatedButton(
-                      onPressed: () {
-                        // if (_formkey.currentState!.validate()) {
-                        //   //Handle password change logic
-                        // }
-                        Navigator.pushReplacementNamed(context, '/home');
-                      },
+                      onPressed: _isLoading ? null : _handleSubmit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
                         foregroundColor: Colors.white,
@@ -217,14 +250,16 @@ class ChangePasswordState extends State<ChangePassword> {
                           ),
                         ),
                       ),
-                      child: Text(
-                        'Submit',
-                        style: TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                              'Submit',
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ],
                 ),

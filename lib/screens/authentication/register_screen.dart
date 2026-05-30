@@ -318,6 +318,8 @@ class RegisterScreenState extends State<RegisterScreen> {
                                 return;
                               }
 
+                                setState(() => _isLoading = true);
+
                               final result = await AuthService.customerRegister(
                                 firstName: _firstNameController.text.trim(),
                                 lastName: _lastNameController.text.trim(),
@@ -325,9 +327,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                                 password: _passwordController.text.trim(),
                               );
 
-                              setState(() {
-                                _isLoading = false;
-                              });
+                              setState(() => _isLoading = false);
 
                               if (result['status'] == 201) {
                                 if (context.mounted) {

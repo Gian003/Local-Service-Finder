@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lsf/dataset/mock_service.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/home/notification/notification_model.dart';
+import 'package:lsf/services/notification_service.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -13,11 +13,21 @@ class NotificationScreen extends StatefulWidget {
 
 class NotificationScreenState extends State<NotificationScreen> {
   List<NotificationModel> _notifications = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _notifications = MockService.getNotifications();
+    _loadNotifications();
+  }
+
+  Future<void> _loadNotifications() async {
+    final list = await NotificationService.getNotifications();
+    if (!mounted) return;
+    setState(() {
+      _notifications = list;
+      _isLoading = false;
+    });
   }
 
   //Icon per Notification type
@@ -61,18 +71,17 @@ class NotificationScreenState extends State<NotificationScreen> {
   void _markAllasRead() {
     setState(() {
       _notifications = _notifications
-          .map(
-            (notification) => NotificationModel(
-              id: notification.id,
-              title: notification.title,
-              message: notification.message,
-              type: notification.type,
-              isRead: true,
-              createdAt: notification.createdAt,
-            ),
-          )
+          .map((n) => NotificationModel(
+                id: n.id,
+                title: n.title,
+                message: n.message,
+                type: n.type,
+                isRead: true,
+                createdAt: n.createdAt,
+              ))
           .toList();
     });
+    NotificationService.markAllAsRead();
   }
 
   @override
@@ -118,7 +127,9 @@ class NotificationScreenState extends State<NotificationScreen> {
         ],
       ),
 
-      body: _notifications.isEmpty
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _notifications.isEmpty
           ? _buildEmptyState()
           : ListView(
               padding: const EdgeInsets.all(20),
@@ -160,22 +171,24 @@ class NotificationScreenState extends State<NotificationScreen> {
   Widget _buildNotifcationCard(NotificationModel notificationModel) {
     return GestureDetector(
       onTap: () {
-        //Mark as read
-        setState(() {
-          _notifications = _notifications.map((notification) {
-            if (notification.id == notificationModel.id) {
-              return NotificationModel(
-                id: notification.id,
-                title: notification.title,
-                message: notification.message,
-                type: notification.type,
-                isRead: true,
-                createdAt: notification.createdAt,
-              );
-            }
-            return notification;
-          }).toList();
-        });
+        if (!notificationModel.isRead) {
+          setState(() {
+            _notifications = _notifications.map((n) {
+              if (n.id == notificationModel.id) {
+                return NotificationModel(
+                  id: n.id,
+                  title: n.title,
+                  message: n.message,
+                  type: n.type,
+                  isRead: true,
+                  createdAt: n.createdAt,
+                );
+              }
+              return n;
+            }).toList();
+          });
+          NotificationService.markAsRead(notificationModel.id);
+        }
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),

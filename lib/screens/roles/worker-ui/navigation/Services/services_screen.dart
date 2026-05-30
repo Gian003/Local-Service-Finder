@@ -1,7 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsf/global%20variable/colors.dart';
-import 'package:lsf/dataset/mock_service.dart';
+import 'package:lsf/services/api_service.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
 
 class WorkerServicesScreen extends StatefulWidget {
@@ -12,15 +13,42 @@ class WorkerServicesScreen extends StatefulWidget {
 }
 
 class WorkerServicesScreenState extends State<WorkerServicesScreen> {
-  late List<ServiceModel> _services;
+  List<ServiceModel> _services = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _services = List.from(MockService.getServices());
+    _fetchServices();
+  }
+
+  Future<void> _fetchServices() async {
+    setState(() => _isLoading = true);
+    try {
+      final response =
+          await ApiService.getRequest('worker-auth/my-services', auth: true);
+      if (!mounted) return;
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final List<dynamic> list =
+            decoded is List ? decoded : (decoded['data'] ?? []);
+        setState(() {
+          _services = list
+              .whereType<Map<String, dynamic>>()
+              .map((json) => ServiceModel.fromJson(json))
+              .toList();
+        });
+      }
+    } catch (_) {
+      // silently degrade
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _showAddServiceSheet() {
+    // Capture before async gaps inside the sheet callbacks
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     final titleController = TextEditingController();
     final priceController = TextEditingController();
     final descriptionController = TextEditingController();
@@ -32,15 +60,15 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) {
+      builder: (modalContext) {
         return StatefulBuilder(
-          builder: (context, setModalState) {
+          builder: (modalContext, setModalState) {
             return Padding(
               padding: EdgeInsets.only(
                 left: 20,
                 right: 20,
                 top: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                bottom: MediaQuery.of(modalContext).viewInsets.bottom + 20,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -57,7 +85,6 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
 
                   const SizedBox(height: 16),
 
-                  // Title
                   TextField(
                     controller: titleController,
                     decoration: InputDecoration(
@@ -70,7 +97,6 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
 
                   const SizedBox(height: 12),
 
-                  // Price
                   TextField(
                     controller: priceController,
                     keyboardType: TextInputType.number,
@@ -84,7 +110,6 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
 
                   const SizedBox(height: 12),
 
-                  // Description
                   TextField(
                     controller: descriptionController,
                     maxLines: 3,
@@ -98,7 +123,6 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
 
                   const SizedBox(height: 12),
 
-                  // Category dropdown
                   DropdownButtonFormField<String>(
                     initialValue: selectedCategory,
                     decoration: InputDecoration(
@@ -108,19 +132,11 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
                       ),
                     ),
                     items:
-                        [
-                              'cleaning',
-                              'plumbing',
-                              'repair',
-                              'roofing',
-                              'furniture',
-                            ]
-                            .map(
-                              (cat) => DropdownMenuItem(
-                                value: cat,
-                                child: Text(cat),
-                              ),
-                            )
+                        ['cleaning', 'plumbing', 'repair', 'roofing', 'furniture']
+                            .map((cat) => DropdownMenuItem(
+                                  value: cat,
+                                  child: Text(cat),
+                                ))
                             .toList(),
                     onChanged: (val) {
                       if (val != null) {
@@ -131,32 +147,38 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
 
                   const SizedBox(height: 20),
 
-                  // Submit button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (titleController.text.isEmpty ||
                             priceController.text.isEmpty) {
                           return;
                         }
 
-                        setState(() {
-                          _services.add(
-                            ServiceModel(
-                              title: titleController.text,
-                              workerName: 'John Reyes',
-                              rating: 0,
-                              reviewCount: 0,
-                              price: double.parse(priceController.text),
-                              imageUrl:
-                                  'https://picsum.photos/seed/${titleController.text}/400',
-                              category: selectedCategory,
-                            ),
-                          );
-                        });
+                        Navigator.pop(modalContext);
 
-                        Navigator.pop(context);
+                        final response = await ApiService.postRequest(
+                          'worker-auth/my-services',
+                          {
+                            'title': titleController.text.trim(),
+                            'price':
+                                double.tryParse(priceController.text) ?? 0,
+                            'description': descriptionController.text.trim(),
+                            'category': selectedCategory,
+                          },
+                          auth: true,
+                        );
+
+                        if (!mounted) return;
+                        if (response.statusCode == 201) {
+                          _fetchServices();
+                        } else {
+                          scaffoldMessenger.showSnackBar(
+                            const SnackBar(
+                                content: Text('Failed to add service')),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
@@ -184,16 +206,16 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
     );
   }
 
-  void _deleteService(int index) {
+  void _deleteService(ServiceModel service) {
+    // Capture before dialog and async gaps
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text(
           'Delete Service',
-          style: TextStyle(
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
         ),
         content: const Text(
           'Are you sure you want to delete this service?',
@@ -201,16 +223,31 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
-              setState(() => _services.removeAt(index));
-              Navigator.pop(context);
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              if (service.id == null) return;
+
+              final response = await ApiService.deleteRequest(
+                'worker-auth/my-services/${service.id}',
+                auth: true,
+              );
+
+              if (!mounted) return;
+              if (response.statusCode == 200 || response.statusCode == 204) {
+                _fetchServices();
+              } else {
+                scaffoldMessenger.showSnackBar(
+                  const SnackBar(content: Text('Failed to delete service')),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+            child:
+                const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -222,7 +259,6 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
     return SafeArea(
       child: Column(
         children: [
-          // Header
           Padding(
             padding: const EdgeInsets.all(20),
             child: Row(
@@ -237,16 +273,12 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
                     ),
                   ),
                 ),
-                // Add service button
                 ElevatedButton.icon(
                   onPressed: _showAddServiceSheet,
                   icon: const Icon(Icons.add, color: Colors.white, size: 18),
                   label: const Text(
                     'Add',
-                    style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      color: Colors.white,
-                    ),
+                    style: TextStyle(fontFamily: 'Montserrat', color: Colors.white),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
@@ -259,44 +291,48 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
             ),
           ),
 
-          // Services list
           Expanded(
-            child: _services.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        FaIcon(
-                          FontAwesomeIcons.briefcase,
-                          size: 60,
-                          color: Colors.grey[300],
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _services.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            FaIcon(
+                              FontAwesomeIcons.briefcase,
+                              size: 60,
+                              color: Colors.grey[300],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No services yet\nTap Add to create one',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'No services yet\nTap Add to create one',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            color: Colors.grey[500],
-                          ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _fetchServices,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          itemCount: _services.length,
+                          itemBuilder: (context, index) {
+                            return _buildServiceCard(_services[index]);
+                          },
                         ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: _services.length,
-                    itemBuilder: (context, index) {
-                      return _buildServiceCard(_services[index], index);
-                    },
-                  ),
+                      ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildServiceCard(ServiceModel service, int index) {
+  Widget _buildServiceCard(ServiceModel service) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -313,20 +349,32 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
       ),
       child: Row(
         children: [
-          // Image
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              service.imageUrl,
-              width: 70,
-              height: 70,
-              fit: BoxFit.cover,
-            ),
+            child: service.imageUrl.isNotEmpty
+                ? Image.network(
+                    service.imageUrl,
+                    width: 70,
+                    height: 70,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 70,
+                      height: 70,
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.image_not_supported,
+                          color: Colors.grey),
+                    ),
+                  )
+                : Container(
+                    width: 70,
+                    height: 70,
+                    color: Colors.grey[200],
+                    child: const Icon(Icons.build, color: Colors.grey),
+                  ),
           ),
 
           const SizedBox(width: 12),
 
-          // Details
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,7 +407,6 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
             ),
           ),
 
-          // Actions
           Column(
             children: [
               IconButton(
@@ -368,7 +415,7 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
                 color: Colors.grey,
               ),
               IconButton(
-                onPressed: () => _deleteService(index),
+                onPressed: () => _deleteService(service),
                 icon: const Icon(Icons.delete_outline, size: 20),
                 color: Colors.red,
               ),

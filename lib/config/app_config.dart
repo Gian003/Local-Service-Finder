@@ -1,15 +1,17 @@
-// import 'package:flutter_secure_dotenv/flutter_secure_dotenv.dart';
-
+// Pass secrets at build time:
+//   flutter run --dart-define-from-file=.env
+//   flutter build apk --dart-define-from-file=.env
+// Copy .env.example to .env and fill in your values.
 class AppConfig {
   static const String baseUrl = 'http://192.168.1.6:8000/api';
   static const bool offlineMode = false;
 
-  static const String pusherKey = '9a9f9541c5b08ea96ad7';
-  static const String pusherCluster = 'ap1';
-
+  static const String pusherKey =
+      String.fromEnvironment('PUSHER_KEY');
+  static const String pusherCluster =
+      String.fromEnvironment('PUSHER_CLUSTER', defaultValue: 'ap1');
   static const String stripePublishableKey =
-      'pk_test_51TVGzZE4EDELAueHeVFJ6YxwSyu9KYs8UfnIjWssU0tFjl4xQXff63dUooCE3ZSkzFddh0rMViD2xy8Hcn8RSAcH00D46ZSbXO';
-
+      String.fromEnvironment('STRIPE_PUBLISHABLE_KEY');
   static const String googleMapsApiKey =
-      'AIzaSyA1Pg5n88KZWoCCmyEM_1ohx-elRiAVWtY';
+      String.fromEnvironment('GOOGLE_MAPS_API_KEY');
 }

@@ -1,82 +1,71 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lsf/config/app_config.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lsf/services/navigation_service.dart';
 import 'http_client.dart';
-import 'response_handler.dart';
-import 'auth_exception.dart';
 
 class ApiService {
   static const String baseUrl = AppConfig.baseUrl;
+  static const _storage = FlutterSecureStorage(
+    aOptions: AndroidOptions(),
+  );
 
-  static Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('token');
+  // ── Token / Role storage (encrypted) ────────────────────────────────────
+
+  static Future<String?> getToken() => _storage.read(key: 'token');
+
+  static Future<void> saveToken(String token) =>
+      _storage.write(key: 'token', value: token);
+
+  static Future<void> clearToken() => _storage.delete(key: 'token');
+
+  static Future<String?> getRole() => _storage.read(key: 'role');
+
+  static Future<void> saveRole(String role) =>
+      _storage.write(key: 'role', value: role);
+
+  static Future<void> clearRole() => _storage.delete(key: 'role');
+
+  static Future<void> clearAll() => _storage.deleteAll();
+
+  // ── Internal helpers ─────────────────────────────────────────────────────
+
+  static Future<Map<String, String>> _headers({bool auth = false}) async {
+    final h = <String, String>{
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    if (auth) {
+      final token = await getToken();
+      if (token != null) h['Authorization'] = 'Bearer $token';
+    }
+    return h;
   }
 
-  static Future<void> saveToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('token', token);
-    debugPrint('Token saved');
+  static void _handleAuthError(int statusCode) {
+    if (statusCode == 401 || statusCode == 403) {
+      clearAll();
+      navigatorKey.currentState
+          ?.pushNamedAndRemoveUntil('/login', (_) => false);
+    }
   }
 
-  static Future<void> clearToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-    debugPrint('Token cleared');
-  }
-
-  static Future<void> saveRole(String role) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('role', role);
-    debugPrint('Role saved: $role');
-  }
-
-  static Future<String?> getRole() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('role');
-  }
-
-  static Future<void> clearRole() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('role');
-    debugPrint('Role cleared');
-  }
-
-  static Future<void> clearAll() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-    await prefs.remove('role');
-    debugPrint('Token and role cleared');
-  }
+  // ── HTTP methods ─────────────────────────────────────────────────────────
 
   static Future<dynamic> getRequest(
     String endpoint, {
     bool auth = false,
   }) async {
     try {
-      final headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      };
-
-      if (auth) {
-        final token = await getToken();
-        if (token != null) {
-          headers['Authorization'] = 'Bearer $token';
-        }
-      }
-
       final response = await HttpClient.get(
         Uri.parse('$baseUrl/$endpoint'),
-        headers: headers,
+        headers: await _headers(auth: auth),
       );
-
-      // _handleAuthError(response.statusCode);
-
+      _handleAuthError(response.statusCode);
       return response;
     } catch (e, st) {
-      debugPrint('GET request failed: $e');
+      debugPrint('GET $endpoint failed: $e');
       debugPrintStack(stackTrace: st);
       rethrow;
     }
@@ -88,46 +77,55 @@ class ApiService {
     bool auth = false,
   }) async {
     try {
-      final headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      };
-
-      if (auth) {
-        final token = await getToken();
-        if (token != null) {
-          headers['Authorization'] = 'Bearer $token';
-        }
-      }
-
       final response = await HttpClient.post(
         Uri.parse('$baseUrl/$endpoint'),
-        headers: headers,
+        headers: await _headers(auth: auth),
         body: jsonEncode(body),
       );
-
-      debugPrint('URL: $baseUrl/$endpoint');
-      debugPrint('Status: ${response.statusCode}');
-
-      // _handleAuthError(response.statusCode);
-
+      _handleAuthError(response.statusCode);
       return response;
     } catch (e, st) {
-      debugPrint('POST request failed: $e');
+      debugPrint('POST $endpoint failed: $e');
       debugPrintStack(stackTrace: st);
       rethrow;
     }
   }
 
-  // /// Handle authentication errors (401/403)
-  // static void _handleAuthError(int statusCode) {
-  //   if (statusCode == 401 || statusCode == 403) {
-  //     debugPrint('Auth error detected ($statusCode), clearing credentials');
-  //     // clearAll();
-  //     // throw AuthException(
-  //     //   message: 'Authentication failed. Please login again.',
-  //     //   statusCode: statusCode,
-  //     // );
-  //   }
-  // }
+  static Future<dynamic> putRequest(
+    String endpoint,
+    Map<String, dynamic> body, {
+    bool auth = false,
+  }) async {
+    try {
+      final response = await HttpClient.put(
+        Uri.parse('$baseUrl/$endpoint'),
+        headers: await _headers(auth: auth),
+        body: jsonEncode(body),
+      );
+      _handleAuthError(response.statusCode);
+      return response;
+    } catch (e, st) {
+      debugPrint('PUT $endpoint failed: $e');
+      debugPrintStack(stackTrace: st);
+      rethrow;
+    }
+  }
+
+  static Future<dynamic> deleteRequest(
+    String endpoint, {
+    bool auth = false,
+  }) async {
+    try {
+      final response = await HttpClient.delete(
+        Uri.parse('$baseUrl/$endpoint'),
+        headers: await _headers(auth: auth),
+      );
+      _handleAuthError(response.statusCode);
+      return response;
+    } catch (e, st) {
+      debugPrint('DELETE $endpoint failed: $e');
+      debugPrintStack(stackTrace: st);
+      rethrow;
+    }
+  }
 }

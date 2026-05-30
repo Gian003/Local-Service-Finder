@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/models/booking_model.dart';
 import 'package:lsf/screens/booking/tracking_screen.dart';
+import 'package:lsf/services/api_service.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
 import 'package:lsf/widgets/app_map.dart';
 
@@ -21,9 +22,12 @@ class UpcomingBookingScreen extends StatefulWidget {
 
 class _UpcomingBookingScreenState extends State<UpcomingBookingScreen> {
   void _showCancelDialog() {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           'Cancel Booking',
@@ -38,19 +42,36 @@ class _UpcomingBookingScreenState extends State<UpcomingBookingScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('No'),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Booking cancelled'),
-                  backgroundColor: Colors.red,
-                ),
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+
+              final response = await ApiService.putRequest(
+                'bookings/${widget.booking.id}/cancel',
+                {},
+                auth: true,
               );
+
+              if (!mounted) return;
+
+              if (response.statusCode == 200) {
+                navigator.pop();
+                scaffoldMessenger.showSnackBar(
+                  const SnackBar(
+                    content: Text('Booking cancelled'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              } else {
+                scaffoldMessenger.showSnackBar(
+                  const SnackBar(
+                    content: Text('Failed to cancel booking. Please try again.'),
+                  ),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text(

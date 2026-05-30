@@ -1,118 +1,190 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/services/api_service.dart';
 
-class DashBoardScreen extends StatelessWidget {
+class DashBoardScreen extends StatefulWidget {
   const DashBoardScreen({super.key});
+
+  @override
+  State<DashBoardScreen> createState() => _DashBoardScreenState();
+}
+
+class _DashBoardScreenState extends State<DashBoardScreen> {
+  bool _isLoading = true;
+  List<Map<String, dynamic>> _recentBookings = [];
+  int _totalBookings = 0;
+  int _pendingCount = 0;
+  double _totalEarnings = 0;
+  double _rating = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      final bookingsRes =
+          await ApiService.getRequest('bookings/worker', auth: true);
+      final profileRes =
+          await ApiService.getRequest('worker-auth/profile', auth: true);
+
+      if (!mounted) return;
+
+      if (bookingsRes.statusCode == 200) {
+        final List<dynamic> list = jsonDecode(bookingsRes.body) is List
+            ? jsonDecode(bookingsRes.body)
+            : (jsonDecode(bookingsRes.body)['data'] ?? []);
+
+        final bookings = list.cast<Map<String, dynamic>>();
+        setState(() {
+          _totalBookings = bookings.length;
+          _pendingCount =
+              bookings.where((b) => b['status'] == 'pending').length;
+          _totalEarnings = bookings
+              .where((b) => b['status'] == 'completed')
+              .fold(0.0, (sum, b) => sum + (double.tryParse(b['total_price'].toString()) ?? 0));
+          _recentBookings = bookings.take(3).toList();
+        });
+      }
+
+      if (profileRes.statusCode == 200) {
+        final profile = jsonDecode(profileRes.body);
+        final workerData = profile['worker'] ?? profile;
+        setState(() {
+          _rating = double.tryParse(workerData['rating']?.toString() ?? '0') ?? 0;
+        });
+      }
+    } catch (_) {
+      // silently degrade — UI shows zeros
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Dashboard',
-                    style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.secondaryColor,
+      child: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: () async {
+                setState(() => _isLoading = true);
+                await _loadData();
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Dashboard',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.secondaryColor,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+
+                    const SizedBox(height: 20),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildStatCard(
+                            label: 'Total Earnings',
+                            value: '₱${_totalEarnings.toStringAsFixed(0)}',
+                            icon: Icons.payments_outlined,
+                            color: Colors.green,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildStatCard(
+                            label: 'Total Bookings',
+                            value: '$_totalBookings',
+                            icon: Icons.calendar_today_outlined,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildStatCard(
+                            label: 'Pending',
+                            value: '$_pendingCount',
+                            icon: Icons.pending_outlined,
+                            color: Colors.orange,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildStatCard(
+                            label: 'Rating',
+                            value: '${_rating.toStringAsFixed(1)} ⭐',
+                            icon: Icons.star_outline,
+                            color: Colors.amber,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    const Text(
+                      'Recent Bookings',
+                      style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    if (_recentBookings.isEmpty)
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: Text(
+                            'No bookings yet',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      ..._recentBookings.map(
+                        (b) => _buildRecentBookingCard(
+                          customerName:
+                              '${b['user']?['first_name'] ?? ''} ${b['user']?['last_name'] ?? ''}'
+                                  .trim(),
+                          service: b['service']?['title'] ?? '',
+                          date: b['scheduled_at']?.toString() ?? '',
+                          status: b['status']?.toString() ?? 'pending',
+                        ),
+                      ),
+                  ],
                 ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // Stats cards
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    label: 'Total Earnings',
-                    value: '₱12,500',
-                    icon: Icons.payments_outlined,
-                    color: Colors.green,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildStatCard(
-                    label: 'Total Bookings',
-                    value: '24',
-                    icon: Icons.calendar_today_outlined,
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    label: 'Pending',
-                    value: '3',
-                    icon: Icons.pending_outlined,
-                    color: Colors.orange,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildStatCard(
-                    label: 'Rating',
-                    value: '4.8 ⭐',
-                    icon: Icons.star_outline,
-                    color: Colors.amber,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // Recent bookings
-            const Text(
-              'Recent Bookings',
-              style: TextStyle(
-                fontFamily: 'Montserrat',
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
               ),
             ),
-
-            const SizedBox(height: 10),
-
-            _buildRecentBookingCard(
-              customerName: 'Gian Rodriguez',
-              service: 'House Cleaning',
-              date: 'Today, 10:00 AM',
-              status: 'pending',
-            ),
-            _buildRecentBookingCard(
-              customerName: 'Maria Santos',
-              service: 'House Cleaning',
-              date: 'Tomorrow, 2:00 PM',
-              status: 'accepted',
-            ),
-            _buildRecentBookingCard(
-              customerName: 'Jose Cruz',
-              service: 'House Cleaning',
-              date: 'Mar 20, 9:00 AM',
-              status: 'completed',
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -194,7 +266,7 @@ class DashBoardScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  customerName,
+                  customerName.isEmpty ? 'Customer' : customerName,
                   style: const TextStyle(
                     fontFamily: 'Montserrat',
                     fontWeight: FontWeight.bold,

@@ -355,27 +355,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   _isLoading
                       ? const Center(child: CircularProgressIndicator())
-                      : ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: _serviceList.length,
-                          itemBuilder: (context, index) {
-                            return ServiceCard(
-                              serviceModel: _serviceList[index],
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ServiceDetailsScreen(
-                                      serviceModel: _serviceList[index],
+                      : Builder(builder: (context) {
+                          final filtered = _searchQuery.isEmpty
+                              ? _serviceList
+                              : _serviceList
+                                  .where((s) => s.title
+                                      .toLowerCase()
+                                      .contains(_searchQuery.toLowerCase()))
+                                  .toList();
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: filtered.length,
+                            itemBuilder: (context, index) {
+                              return ServiceCard(
+                                serviceModel: filtered[index],
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ServiceDetailsScreen(
+                                        serviceModel: filtered[index],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                              onBookMark: () {},
-                            );
-                          },
-                        ),
+                                  );
+                                },
+                                onBookMark: () {},
+                              );
+                            },
+                          );
+                        }),
                 ],
               ),
             ],

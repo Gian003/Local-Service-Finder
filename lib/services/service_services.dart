@@ -49,13 +49,21 @@ class ServiceServices {
 
       if (response.statusCode == 200) {
         try {
-          final data = ResponseHandler.parseJsonArray(response.body);
-          return data
+          final decoded = jsonDecode(response.body);
+          List<dynamic> list;
+          if (decoded is List) {
+            list = decoded;
+          } else if (decoded is Map<String, dynamic>) {
+            list = (decoded['data'] ?? decoded['services'] ?? []) as List<dynamic>;
+          } else {
+            list = [];
+          }
+          return list
               .whereType<Map<String, dynamic>>()
               .map((json) => ServiceModel.fromJson(json))
               .toList();
-        } on ApiException catch (e) {
-          debugPrint('Parse error: ${e.message}');
+        } catch (e) {
+          debugPrint('Parse error: $e');
           return [];
         }
       }
