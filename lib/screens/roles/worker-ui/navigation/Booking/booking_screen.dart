@@ -15,7 +15,7 @@ class WorkerBookingsScreenState extends State<WorkerBookingsScreen> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _bookings = [];
 
-  final List<String> _tabs = ['Pending', 'Accepted', 'Completed', 'Cancelled'];
+  final List<String> _tabs = ['Pending', 'Accepted', 'Completed', 'Rejected', 'Cancelled'];
 
   @override
   void initState() {

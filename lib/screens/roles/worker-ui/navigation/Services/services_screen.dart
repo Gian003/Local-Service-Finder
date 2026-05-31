@@ -132,7 +132,7 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
                       ),
                     ),
                     items:
-                        ['cleaning', 'plumbing', 'repair', 'roofing', 'furniture']
+                        ['cleaning', 'plumbing', 'repair', 'roofing', 'electrical']
                             .map((cat) => DropdownMenuItem(
                                   value: cat,
                                   child: Text(cat),

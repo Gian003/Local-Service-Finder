@@ -7,7 +7,6 @@ import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/chat/chat_service.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/chat/message_model.dart';
 import 'package:lsf/services/api_service.dart';
-import 'package:lsf/screens/roles/user-ui/navigation/chat/chat_screen.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -79,7 +78,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _loadCurrentUser() async {
-    final response = await ApiService.getRequest('/auth/me', auth: true);
+    final response = await ApiService.getRequest('auth/me', auth: true);
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       setState(() => _currentUserId = data['id']);
