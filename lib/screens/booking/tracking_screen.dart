@@ -1,9 +1,13 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/models/booking_model.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/chat/chat_screen.dart';
-import 'package:lsf/screens/roles/user-ui/navigation/profile/profile_screen.dart';
 import 'package:lsf/screens/roles/user-ui/service%20details/service_details_screen.dart';
+import 'package:lsf/services/api_service.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
 import 'package:lsf/widgets/app_map.dart';
 
@@ -18,6 +22,60 @@ class TrackingScreen extends StatefulWidget {
 }
 
 class _TrackingScreenState extends State<TrackingScreen> {
+  double? _workerLat;
+  double? _workerLng;
+  Timer? _pollTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchWorkerLocation();
+    _pollTimer = Timer.periodic(
+      const Duration(seconds: 15),
+      (_) => _fetchWorkerLocation(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchWorkerLocation() async {
+    try {
+      final response = await ApiService.getRequest(
+        'bookings/${widget.booking.id}',
+        auth: true,
+      );
+      if (!mounted || response.statusCode != 200) return;
+
+      final data = jsonDecode(response.body);
+      final worker = data['worker'];
+      final lat = worker?['latitude'];
+      final lng = worker?['longitude'];
+
+      if (lat != null && lng != null) {
+        setState(() {
+          _workerLat = double.tryParse(lat.toString());
+          _workerLng = double.tryParse(lng.toString());
+        });
+      }
+    } catch (_) {
+      // Keep showing the last known location if a poll fails.
+    }
+  }
+
+  double? get _distanceKm {
+    if (_workerLat == null || _workerLng == null) return null;
+    final destination = LatLng(
+      widget.booking.latitude ?? 15.9754,
+      widget.booking.longitude ?? 120.5720,
+    );
+    final worker = LatLng(_workerLat!, _workerLng!);
+    return const Distance().as(LengthUnit.Kilometer, destination, worker);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,6 +88,9 @@ class _TrackingScreenState extends State<TrackingScreen> {
             zoom: 15,
             interactive: true, // full screen, allow touch
             showPin: true,
+            secondaryLatitude: _workerLat,
+            secondaryLongitude: _workerLng,
+            secondaryIcon: Icons.person_pin_circle,
           ),
 
           // Back button
@@ -147,6 +208,31 @@ class _TrackingScreenState extends State<TrackingScreen> {
                         color: Colors.grey[600],
                       ),
                     ),
+                    if (_distanceKm != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          '${_distanceKm!.toStringAsFixed(1)} km away',
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                      )
+                    else
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          'Waiting for location…',
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 12,
+                            color: Colors.grey[400],
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),

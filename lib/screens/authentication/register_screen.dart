@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/services/auth_service.dart';
+import 'package:lsf/widgets/error_dialog.dart';
 import 'package:lsf/widgets/role_toggle.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -356,19 +357,11 @@ class RegisterScreenState extends State<RegisterScreen> {
                                   );
                                 }
                               } else {
-                                final errors = result['errors'];
-                                String message =
-                                    result['message'] ?? 'Registration Failed';
-
-                                if (errors != null) {
-                                  if (errors['email'] != null) {
-                                    message = errors['email'][0];
-                                  }
-                                }
-
                                 if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(message)),
+                                  showApiErrorDialog(
+                                    context,
+                                    result,
+                                    fallbackMessage: 'Registration failed.',
                                   );
                                 }
                               }

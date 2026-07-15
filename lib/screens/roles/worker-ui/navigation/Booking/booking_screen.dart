@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/services/api_service.dart';
+import 'package:lsf/services/worker_location_service.dart';
 
 class WorkerBookingsScreen extends StatefulWidget {
   const WorkerBookingsScreen({super.key});
@@ -34,11 +35,24 @@ class WorkerBookingsScreenState extends State<WorkerBookingsScreen> {
         final List<dynamic> list =
             decoded is List ? decoded : (decoded['data'] ?? []);
         setState(() => _bookings = list.cast<Map<String, dynamic>>());
+        _syncLocationTracking();
       }
     } catch (_) {
       // silently degrade
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // Report live location only while there's a job actually in progress —
+  // covers both resuming after the app restarts with a job already accepted,
+  // and starting/stopping right as accept/complete/reject happen below.
+  void _syncLocationTracking() {
+    final hasActiveJob = _bookings.any((b) => b['status'] == 'accepted');
+    if (hasActiveJob) {
+      WorkerLocationService.start();
+    } else {
+      WorkerLocationService.stop();
     }
   }
 

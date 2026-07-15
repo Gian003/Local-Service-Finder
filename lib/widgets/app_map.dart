@@ -13,6 +13,13 @@ class AppMap extends StatefulWidget {
   final bool interactive; // false = mini map, true = full screen
   final bool showPin;
 
+  // Optional second point (e.g. a worker's live location) — when set, a
+  // second marker is drawn along with a line connecting the two points.
+  final double? secondaryLatitude;
+  final double? secondaryLongitude;
+  final IconData secondaryIcon;
+  final Color secondaryColor;
+
   const AppMap({
     super.key,
     required this.latitude,
@@ -20,6 +27,10 @@ class AppMap extends StatefulWidget {
     this.zoom = 15.0,
     this.interactive = false,
     this.showPin = true,
+    this.secondaryLatitude,
+    this.secondaryLongitude,
+    this.secondaryIcon = Icons.directions_car,
+    this.secondaryColor = Colors.blue,
   });
 
   @override
@@ -51,10 +62,24 @@ class _AppMapState extends State<AppMap> {
     }
 
     final location = LatLng(widget.latitude, widget.longitude);
+    final hasSecondary =
+        widget.secondaryLatitude != null && widget.secondaryLongitude != null;
+    final secondaryLocation = hasSecondary
+        ? LatLng(widget.secondaryLatitude!, widget.secondaryLongitude!)
+        : null;
+
+    // Center between both points when tracking a second location, so
+    // neither pin starts off-screen.
+    final center = secondaryLocation == null
+        ? location
+        : LatLng(
+            (location.latitude + secondaryLocation.latitude) / 2,
+            (location.longitude + secondaryLocation.longitude) / 2,
+          );
 
     return FlutterMap(
       options: MapOptions(
-        initialCenter: location,
+        initialCenter: center,
         initialZoom: widget.zoom,
         // Disable interactions for mini map
         interactionOptions: InteractionOptions(
@@ -76,6 +101,18 @@ class _AppMapState extends State<AppMap> {
                 CachePolicy.forceCache, // always use cache if available
           ),
         ),
+
+        // Line joining the destination and the secondary (e.g. worker) point
+        if (secondaryLocation != null)
+          PolylineLayer(
+            polylines: [
+              Polyline(
+                points: [location, secondaryLocation],
+                strokeWidth: 4,
+                color: widget.secondaryColor,
+              ),
+            ],
+          ),
 
         // Destination marker
         if (widget.showPin)
@@ -115,6 +152,38 @@ class _AppMapState extends State<AppMap> {
                       color: AppColors.primaryColor,
                     ),
                   ],
+                ),
+              ),
+            ],
+          ),
+
+        // Secondary (e.g. worker) marker
+        if (secondaryLocation != null)
+          MarkerLayer(
+            markers: [
+              Marker(
+                point: secondaryLocation,
+                width: 44,
+                height: 44,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: widget.secondaryColor,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: widget.secondaryColor.withValues(alpha: 0.4),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    widget.secondaryIcon,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                 ),
               ),
             ],

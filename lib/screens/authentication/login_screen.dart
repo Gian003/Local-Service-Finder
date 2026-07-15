@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/services/auth_service.dart';
+import 'package:lsf/widgets/error_dialog.dart';
 import 'package:lsf/widgets/role_toggle.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -385,9 +386,7 @@ class LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacementNamed(context, '/home');
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message'] ?? 'Login Failed')),
-      );
+      showApiErrorDialog(context, result, fallbackMessage: 'Login failed.');
     }
   }
 }

@@ -28,7 +28,12 @@ class SplashScreenWrapperState extends State<SplashScreenWrapper> {
       await _preCacheMapTiles();
 
       if (!mounted) return;
-      await _navigateBasedOnAuth();
+
+      // Secure-storage reads go through a platform channel and can be slow
+      // on some devices (Keystore cipher re-initialization) — never let a
+      // stuck read leave the user staring at the splash screen forever with
+      // no way out.
+      await _navigateBasedOnAuth().timeout(const Duration(seconds: 15));
     } catch (e) {
       if (kDebugMode) {
         print('Initialization error: $e');
@@ -54,22 +59,26 @@ class SplashScreenWrapperState extends State<SplashScreenWrapper> {
 
   Future<void> _navigateBasedOnAuth() async {
     //role checker
-    final token = await ApiService.getToken();
     final role = await ApiService.getRole();
+    final token = await ApiService.getToken(role: role);
 
     if (!mounted) return;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (token != null) {
-        if (role == 'worker') {
-          Navigator.pushReplacementNamed(context, '/worker-home');
-        } else {
-          Navigator.pushReplacementNamed(context, '/home');
-        }
+    // Navigate directly rather than via addPostFrameCallback: by this point
+    // we're long past the initial build/frame (these are awaited async
+    // reads), so there's no build-phase restriction to work around. The
+    // splash screen's entrance animation goes fully static after ~1s with
+    // no ticker left running, so nothing schedules a "next frame" for a
+    // post-frame callback to ride along with — it would sit queued forever.
+    if (token != null) {
+      if (role == 'worker') {
+        Navigator.pushReplacementNamed(context, '/worker-home');
       } else {
-        Navigator.pushReplacementNamed(context, '/onBoarding');
+        Navigator.pushReplacementNamed(context, '/home');
       }
-    });
+    } else {
+      Navigator.pushReplacementNamed(context, '/onBoarding');
+    }
   }
 
   void _retryInitializeApp() {

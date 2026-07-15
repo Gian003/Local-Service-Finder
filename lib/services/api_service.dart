@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
@@ -12,34 +13,55 @@ class ApiService {
     aOptions: AndroidOptions(),
   );
 
+  // Serializes every secure-storage call. On some devices the plugin's
+  // one-time cipher-algorithm migration (delete old Keystore key, generate a
+  // new one) can be entered by two concurrent reads at once — e.g. the
+  // splash screen's auth check racing SyncService's startup outbox check —
+  // and the Android Keystore call for the second one can hang indefinitely
+  // instead of erroring. Running all reads/writes through this queue means
+  // that migration only ever happens on one call at a time.
+  static Future<dynamic> _storageQueue = Future.value();
+
+  static Future<T> _locked<T>(Future<T> Function() action) {
+    final result = _storageQueue.then((_) => action());
+    // Swallow the error here so a failed call doesn't poison the queue for
+    // everything after it — the real error still reaches the caller below.
+    _storageQueue = result.then((_) {}, onError: (_) {});
+    return result;
+  }
+
   // ── Token / Role storage (encrypted) ────────────────────────────────────
 
-  static Future<String?> getToken() async {
-    final role = await getRole();
-    if (role != null) {
-      final roleToken = await _storage.read(key: '${role}_token');
-      if (roleToken != null) return roleToken;
-    }
-    return _storage.read(key: 'token');
-  }
+  // Pass [role] if the caller already fetched it — each secure-storage read
+  // is a real platform-channel round-trip (slower on some devices, e.g. when
+  // the Keystore cipher needs re-initializing), so avoid re-reading 'role'
+  // when it's already in hand.
+  static Future<String?> getToken({String? role}) => _locked(() async {
+        final resolvedRole = role ?? await _storage.read(key: 'role');
+        if (resolvedRole != null) {
+          final roleToken = await _storage.read(key: '${resolvedRole}_token');
+          if (roleToken != null) return roleToken;
+        }
+        return _storage.read(key: 'token');
+      });
 
-  static Future<void> saveToken(String token, {String? role}) async {
-    await _storage.write(key: 'token', value: token);
-    if (role != null) {
-      await _storage.write(key: '${role}_token', value: token);
-    }
-  }
+  static Future<void> saveToken(String token, {String? role}) => _locked(() async {
+        await _storage.write(key: 'token', value: token);
+        if (role != null) {
+          await _storage.write(key: '${role}_token', value: token);
+        }
+      });
 
-  static Future<void> clearToken() => _storage.delete(key: 'token');
+  static Future<void> clearToken() => _locked(() => _storage.delete(key: 'token'));
 
-  static Future<String?> getRole() => _storage.read(key: 'role');
+  static Future<String?> getRole() => _locked(() => _storage.read(key: 'role'));
 
   static Future<void> saveRole(String role) =>
-      _storage.write(key: 'role', value: role);
+      _locked(() => _storage.write(key: 'role', value: role));
 
-  static Future<void> clearRole() => _storage.delete(key: 'role');
+  static Future<void> clearRole() => _locked(() => _storage.delete(key: 'role'));
 
-  static Future<void> clearAll() => _storage.deleteAll();
+  static Future<void> clearAll() => _locked(() => _storage.deleteAll());
 
   // ── Internal helpers ─────────────────────────────────────────────────────
 

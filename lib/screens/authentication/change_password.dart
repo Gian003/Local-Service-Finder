@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/services/api_service.dart';
+import 'package:lsf/widgets/error_dialog.dart';
 
 class ChangePassword extends StatefulWidget {
   const ChangePassword({super.key});
@@ -62,20 +63,23 @@ class ChangePasswordState extends State<ChangePassword> {
         );
         Navigator.pushReplacementNamed(context, '/home');
       } else {
-        String message = 'Failed to change password. Please try again.';
+        Map<String, dynamic> data = {};
         try {
-          final data = jsonDecode(response.body);
-          message = data['message']?.toString() ?? message;
+          data = jsonDecode(response.body) as Map<String, dynamic>;
         } catch (_) {}
 
-        ScaffoldMessenger.of(
+        showApiErrorDialog(
           context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+          data,
+          fallbackMessage: 'Failed to change password. Please try again.',
+        );
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Network error. Please try again.')),
+      showApiErrorDialog(
+        context,
+        const {},
+        fallbackMessage: 'Network error. Please try again.',
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
