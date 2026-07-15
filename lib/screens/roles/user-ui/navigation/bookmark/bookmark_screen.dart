@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,9 @@ import 'package:lsf/screens/booking/upcoming_booking_screen.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/bookmark/bookmark_card.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/bookmark/bookmark_model.dart';
 import 'package:lsf/services/api_service.dart';
+import 'package:lsf/services/local_db.dart';
+import 'package:lsf/services/review_service.dart';
+import 'package:lsf/widgets/offline_banner.dart';
 
 class BookmarkScreen extends StatefulWidget {
   const BookmarkScreen({super.key});
@@ -25,6 +29,7 @@ class BookmarkScreenState extends State<BookmarkScreen> {
   // Full list fetched once; tabs filter in the getter below
   List<BookingModel> _allBookings = [];
   bool _isLoading = true;
+  bool _isShowingCachedData = false;
 
   @override
   void initState() {
@@ -34,10 +39,12 @@ class BookmarkScreenState extends State<BookmarkScreen> {
 
   Future<void> _loadBookings() async {
     setState(() => _isLoading = true);
-    final response = await ApiService.getRequest('bookings/user', auth: true);
-    if (!mounted) return;
-    if (response.statusCode == 200) {
-      try {
+
+    try {
+      final response = await ApiService.getRequest('bookings/user', auth: true);
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List<dynamic> list;
         if (decoded is List) {
@@ -47,14 +54,25 @@ class BookmarkScreenState extends State<BookmarkScreen> {
         } else {
           list = [];
         }
+        final rawBookings = list.whereType<Map<String, dynamic>>().toList();
+
+        unawaited(LocalDb.cacheBookings('user', rawBookings));
+
         setState(() {
-          _allBookings = list
-              .whereType<Map<String, dynamic>>()
-              .map((json) => BookingModel.fromJson(json))
-              .toList();
+          _allBookings = rawBookings.map((json) => BookingModel.fromJson(json)).toList();
+          _isShowingCachedData = false;
         });
-      } catch (_) {}
+      }
+    } catch (_) {
+      // Network unreachable — fall back to the last successful fetch.
+      final cached = await LocalDb.getCachedBookings('user');
+      if (!mounted) return;
+      setState(() {
+        _allBookings = cached.map((json) => BookingModel.fromJson(json)).toList();
+        _isShowingCachedData = cached.isNotEmpty;
+      });
     }
+
     if (mounted) setState(() => _isLoading = false);
   }
 
@@ -77,6 +95,8 @@ class BookmarkScreenState extends State<BookmarkScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (_isShowingCachedData) const OfflineBanner(),
+
           Padding(
             padding: const EdgeInsets.all(20),
             child: Center(
@@ -210,12 +230,94 @@ class BookmarkScreenState extends State<BookmarkScreen> {
                     ),
                   ),
                 );
+              } else if (_selectedTab == 'Completed') {
+                _showReviewDialog(booking);
               }
             },
           );
         },
       ),
     );
+  }
+
+  Future<void> _showReviewDialog(BookingModel booking) async {
+    final workerId = booking.workerId;
+    if (workerId == null) return;
+
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    double rating = 5;
+    final commentController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text('Rate ${booking.workerName}'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      return IconButton(
+                        icon: Icon(
+                          index < rating ? Icons.star : Icons.star_border,
+                          color: Colors.amber,
+                        ),
+                        onPressed: () =>
+                            setDialogState(() => rating = index + 1),
+                      );
+                    }),
+                  ),
+                  TextField(
+                    controller: commentController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      hintText: 'Share your experience (optional)',
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final result = await ReviewService.submitReview(
+                      bookingId: booking.id,
+                      workerId: workerId,
+                      rating: rating,
+                      comment: commentController.text.trim().isEmpty
+                          ? null
+                          : commentController.text.trim(),
+                    );
+
+                    if (!dialogContext.mounted) return;
+                    Navigator.pop(dialogContext);
+
+                    final message = result['status'] == 201
+                        ? 'Review submitted. Thank you!'
+                        : (result['message']?.toString() ??
+                              'Failed to submit review');
+
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(content: Text(message)),
+                    );
+                  },
+                  child: const Text('Submit'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    commentController.dispose();
   }
 
   Widget _buildSavedList() {

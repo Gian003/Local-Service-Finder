@@ -3,7 +3,7 @@
 //   flutter build apk --dart-define-from-file=.env
 // Copy .env.example to .env and fill in your values.
 class AppConfig {
-  static const String baseUrl = 'http://192.168.1.6:8000/api';
+  static const String baseUrl = 'http://192.168.1.3:8000/api';
   static const bool offlineMode = false;
 
   static const String pusherKey =

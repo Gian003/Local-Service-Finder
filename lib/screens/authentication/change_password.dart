@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/services/api_service.dart';
@@ -12,15 +14,19 @@ class ChangePassword extends StatefulWidget {
 class ChangePasswordState extends State<ChangePassword> {
   final _formkey = GlobalKey<FormState>();
   bool _isLoading = false;
+  bool _obscureCurrentPassword = true;
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
 
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
   @override
   void dispose() {
+    _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -38,7 +44,10 @@ class ChangePasswordState extends State<ChangePassword> {
     try {
       final response = await ApiService.putRequest(
         'user-auth/profile/password',
-        {'password': _newPasswordController.text.trim()},
+        {
+          'current_password': _currentPasswordController.text,
+          'password': _newPasswordController.text.trim(),
+        },
         auth: true,
       );
 
@@ -53,11 +62,15 @@ class ChangePasswordState extends State<ChangePassword> {
         );
         Navigator.pushReplacementNamed(context, '/home');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to change password. Please try again.'),
-          ),
-        );
+        String message = 'Failed to change password. Please try again.';
+        try {
+          final data = jsonDecode(response.body);
+          message = data['message']?.toString() ?? message;
+        } catch (_) {}
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
       }
     } catch (e) {
       if (!mounted) return;
@@ -103,6 +116,41 @@ class ChangePasswordState extends State<ChangePassword> {
                     ),
 
                     const SizedBox(height: 50),
+
+                    TextFormField(
+                      controller: _currentPasswordController,
+                      obscureText: _obscureCurrentPassword,
+                      decoration: InputDecoration(
+                        labelText: 'Enter Current Password',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.horizontal(
+                            left: Radius.circular(15),
+                            right: Radius.circular(15),
+                          ),
+                        ),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _obscureCurrentPassword =
+                                  !_obscureCurrentPassword;
+                            });
+                          },
+                          icon: Icon(
+                            _obscureCurrentPassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your current password';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 25),
 
                     TextFormField(
                       controller: _newPasswordController,

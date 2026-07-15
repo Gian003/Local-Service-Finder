@@ -267,6 +267,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
               children: [
                 Text(
                   customerName.isEmpty ? 'Customer' : customerName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontFamily: 'Montserrat',
                     fontWeight: FontWeight.bold,
@@ -275,6 +277,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                 ),
                 Text(
                   service,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Montserrat',
                     fontSize: 12,

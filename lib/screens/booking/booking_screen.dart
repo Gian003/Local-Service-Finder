@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -7,7 +8,9 @@ import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/models/booking_model.dart';
 import 'package:lsf/services/api_service.dart';
 import 'package:lsf/services/booking_service.dart';
+import 'package:lsf/services/local_db.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
+import 'package:lsf/widgets/offline_banner.dart';
 
 class BookingScreen extends StatefulWidget {
   final ServiceModel service;
@@ -40,10 +43,16 @@ class _BookingScreenState extends State<BookingScreen> {
   // Step 2 state
   Map<String, dynamic>? _selectedAddress;
   final List<Map<String, dynamic>> _addresses = [];
+  bool _isShowingCachedAddresses = false;
 
   // Step 3 state
   String? _selectedPayment;
   bool _isLoading = false;
+
+  // Set once a card charge actually succeeds. If confirmBooking then fails
+  // (network blip, server error) and the user taps Confirm again, we must
+  // reuse this instead of charging the card a second time.
+  String? _paidPaymentIntentId;
 
   final List<Map<String, dynamic>> _paymentMethods = [
     {'id': 'cash', 'label': 'Cash Payment', 'icon': '💵'},
@@ -96,11 +105,97 @@ class _BookingScreenState extends State<BookingScreen> {
     }
   }
 
-  void _fetchAddresses() async {
-    final response = await ApiService.getRequest('addresses', auth: true);
+  Future<void> _deleteAddress(Map<String, dynamic> addr) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final response = await ApiService.deleteRequest(
+      'addresses/${addr['id']}',
+      auth: true,
+    );
+
     if (!mounted) return;
+
     if (response.statusCode == 200) {
+      setState(() {
+        _addresses.removeWhere((a) => a['id'] == addr['id']);
+        if (_selectedAddress?['id'] == addr['id']) _selectedAddress = null;
+      });
+    } else {
+      String message = 'Failed to delete address';
       try {
+        final decoded = jsonDecode(response.body);
+        message = decoded['message']?.toString() ?? message;
+      } catch (_) {}
+      scaffoldMessenger.showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
+  Future<void> _setDefaultAddress(Map<String, dynamic> addr) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final response = await ApiService.putRequest(
+      'addresses/${addr['id']}/default',
+      {},
+      auth: true,
+    );
+
+    if (!mounted) return;
+
+    if (response.statusCode == 200) {
+      setState(() {
+        for (final a in _addresses) {
+          a['is_default'] = a['id'] == addr['id'];
+        }
+      });
+    } else {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Failed to update default address')),
+      );
+    }
+  }
+
+  Future<void> _updateAddress(
+    Map<String, dynamic> addr,
+    String label,
+    String address,
+    String city,
+  ) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    final response = await ApiService.putRequest('addresses/${addr['id']}', {
+      'label': label,
+      'address': address,
+      'city': city,
+    }, auth: true);
+
+    if (!mounted) return;
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic>? updated;
+      try {
+        final decoded = jsonDecode(response.body);
+        updated = decoded['address'] as Map<String, dynamic>?;
+      } catch (_) {}
+
+      if (updated != null) {
+        setState(() {
+          final index = _addresses.indexWhere((a) => a['id'] == addr['id']);
+          if (index != -1) _addresses[index] = updated!;
+          if (_selectedAddress?['id'] == addr['id']) _selectedAddress = updated;
+        });
+      }
+      navigator.pop();
+    } else {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Failed to update address')),
+      );
+    }
+  }
+
+  void _fetchAddresses() async {
+    try {
+      final response = await ApiService.getRequest('addresses', auth: true);
+      if (!mounted) return;
+      if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List<dynamic> list;
         if (decoded is List) {
@@ -110,15 +205,29 @@ class _BookingScreenState extends State<BookingScreen> {
         } else {
           list = [];
         }
+        final rawAddresses = list.whereType<Map<String, dynamic>>().toList();
+
+        unawaited(LocalDb.cacheAddresses(rawAddresses));
+
         setState(() {
           _addresses.clear();
-          _addresses.addAll(list.whereType<Map<String, dynamic>>());
+          _addresses.addAll(rawAddresses);
+          _isShowingCachedAddresses = false;
         });
-      } catch (_) {}
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to fetch addresses')),
-      );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to fetch addresses')),
+        );
+      }
+    } catch (_) {
+      // Network unreachable — fall back to the last successful fetch.
+      final cached = await LocalDb.getCachedAddresses();
+      if (!mounted) return;
+      setState(() {
+        _addresses.clear();
+        _addresses.addAll(cached);
+        _isShowingCachedAddresses = cached.isNotEmpty;
+      });
     }
   }
 
@@ -480,6 +589,11 @@ class _BookingScreenState extends State<BookingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (_isShowingCachedAddresses) ...[
+            const OfflineBanner(),
+            const SizedBox(height: 12),
+          ],
+
           const Text(
             'Select Address',
             style: TextStyle(
@@ -519,6 +633,7 @@ class _BookingScreenState extends State<BookingScreen> {
           // Saved addresses
           ..._addresses.map((addr) {
             final isSelected = _selectedAddress?['id'] == addr['id'];
+            final isDefault = addr['is_default'] == true;
             return GestureDetector(
               onTap: () => setState(() => _selectedAddress = addr),
               child: Container(
@@ -535,13 +650,44 @@ class _BookingScreenState extends State<BookingScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      addr['label'],
-                      style: const TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            addr['label'],
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                        if (isDefault) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryColor.withValues(
+                                alpha: 0.1,
+                              ),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'Default',
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     Text(
                       addr['address'],
@@ -552,7 +698,10 @@ class _BookingScreenState extends State<BookingScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Row(
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Container(
                           width: 12,
@@ -565,9 +714,8 @@ class _BookingScreenState extends State<BookingScreen> {
                             border: Border.all(color: AppColors.primaryColor),
                           ),
                         ),
-                        const SizedBox(width: 16),
                         GestureDetector(
-                          onTap: () async {},
+                          onTap: () => _showEditAddressSheet(addr),
                           child: Text(
                             'Edit',
                             style: TextStyle(
@@ -577,9 +725,8 @@ class _BookingScreenState extends State<BookingScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 16),
                         GestureDetector(
-                          onTap: () async {},
+                          onTap: () => _deleteAddress(addr),
                           child: const Text(
                             'Delete',
                             style: TextStyle(
@@ -589,6 +736,18 @@ class _BookingScreenState extends State<BookingScreen> {
                             ),
                           ),
                         ),
+                        if (!isDefault)
+                          GestureDetector(
+                            onTap: () => _setDefaultAddress(addr),
+                            child: Text(
+                              'Set as Default',
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                color: Colors.grey[700],
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ],
@@ -801,6 +960,103 @@ class _BookingScreenState extends State<BookingScreen> {
                 ),
                 child: const Text(
                   'Save Address',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Montserrat',
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEditAddressSheet(Map<String, dynamic> addr) {
+    final labelController = TextEditingController(text: addr['label']?.toString());
+    final addressController = TextEditingController(text: addr['address']?.toString());
+    final cityController = TextEditingController(text: addr['city']?.toString());
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Edit Address',
+              style: TextStyle(
+                fontFamily: 'Montserrat',
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: labelController,
+              decoration: InputDecoration(
+                labelText: 'Label (e.g. Home, Work)',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: addressController,
+              decoration: InputDecoration(
+                labelText: 'Full Address',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: cityController,
+              decoration: InputDecoration(
+                labelText: 'City',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (labelController.text.isEmpty ||
+                      addressController.text.isEmpty) {
+                    return;
+                  }
+                  _updateAddress(
+                    addr,
+                    labelController.text,
+                    addressController.text,
+                    cityController.text,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Save Changes',
                   style: TextStyle(
                     color: Colors.white,
                     fontFamily: 'Montserrat',
@@ -1065,11 +1321,12 @@ class _BookingScreenState extends State<BookingScreen> {
         return;
       }
 
-      // Online — Stripe flow
-      if (_selectedPayment == 'card') {
-        final amountInCentavos = (widget.service.price * 100).round();
+      // Online — Stripe flow. If a previous attempt already charged the card
+      // and only confirmBooking failed afterwards, reuse that charge instead
+      // of billing the card again.
+      String? paymentIntentId = _paidPaymentIntentId;
+      if (_selectedPayment == 'card' && paymentIntentId == null) {
         final clientSecret = await BookingService.createPaymentIntent(
-          amount: amountInCentavos,
           serviceId: widget.service.id ?? 1,
         );
 
@@ -1083,19 +1340,21 @@ class _BookingScreenState extends State<BookingScreen> {
           return;
         }
 
-        final success = await BookingService.processStripePayment(
+        paymentIntentId = await BookingService.processStripePayment(
           clientSecret: clientSecret,
         );
 
         if (!mounted) return;
 
-        if (!success) {
+        if (paymentIntentId == null) {
           setState(() => _isLoading = false);
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(const SnackBar(content: Text('Payment cancelled')));
           return;
         }
+
+        _paidPaymentIntentId = paymentIntentId;
       }
 
       String convertTo24Hour(String time12h) {
@@ -1137,6 +1396,7 @@ class _BookingScreenState extends State<BookingScreen> {
         scheduledAt: scheduled,
         totalPrice: widget.service.price,
         paymentMethod: _selectedPayment!,
+        paymentIntentId: paymentIntentId,
       );
 
       if (!mounted) return;

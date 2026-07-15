@@ -1,15 +1,19 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:lsf/config/app_config.dart';
 import 'package:lsf/dataset/mock_service.dart';
+import 'package:lsf/services/local_db.dart';
 import 'package:lsf/templates/service card/service_model.dart';
 import 'api_service.dart';
 import 'response_handler.dart';
 import 'auth_exception.dart';
 
 class ServiceServices {
-  //Get All Services
-  static Future<List<ServiceModel>> getAllServices({
+  //Get All Services. isFromCache tells the caller whether this came from the
+  //live API (false) or the local read-through cache after a failed request
+  //(true), so the UI can show an "offline — showing saved data" banner.
+  static Future<({List<ServiceModel> services, bool isFromCache})> getAllServices({
     String? category,
     String? sort,
   }) async {
@@ -32,7 +36,7 @@ class ServiceServices {
         list.sort((a, b) => a.price.compareTo(b.price));
       }
 
-      return list;
+      return (services: list, isFromCache: false);
     }
 
     //Online Mode
@@ -65,25 +69,61 @@ class ServiceServices {
           } else {
             list = [];
           }
-          return list
-              .whereType<Map<String, dynamic>>()
-              .map((json) => ServiceModel.fromJson(json))
-              .toList();
+          final rawServices = list.whereType<Map<String, dynamic>>().toList();
+
+          // Cache is best-effort — a failure here shouldn't fail the request
+          // that already has a good response in hand.
+          unawaited(LocalDb.cacheServices(rawServices));
+
+          return (
+            services: rawServices.map((json) => ServiceModel.fromJson(json)).toList(),
+            isFromCache: false,
+          );
         } catch (e) {
           debugPrint('Parse error: $e');
-          return [];
+          return (services: <ServiceModel>[], isFromCache: false);
         }
       }
 
       debugPrint('Failed to fetch services: status ${response.statusCode}');
-      return [];
+      return (
+        services: await _cachedServicesFallback(category: category, sort: sort),
+        isFromCache: true,
+      );
     } on AuthException catch (e) {
       debugPrint('Auth error: ${e.message}');
-      return [];
+      return (services: <ServiceModel>[], isFromCache: false);
     } catch (e) {
-      debugPrint('Failed to fetch services: $e');
-      return [];
+      debugPrint('Failed to fetch services (offline?): $e');
+      return (
+        services: await _cachedServicesFallback(category: category, sort: sort),
+        isFromCache: true,
+      );
     }
+  }
+
+  // Falls back to whatever was last successfully cached — used when the
+  // network request above fails outright (no connectivity, server down).
+  static Future<List<ServiceModel>> _cachedServicesFallback({
+    String? category,
+    String? sort,
+  }) async {
+    final cached = await LocalDb.getCachedServices();
+    var list = cached.map((json) => ServiceModel.fromJson(json)).toList();
+
+    if (category != null) {
+      list = list.where((service) => service.category == category).toList();
+    }
+
+    if (sort == 'popular') {
+      list.sort((a, b) => b.reviewCount.compareTo(a.reviewCount));
+    } else if (sort == 'most_expensive') {
+      list.sort((a, b) => b.price.compareTo(a.price));
+    } else if (sort == 'lowest_price') {
+      list.sort((a, b) => a.price.compareTo(b.price));
+    }
+
+    return list;
   }
 
   //Get single Service

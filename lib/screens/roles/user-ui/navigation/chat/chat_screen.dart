@@ -113,9 +113,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
       await _pusher.connect();
 
-      // Subscribe to private channel
-      final ids = [_currentUserId, widget.workerId]..sort();
-      final channelName = 'private-chat.${ids[0]}.${ids[1]}';
+      // Subscribe to private channel. Participants are keyed "type-id" to
+      // match the backend (users and workers are separate id sequences, so
+      // bare ids could let two unrelated conversations collide onto the same
+      // channel). This screen is always a customer talking to a worker, and
+      // "user-" sorts before "worker-" lexicographically regardless of id,
+      // so the ordering here always matches MessageSent::broadcastOn().
+      final channelName =
+          'private-chat.user-$_currentUserId.worker-${widget.workerId}';
 
       await _pusher.subscribe(
         channelName: channelName,
@@ -159,6 +164,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final message = await ChatService.sendMessage(
       receiverId: widget.workerId,
       content: content,
+      senderId: _currentUserId,
     );
 
     if (message != null) {
@@ -266,12 +272,19 @@ class _ChatScreenState extends State<ChatScreen> {
                         );
                       }
                       final msg = _messages[index];
-                      final isMe = msg.senderId == _currentUserId;
+                      // Match on type + id, not just id: sender_id alone is
+                      // ambiguous since users and workers have independent id
+                      // sequences, so a worker could otherwise be misread as
+                      // "me" whenever their id happens to equal mine.
+                      final isMe =
+                          msg.senderId == _currentUserId &&
+                          msg.senderType != 'worker';
                       return _buildMessageBubble(
                         content: msg.content,
                         isMe: isMe,
                         isRead: msg.isRead,
                         time: msg.createdAt,
+                        isPending: msg.isPending,
                       );
                     },
                   ),
@@ -289,6 +302,7 @@ class _ChatScreenState extends State<ChatScreen> {
     required bool isMe,
     required bool isRead,
     required DateTime time,
+    bool isPending = false,
   }) {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -341,7 +355,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 if (isMe) ...[
                   const SizedBox(width: 4),
                   Icon(
-                    isRead ? Icons.done_all : Icons.done,
+                    isPending
+                        ? Icons.access_time
+                        : (isRead ? Icons.done_all : Icons.done),
                     size: 14,
                     color: isRead ? AppColors.primaryColor : Colors.grey,
                   ),

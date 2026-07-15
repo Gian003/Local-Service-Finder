@@ -5,14 +5,13 @@ import 'response_handler.dart';
 import 'auth_exception.dart';
 
 class BookingService {
-  // Step 1: Create Stripe PaymentIntent
+  // Step 1: Create Stripe PaymentIntent. The charge amount is computed
+  // server-side from the Service price — the app has no say in what gets charged.
   static Future<String?> createPaymentIntent({
-    required int amount, // in centavos e.g. 150000
     required int serviceId,
   }) async {
     try {
       final response = await ApiService.postRequest('payment/intent', {
-        'amount': amount,
         'service_id': serviceId,
       }, auth: true);
 
@@ -36,8 +35,11 @@ class BookingService {
     }
   }
 
-  // Step 2: Process Stripe payment
-  static Future<bool> processStripePayment({
+  // Step 2: Process Stripe payment. Returns the underlying PaymentIntent id
+  // on success — the server needs this to verify the charge in confirmBooking
+  // rather than just trusting that the app called it. Returns null if the
+  // payment was cancelled or failed.
+  static Future<String?> processStripePayment({
     required String clientSecret,
   }) async {
     try {
@@ -50,14 +52,19 @@ class BookingService {
       );
 
       await Stripe.instance.presentPaymentSheet();
-      return true; // payment success
+
+      // client_secret is always "{payment_intent_id}_secret_{secret}".
+      return clientSecret.split('_secret_').first;
     } catch (e) {
       debugPrint('Stripe payment failed: $e');
-      return false; // payment cancelled or failed
+      return null;
     }
   }
 
-  // Step 3: Confirm booking in database
+  // Step 3: Confirm booking in database. ApiService.postRequest attaches an
+  // idempotency_key automatically — see its doc comment — which the server
+  // uses to recognize "same attempt, response got lost" and return the
+  // already-created booking instead of creating a duplicate.
   static Future<bool> confirmBooking({
     required int serviceId,
     required int workerId,

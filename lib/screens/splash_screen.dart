@@ -13,7 +13,6 @@ class SplashScreenWrapper extends StatefulWidget {
 class SplashScreenWrapperState extends State<SplashScreenWrapper> {
   bool _hasError = false;
   String _errorMessage = '';
-  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -26,17 +25,10 @@ class SplashScreenWrapperState extends State<SplashScreenWrapper> {
 
   Future<void> _initializeApp() async {
     try {
-      // Simulate some initialization time
-      await Future.delayed(const Duration(seconds: 5));
-
       await _preCacheMapTiles();
 
-      if (mounted) {
-        setState(() {
-          _isInitialized = true;
-        });
-        await _navigateBasedOnAuth();
-      }
+      if (!mounted) return;
+      await _navigateBasedOnAuth();
     } catch (e) {
       if (kDebugMode) {
         print('Initialization error: $e');
@@ -45,7 +37,6 @@ class SplashScreenWrapperState extends State<SplashScreenWrapper> {
         setState(() {
           _hasError = true;
           _errorMessage = 'Initialization failed: ${e.toString()}';
-          _isInitialized = true;
         });
       }
     }
@@ -91,10 +82,10 @@ class SplashScreenWrapperState extends State<SplashScreenWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isInitialized && !_hasError) {
-      return Container();
-    }
-
+    // Always show the splash UI (loading, or the error/retry state) — this
+    // route gets replaced by Navigator.pushReplacementNamed once navigation
+    // actually fires, so there's never a moment where a blank screen is the
+    // right thing to show in between.
     return SplashScreen(
       hasError: _hasError,
       errorMessage: _errorMessage,

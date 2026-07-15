@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:lsf/services/api_service.dart';
+import 'package:lsf/services/local_db.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/chat/message_model.dart';
 
 class ChatService {
@@ -28,19 +30,46 @@ class ChatService {
     return [];
   }
 
-  // Send a message
+  // Send a message. If the request fails outright (no connectivity), the
+  // message is queued in the outbox and a locally-rendered pending copy is
+  // returned instead of null, so it still shows up in the thread; SyncService
+  // sends it for real once the connection comes back.
   static Future<MessageModel?> sendMessage({
     required int receiverId,
     required String content,
+    required int senderId,
   }) async {
-    final response = await ApiService.postRequest('messages', {
-      'receiver_id': receiverId,
-      'content': content,
-    }, auth: true);
+    final body = {'receiver_id': receiverId, 'content': content};
 
-    if (response.statusCode == 201) {
-      return MessageModel.fromJson(jsonDecode(response.body));
+    try {
+      final response = await ApiService.postRequest('messages', body, auth: true);
+
+      if (response.statusCode == 201) {
+        return MessageModel.fromJson(jsonDecode(response.body));
+      }
+      return null;
+    } catch (_) {
+      final idempotencyKey =
+          '${DateTime.now().microsecondsSinceEpoch}-${Random().nextInt(1 << 32)}';
+
+      await LocalDb.enqueue(
+        endpoint: 'messages',
+        method: 'POST',
+        body: {...body, 'idempotency_key': idempotencyKey},
+        idempotencyKey: idempotencyKey,
+      );
+
+      return MessageModel(
+        id: -DateTime.now().millisecondsSinceEpoch,
+        senderId: senderId,
+        senderType: 'user',
+        receiverId: receiverId,
+        receiverType: 'worker',
+        content: content,
+        isRead: false,
+        createdAt: DateTime.now(),
+        isPending: true,
+      );
     }
-    return null;
   }
 }

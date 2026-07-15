@@ -7,6 +7,7 @@ import 'package:lsf/screens/verification/auth_otp_email.dart';
 import 'package:lsf/screens/authentication/change_password.dart';
 import 'package:lsf/screens/authentication/forgot_password.dart';
 import 'package:lsf/services/navigation_service.dart';
+import 'package:lsf/services/sync_service.dart';
 
 import 'screens/splash_screen.dart';
 import 'package:lsf/screens/on_boarding_screen.dart';
@@ -18,6 +19,10 @@ void main() async {
 
   Stripe.publishableKey = AppConfig.stripePublishableKey;
   await Stripe.instance.applySettings();
+
+  // Replays anything queued in the offline outbox as soon as connectivity
+  // comes back (e.g. a chat message sent while offline).
+  SyncService.start();
 
   runApp(const MyApp());
 }

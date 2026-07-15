@@ -208,8 +208,9 @@ class ForgotPasswordState extends State<ForgotPassword> {
 
                     const SizedBox(height: 50),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 5,
                       children: [
                         Text(
                           'Don\'t have an account?',
@@ -219,8 +220,6 @@ class ForgotPasswordState extends State<ForgotPassword> {
                             fontWeight: FontWeight.normal,
                           ),
                         ),
-
-                        const SizedBox(width: 5),
 
                         GestureDetector(
                           onTap: () {

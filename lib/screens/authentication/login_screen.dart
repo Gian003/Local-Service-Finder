@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/services/auth_service.dart';
+import 'package:lsf/widgets/role_toggle.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -79,6 +80,13 @@ class LoginScreenState extends State<LoginScreen> {
                     ),
 
                     const SizedBox(height: 30),
+
+                    RoleToggle(
+                      selectedRole: _selectedRole,
+                      onChanged: (role) => setState(() => _selectedRole = role),
+                    ),
+
+                    const SizedBox(height: 25),
 
                     //Email Field
                     Column(
@@ -301,39 +309,40 @@ class LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 40),
 
                             //Sign Up Button
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Don\'t have an account?',
-                                  style: TextStyle(
-                                    fontFamily: 'Montserrat',
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.black,
-                                  ),
-                                ),
-
-                                const SizedBox(width: 5),
-
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.pushReplacementNamed(
-                                      context,
-                                      '/register',
-                                    );
-                                  },
-                                  child: Text(
-                                    'Sign Up',
+                            Center(
+                              child: Wrap(
+                                alignment: WrapAlignment.center,
+                                spacing: 5,
+                                children: [
+                                  Text(
+                                    'Don\'t have an account?',
                                     style: TextStyle(
                                       fontFamily: 'Montserrat',
                                       fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.secondaryColor,
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.black,
                                     ),
                                   ),
-                                ),
-                              ],
+
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushReplacementNamed(
+                                        context,
+                                        '/register',
+                                      );
+                                    },
+                                    child: Text(
+                                      'Sign Up',
+                                      style: TextStyle(
+                                        fontFamily: 'Montserrat',
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.secondaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -345,53 +354,6 @@ class LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildRoleToggle() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.horizontal(
-          left: Radius.circular(12),
-          right: Radius.circular(12),
-        ),
-      ),
-      child: Row(
-        children: ['customer', 'worker'].map((role) {
-          final isSelected = _selectedRole == role;
-
-          return Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedRole = role;
-                });
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.primaryColor
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Text(
-                    role == 'customer' ? 'Customer' : 'Worker',
-                    style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.white : Colors.grey,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }).toList(),
       ),
     );
   }

@@ -156,6 +156,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       ),
       title: Text(
         data['worker_name'],
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: const TextStyle(
           fontFamily: 'Montserrat',
           fontWeight: FontWeight.bold,
@@ -234,6 +236,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       ),
       title: Text(
         workerName,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: const TextStyle(
           fontFamily: 'Montserrat',
           fontWeight: FontWeight.bold,

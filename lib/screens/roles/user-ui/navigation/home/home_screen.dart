@@ -13,6 +13,7 @@ import 'package:lsf/templates/hero_layout_card.dart';
 import 'package:lsf/templates/searh_bar.dart';
 import 'package:lsf/templates/service%20card/service_card.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
+import 'package:lsf/widgets/offline_banner.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,11 +38,13 @@ class _HomeScreenState extends State<HomeScreen> {
   //Service List
   List<ServiceModel> _serviceList = [];
   bool _isLoading = true;
+  bool _isShowingCachedData = false;
 
   Future<void> _loadServices() async {
-    final services = await ServiceServices.getAllServices();
+    final result = await ServiceServices.getAllServices();
     setState(() {
-      _serviceList = services;
+      _serviceList = result.services;
+      _isShowingCachedData = result.isFromCache;
       _isLoading = false;
     });
   }
@@ -85,6 +88,11 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
+              if (_isShowingCachedData) ...[
+                const OfflineBanner(),
+                const SizedBox(height: 12),
+              ],
+
               //Header
               SizedBox(
                 height: 135,

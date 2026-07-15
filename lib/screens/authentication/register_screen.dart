@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lsf/global%20variable/colors.dart';
-import 'package:lsf/services/api_service.dart';
 import 'package:lsf/services/auth_service.dart';
+import 'package:lsf/widgets/role_toggle.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -49,6 +49,7 @@ class RegisterScreenState extends State<RegisterScreen> {
   }
 
   bool _acceptTerms = false;
+  String _selectedRole = 'customer';
 
   void _handleTermsChanged(bool value) {
     setState(() {
@@ -98,6 +99,13 @@ class RegisterScreenState extends State<RegisterScreen> {
                     ),
 
                     const SizedBox(height: 30),
+
+                    RoleToggle(
+                      selectedRole: _selectedRole,
+                      onChanged: (role) => setState(() => _selectedRole = role),
+                    ),
+
+                    const SizedBox(height: 25),
 
                     //First and Last Name Fields
                     Row(
@@ -320,12 +328,19 @@ class RegisterScreenState extends State<RegisterScreen> {
 
                                 setState(() => _isLoading = true);
 
-                              final result = await AuthService.customerRegister(
-                                firstName: _firstNameController.text.trim(),
-                                lastName: _lastNameController.text.trim(),
-                                email: _emailController.text.trim(),
-                                password: _passwordController.text.trim(),
-                              );
+                              final result = _selectedRole == 'worker'
+                                  ? await AuthService.workerRegister(
+                                      firstName: _firstNameController.text.trim(),
+                                      lastName: _lastNameController.text.trim(),
+                                      email: _emailController.text.trim(),
+                                      password: _passwordController.text.trim(),
+                                    )
+                                  : await AuthService.customerRegister(
+                                      firstName: _firstNameController.text.trim(),
+                                      lastName: _lastNameController.text.trim(),
+                                      email: _emailController.text.trim(),
+                                      password: _passwordController.text.trim(),
+                                    );
 
                               setState(() => _isLoading = false);
 
@@ -334,6 +349,10 @@ class RegisterScreenState extends State<RegisterScreen> {
                                   Navigator.pushReplacementNamed(
                                     context,
                                     '/verify',
+                                    arguments: {
+                                      'email': _emailController.text.trim(),
+                                      'role': _selectedRole,
+                                    },
                                   );
                                 }
                               } else {
@@ -382,8 +401,9 @@ class RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 40),
 
                     //Sign Up Button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 5,
                       children: [
                         Text(
                           'Already have an account?',
@@ -394,8 +414,6 @@ class RegisterScreenState extends State<RegisterScreen> {
                             color: Colors.black,
                           ),
                         ),
-
-                        const SizedBox(width: 5),
 
                         GestureDetector(
                           onTap: () {

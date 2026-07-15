@@ -48,6 +48,66 @@ class AuthService {
           final token = ResponseHandler.getString(data, 'token');
           if (token.isNotEmpty) {
             await ApiService.saveToken(token, role: 'customer');
+            await ApiService.saveRole('customer');
+          }
+        }
+
+        return {'status': response.statusCode, ...data};
+      } on ApiException catch (e) {
+        return {
+          'status': response.statusCode,
+          'message': 'Failed to parse response: ${e.message}',
+        };
+      }
+    } on AuthException catch (e) {
+      return {'status': e.statusCode ?? 0, 'message': e.message};
+    } catch (e) {
+      return {'status': 0, 'message': 'Registration failed: $e'};
+    }
+  }
+
+  //Worker Register
+  static Future<Map<String, dynamic>> workerRegister({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String password,
+  }) async {
+    //OfflineMode
+    if (AppConfig.offlineMode) {
+      await Future.delayed(Duration(seconds: 5));
+      return MockService.mockRegister();
+    }
+
+    //OnlineMode
+    try {
+      final response = await ApiService.postRequest('worker-auth/register', {
+        'first_name': firstName,
+        'last_name': lastName,
+        'email': email,
+        'password': password,
+        'password_confirmation': password,
+      });
+
+      final contentType = response.headers['content-type'] ?? '';
+
+      if (!contentType.contains('application/json')) {
+        return {
+          'status': response.statusCode,
+          'message':
+              'Server error: received HTML instead of JSON. '
+              'Check if Laravel is running correctly.',
+        };
+      }
+
+      try {
+        final data = ResponseHandler.parseJson(response.body);
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final token = ResponseHandler.getString(data, 'token');
+          if (token.isNotEmpty) {
+            await ApiService.saveToken(token, role: 'worker');
+            await ApiService.saveRole('worker');
           }
         }
 

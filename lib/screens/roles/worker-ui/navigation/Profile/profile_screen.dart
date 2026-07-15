@@ -14,6 +14,7 @@ class WorkerProfileScreen extends StatefulWidget {
 
 class WorkerProfileScreenState extends State<WorkerProfileScreen> {
   Map<String, dynamic>? _worker;
+  int _bookingsCount = 0;
   bool _isLoading = true;
 
   @override
@@ -38,6 +39,7 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
           'profile_photo': null,
           'bio': 'Professional cleaning specialist with 5+ years experience.',
         };
+        _bookingsCount = 24;
         _isLoading = false;
       });
       return;
@@ -52,6 +54,20 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
       });
     } else {
       setState(() => _isLoading = false);
+    }
+
+    final bookingsResponse = await ApiService.getRequest(
+      'bookings/worker',
+      auth: true,
+    );
+    if (!mounted) return;
+    if (bookingsResponse.statusCode == 200) {
+      try {
+        final decoded = jsonDecode(bookingsResponse.body);
+        if (decoded is List) {
+          setState(() => _bookingsCount = decoded.length);
+        }
+      } catch (_) {}
     }
   }
 
@@ -266,6 +282,7 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
               children: [
                 Text(
                   name,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontFamily: 'Montserrat',
                     fontSize: 16,
@@ -274,6 +291,7 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
                 ),
                 Text(
                   email,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Montserrat',
                     fontSize: 12,
@@ -292,6 +310,7 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
                   ),
                   child: Text(
                     category,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: 'Montserrat',
                       fontSize: 11,
@@ -340,11 +359,14 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildStat('Rating', '${_worker?['rating'] ?? 0} ⭐'),
+          _buildStat(
+            'Rating',
+            '${double.tryParse('${_worker?['rating'] ?? 0}')?.toStringAsFixed(1) ?? '0.0'} ⭐',
+          ),
           _buildDivider(),
           _buildStat('Reviews', '${_worker?['review_count'] ?? 0}'),
           _buildDivider(),
-          _buildStat('Bookings', '24'),
+          _buildStat('Bookings', '$_bookingsCount'),
         ],
       ),
     );

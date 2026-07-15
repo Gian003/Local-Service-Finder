@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:lsf/dataset/mock_service.dart';
 import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/models/review_model.dart';
 import 'package:lsf/screens/booking/booking_screen.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/chat/chat_screen.dart';
+import 'package:lsf/services/review_service.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
 
 class ServiceDetailsScreen extends StatefulWidget {
@@ -19,10 +20,29 @@ class ServiceDetailsScreenState extends State<ServiceDetailsScreen>
   late TabController _tabController;
   bool _isBookmarked = false;
 
+  List<ReviewModel> _reviews = [];
+  bool _isLoadingReviews = true;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _loadReviews();
+  }
+
+  Future<void> _loadReviews() async {
+    final workerId = widget.serviceModel.workerId;
+    if (workerId == null) {
+      setState(() => _isLoadingReviews = false);
+      return;
+    }
+
+    final reviews = await ReviewService.getWorkerReviews(workerId);
+    if (!mounted) return;
+    setState(() {
+      _reviews = reviews;
+      _isLoadingReviews = false;
+    });
   }
 
   @override
@@ -435,13 +455,24 @@ class ServiceDetailsScreenState extends State<ServiceDetailsScreen>
 
   // Review Tab
   Widget _buildReviewTab() {
-    final reviews = MockService.getReviews(widget.serviceModel.id ?? 1);
+    if (_isLoadingReviews) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_reviews.isEmpty) {
+      return const Center(
+        child: Text(
+          'No reviews yet.',
+          style: TextStyle(fontFamily: 'Montserrat', color: Colors.grey),
+        ),
+      );
+    }
 
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-      itemCount: reviews.length,
+      itemCount: _reviews.length,
       itemBuilder: (context, index) {
-        final review = reviews[index];
+        final review = _reviews[index];
 
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
@@ -451,7 +482,12 @@ class ServiceDetailsScreenState extends State<ServiceDetailsScreen>
               // User Avatar
               CircleAvatar(
                 radius: 20,
-                backgroundImage: NetworkImage(review['user_image']),
+                backgroundImage: review.userImage != null
+                    ? NetworkImage(review.userImage!)
+                    : null,
+                child: review.userImage == null
+                    ? const Icon(Icons.person, size: 20)
+                    : null,
               ),
 
               const SizedBox(width: 12),
@@ -465,7 +501,7 @@ class ServiceDetailsScreenState extends State<ServiceDetailsScreen>
                       children: [
                         Expanded(
                           child: Text(
-                            review['user_name'],
+                            review.userName,
                             style: const TextStyle(
                               fontFamily: 'Montserrat',
                               fontSize: 14,
@@ -474,14 +510,15 @@ class ServiceDetailsScreenState extends State<ServiceDetailsScreen>
                           ),
                         ),
 
-                        Text(
-                          review['date'].toString(),
-                          style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontSize: 12,
-                            color: Colors.grey[600],
+                        if (review.createdAt != null)
+                          Text(
+                            '${review.createdAt!.year}-${review.createdAt!.month.toString().padLeft(2, '0')}-${review.createdAt!.day.toString().padLeft(2, '0')}',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
                           ),
-                        ),
                       ],
                     ),
 
@@ -491,7 +528,7 @@ class ServiceDetailsScreenState extends State<ServiceDetailsScreen>
                     Row(
                       children: List.generate(5, (index) {
                         return Icon(
-                          index < review['rating'].toInt()
+                          index < review.rating.toInt()
                               ? Icons.star
                               : Icons.star_border,
                           color: Colors.amber,
@@ -500,17 +537,17 @@ class ServiceDetailsScreenState extends State<ServiceDetailsScreen>
                       }),
                     ),
 
-                    const SizedBox(height: 4),
-
-                    // Comment
-                    Text(
-                      review['comment'],
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 13,
-                        color: Colors.grey[700],
+                    if (review.comment != null && review.comment!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        review.comment!,
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 13,
+                          color: Colors.grey[700],
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lsf/config/app_config.dart';
@@ -82,16 +83,26 @@ class ApiService {
     }
   }
 
+  // Every POST carries an idempotency_key so a lost response + automatic
+  // retry (see HttpClient) can't duplicate the side effect server-side.
+  // Callers that already manage their own key (e.g. BookingService.confirmBooking)
+  // are left untouched — this only fills the field in if it's absent.
+  static String _newIdempotencyKey() =>
+      '${DateTime.now().microsecondsSinceEpoch}-${Random().nextInt(1 << 32)}';
+
   static Future<dynamic> postRequest(
     String endpoint,
     Map<String, dynamic> body, {
     bool auth = false,
   }) async {
+    final requestBody = Map<String, dynamic>.from(body);
+    requestBody.putIfAbsent('idempotency_key', _newIdempotencyKey);
+
     try {
       final response = await HttpClient.post(
         Uri.parse('$baseUrl/$endpoint'),
         headers: await _headers(auth: auth),
-        body: jsonEncode(body),
+        body: jsonEncode(requestBody),
       );
       _handleAuthError(response.statusCode);
       return response;

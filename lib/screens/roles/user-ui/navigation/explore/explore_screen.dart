@@ -6,6 +6,7 @@ import 'package:lsf/services/service_services.dart';
 import 'package:lsf/templates/searh_bar.dart';
 import 'package:lsf/templates/service%20card/service_card.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
+import 'package:lsf/widgets/offline_banner.dart';
 
 class ExploreScreen extends StatefulWidget {
   final String? initialCategory;
@@ -23,6 +24,7 @@ class ExploreScreenState extends State<ExploreScreen> {
   List<ServiceModel> _serviceList = [];
   List<ServiceModel> _fullServiceList = [];
   bool _isLoading = true;
+  bool _isShowingCachedData = false;
 
   String _selectedFilter = 'Popular';
   List<String> _selectedCategories = [];
@@ -51,10 +53,11 @@ class ExploreScreenState extends State<ExploreScreen> {
 
   Future<void> _loadServices() async {
     setState(() => _isLoading = true);
-    final services = await ServiceServices.getAllServices();
+    final result = await ServiceServices.getAllServices();
     if (!mounted) return;
     setState(() {
-      _fullServiceList = services;
+      _fullServiceList = result.services;
+      _isShowingCachedData = result.isFromCache;
       _isLoading = false;
     });
     _applyFiltering();
@@ -274,6 +277,11 @@ class ExploreScreenState extends State<ExploreScreen> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
+              if (_isShowingCachedData) ...[
+                const OfflineBanner(),
+                const SizedBox(height: 12),
+              ],
+
               Center(
                 child: Text(
                   'Explore',
@@ -285,7 +293,7 @@ class ExploreScreenState extends State<ExploreScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 48),
+              const SizedBox(height: 15),
 
               _buildSearchBar(),
 

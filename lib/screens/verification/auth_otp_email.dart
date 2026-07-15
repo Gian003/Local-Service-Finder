@@ -21,6 +21,7 @@ class AuthOtpEmailState extends State<AuthOtpEmail> {
 
   String _userEmail = '';
   String _userPassword = '';
+  String _userRole = 'customer';
   Map<String, dynamic> _userData = {};
   String _maskedContactInfo = '';
 
@@ -50,6 +51,9 @@ class AuthOtpEmailState extends State<AuthOtpEmail> {
 
     try {
       final Map<String, dynamic> dynamicArgs = args as Map<String, dynamic>;
+
+      _userEmail = dynamicArgs['email']?.toString() ?? '';
+      _userRole = dynamicArgs['role']?.toString() ?? 'customer';
 
       if (kDebugMode) {
         debugPrint('== DEBUG: Arguments received in AuthOtpEmail');
@@ -185,8 +189,7 @@ class AuthOtpEmailState extends State<AuthOtpEmail> {
 
         Navigator.pushReplacementNamed(
           context,
-          '/home',
-
+          _userRole == 'worker' ? '/worker-home' : '/home',
           arguments: {'email': _userEmail},
         );
       } else {

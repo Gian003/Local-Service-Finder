@@ -25,7 +25,7 @@ class BookmarkCard extends StatelessWidget {
   String get _dateLabel {
     switch (bookmark.status) {
       case 'completed':
-        return 'Upcoming on ${bookmark.date.day}/${bookmark.date.month}/${bookmark.date.year}';
+        return 'Completed on ${bookmark.date.day}/${bookmark.date.month}/${bookmark.date.year}';
       case 'pending':
         return 'Upcoming on ${bookmark.date.day}/${bookmark.date.month}/${bookmark.date.year}';
       case 'cancelled':

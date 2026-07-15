@@ -80,7 +80,12 @@ class _TrackingScreenState extends State<TrackingScreen> {
           ),
 
           // Bottom worker card
-          Positioned(bottom: 0, left: 0, right: 0, child: _buildWorkerCard()),
+          Positioned(
+            bottom: MediaQuery.of(context).padding.bottom,
+            left: 0,
+            right: 0,
+            child: _buildWorkerCard(),
+          ),
         ],
       ),
     );

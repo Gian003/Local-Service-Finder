@@ -203,7 +203,11 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
           },
         );
       },
-    );
+    ).then((_) {
+      titleController.dispose();
+      priceController.dispose();
+      descriptionController.dispose();
+    });
   }
 
   void _deleteService(ServiceModel service) {
@@ -381,6 +385,8 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
               children: [
                 Text(
                   service.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontFamily: 'Montserrat',
                     fontWeight: FontWeight.bold,
@@ -389,6 +395,8 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
                 ),
                 Text(
                   service.category ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Montserrat',
                     fontSize: 12,

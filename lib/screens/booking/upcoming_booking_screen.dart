@@ -185,8 +185,8 @@ class _UpcomingBookingScreenState extends State<UpcomingBookingScreen> {
             children: [
               Expanded(
                 child: _buildDetailItem(
-                  label: 'Selected',
-                  value: 'Full Home Cleaning',
+                  label: 'Provider',
+                  value: widget.booking.workerName,
                 ),
               ),
               Expanded(
