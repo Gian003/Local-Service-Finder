@@ -12,6 +12,7 @@ class ServiceModel {
   final String? category;
   final String? description;
   final List<String>? galleryImages;
+  final String? videoUrl;
   final int? workerId;
   final String? workerImage;
 
@@ -27,6 +28,7 @@ class ServiceModel {
     this.category,
     this.description,
     this.galleryImages,
+    this.videoUrl,
     this.workerId,
     this.workerImage,
   });
@@ -60,6 +62,7 @@ class ServiceModel {
       workerId: TypeConverter.toInt(json['worker_id']),
       workerImage: worker?['profile_photo']?.toString(),
       galleryImages: gallery.isNotEmpty ? gallery : null,
+      videoUrl: json['video_url']?.toString(),
     );
   }
 }

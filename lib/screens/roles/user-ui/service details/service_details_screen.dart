@@ -5,6 +5,8 @@ import 'package:lsf/screens/booking/booking_screen.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/chat/chat_screen.dart';
 import 'package:lsf/services/review_service.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
+import 'package:lsf/utils/image_helper.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ServiceDetailsScreen extends StatefulWidget {
   final ServiceModel serviceModel;
@@ -49,6 +51,22 @@ class ServiceDetailsScreenState extends State<ServiceDetailsScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> _openDemoVideo() async {
+    final url = widget.serviceModel.videoUrl;
+    if (url == null) return;
+
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final uri = Uri.tryParse(url);
+    final launched = uri != null &&
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+
+    if (!launched && mounted) {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Could not open the demo video')),
+      );
+    }
   }
 
   @override
@@ -107,10 +125,21 @@ class ServiceDetailsScreenState extends State<ServiceDetailsScreen>
                     fit: StackFit.expand,
                     children: [
                       // Main Image
-                      Image.network(
-                        widget.serviceModel.imageUrl,
-                        fit: BoxFit.cover,
-                      ),
+                      if (widget.serviceModel.imageUrl.isNotEmpty)
+                        Image.network(
+                          widget.serviceModel.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: Colors.grey[200],
+                            child: const Icon(Icons.image_not_supported,
+                                color: Colors.grey, size: 48),
+                          ),
+                        )
+                      else
+                        Container(
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.build, color: Colors.grey, size: 48),
+                        ),
 
                       // Dark Overlay
                       Container(
@@ -126,41 +155,44 @@ class ServiceDetailsScreenState extends State<ServiceDetailsScreen>
                         ),
                       ),
 
-                      // Demo Video
-                      Center(
-                        child: GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.6),
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.play_circle_fill,
-                                  color: Colors.white,
-                                  size: 28,
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Demo Video',
-                                  style: TextStyle(
-                                    fontFamily: 'Montserrat',
+                      // Demo Video — only shown when the worker has actually
+                      // uploaded one; opens externally rather than an
+                      // in-app player, which this app doesn't have.
+                      if (widget.serviceModel.videoUrl != null)
+                        Center(
+                          child: GestureDetector(
+                            onTap: _openDemoVideo,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.6),
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.play_circle_fill,
                                     color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                                    size: 28,
                                   ),
-                                ),
-                              ],
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Demo Video',
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
                       Positioned(
                         bottom: 10,
@@ -343,11 +375,10 @@ class ServiceDetailsScreenState extends State<ServiceDetailsScreen>
               // Avatar
               CircleAvatar(
                 radius: 25,
-                backgroundImage: widget.serviceModel.workerImage != null
-                    ? NetworkImage(widget.serviceModel.workerImage!)
-                    : null,
+                backgroundImage: safeNetworkImage(widget.serviceModel.workerImage),
                 backgroundColor: Colors.grey[200],
-                child: widget.serviceModel.workerImage == null
+                child: (widget.serviceModel.workerImage == null ||
+                        widget.serviceModel.workerImage!.isEmpty)
                     ? const Icon(Icons.person)
                     : null,
               ),
@@ -482,10 +513,8 @@ class ServiceDetailsScreenState extends State<ServiceDetailsScreen>
               // User Avatar
               CircleAvatar(
                 radius: 20,
-                backgroundImage: review.userImage != null
-                    ? NetworkImage(review.userImage!)
-                    : null,
-                child: review.userImage == null
+                backgroundImage: safeNetworkImage(review.userImage),
+                child: (review.userImage == null || review.userImage!.isEmpty)
                     ? const Icon(Icons.person, size: 20)
                     : null,
               ),

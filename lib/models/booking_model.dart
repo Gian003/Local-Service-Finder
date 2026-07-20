@@ -3,6 +3,7 @@ import 'package:lsf/services/type_converter.dart';
 class BookingModel {
   final int id;
   final String serviceName;
+  final String? category;
   final String workerName;
   final String? workerImage;
   final String date;
@@ -17,6 +18,7 @@ class BookingModel {
   const BookingModel({
     required this.id,
     required this.serviceName,
+    this.category,
     required this.workerName,
     this.workerImage,
     required this.date,
@@ -40,6 +42,7 @@ class BookingModel {
     return BookingModel(
       id: TypeConverter.toInt(json['id']),
       serviceName: json['service']?['title']?.toString() ?? '',
+      category: json['service']?['category']?.toString(),
       workerName: '${json['worker']?['first_name'] ?? ''} ${json['worker']?['last_name'] ?? ''}'.trim(),
       workerImage: json['worker']?['profile_photo']?.toString(),
       date: date,

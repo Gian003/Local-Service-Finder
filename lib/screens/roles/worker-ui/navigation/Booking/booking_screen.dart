@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/services/api_service.dart';
 import 'package:lsf/services/worker_location_service.dart';
+import 'package:lsf/utils/image_helper.dart';
 
 class WorkerBookingsScreen extends StatefulWidget {
   const WorkerBookingsScreen({super.key});
@@ -48,9 +50,20 @@ class WorkerBookingsScreenState extends State<WorkerBookingsScreen> {
   // covers both resuming after the app restarts with a job already accepted,
   // and starting/stopping right as accept/complete/reject happen below.
   void _syncLocationTracking() {
-    final hasActiveJob = _bookings.any((b) => b['status'] == 'accepted');
-    if (hasActiveJob) {
-      WorkerLocationService.start();
+    Map<String, dynamic>? activeJob;
+    for (final b in _bookings) {
+      if (b['status'] == 'accepted') {
+        activeJob = b;
+        break;
+      }
+    }
+
+    if (activeJob != null) {
+      final lat = double.tryParse(activeJob['latitude']?.toString() ?? '');
+      final lng = double.tryParse(activeJob['longitude']?.toString() ?? '');
+      WorkerLocationService.start(
+        destination: (lat != null && lng != null) ? LatLng(lat, lng) : null,
+      );
     } else {
       WorkerLocationService.stop();
     }
@@ -217,11 +230,10 @@ class WorkerBookingsScreenState extends State<WorkerBookingsScreen> {
           Row(
             children: [
               CircleAvatar(
-                backgroundImage:
-                    imageUrl != null ? NetworkImage(imageUrl) : null,
+                backgroundImage: safeNetworkImage(imageUrl),
                 backgroundColor: Colors.grey[200],
                 radius: 25,
-                child: imageUrl == null
+                child: (imageUrl == null || imageUrl.isEmpty)
                     ? const Icon(Icons.person, color: Colors.grey)
                     : null,
               ),

@@ -9,6 +9,7 @@ import 'package:lsf/screens/roles/user-ui/navigation/chat/chat_screen.dart';
 import 'package:lsf/screens/roles/user-ui/service%20details/service_details_screen.dart';
 import 'package:lsf/services/api_service.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
+import 'package:lsf/utils/image_helper.dart';
 import 'package:lsf/widgets/app_map.dart';
 
 class TrackingScreen extends StatefulWidget {
@@ -176,11 +177,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
               // Worker avatar
               CircleAvatar(
                 radius: 28,
-                backgroundImage: widget.booking.workerImage != null
-                    ? NetworkImage(widget.booking.workerImage!)
-                    : null,
+                backgroundImage: safeNetworkImage(widget.booking.workerImage),
                 backgroundColor: Colors.grey[200],
-                child: widget.booking.workerImage == null
+                child: (widget.booking.workerImage == null ||
+                        widget.booking.workerImage!.isEmpty)
                     ? const Icon(Icons.person, size: 28)
                     : null,
               ),

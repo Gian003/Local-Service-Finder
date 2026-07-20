@@ -7,6 +7,7 @@ import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/chat/chat_service.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/chat/message_model.dart';
 import 'package:lsf/services/api_service.dart';
+import 'package:lsf/utils/image_helper.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -213,10 +214,8 @@ class _ChatScreenState extends State<ChatScreen> {
             // Worker avatar
             CircleAvatar(
               radius: 18,
-              backgroundImage: widget.workerImage != null
-                  ? NetworkImage(widget.workerImage!)
-                  : null,
-              child: widget.workerImage == null
+              backgroundImage: safeNetworkImage(widget.workerImage),
+              child: (widget.workerImage == null || widget.workerImage!.isEmpty)
                   ? const Icon(Icons.person)
                   : null,
             ),

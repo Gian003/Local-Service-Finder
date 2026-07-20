@@ -4,6 +4,7 @@ import 'package:lsf/screens/roles/user-ui/navigation/chat/chat_service.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/chat/message_model.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/chat/chat_screen.dart';
 import 'package:lsf/global%20variable/colors.dart';
+import 'package:lsf/utils/image_helper.dart';
 
 class ConversationListScreen extends StatefulWidget {
   const ConversationListScreen({super.key});
@@ -136,7 +137,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         children: [
           CircleAvatar(
             radius: 25,
-            backgroundImage: NetworkImage(data['image']),
+            backgroundImage: safeNetworkImage(data['image'] as String?),
           ),
           // Online indicator
           Positioned(
@@ -231,8 +232,10 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         );
       },
       leading: CircleAvatar(
-        backgroundImage: workerPhoto != null ? NetworkImage(workerPhoto) : null,
-        child: workerPhoto == null ? const Icon(Icons.person) : null,
+        backgroundImage: safeNetworkImage(workerPhoto),
+        child: (workerPhoto == null || workerPhoto.isEmpty)
+            ? const Icon(Icons.person)
+            : null,
       ),
       title: Text(
         workerName,

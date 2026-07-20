@@ -210,11 +210,13 @@ class BookmarkScreenState extends State<BookmarkScreen> {
           final booking = bookings[index];
           final bookmark = BookmarkModel(
             id: booking.id,
-            serviceType: 'Service',
+            serviceType: booking.category ?? 'Service',
             serviceName: booking.serviceName,
             providerName: booking.workerName,
             imageUrl: booking.workerImage ?? '',
-            date: DateTime.now(),
+            date: DateTime.tryParse(booking.date),
+            time: booking.time,
+            price: booking.totalPrice,
             status: booking.status,
           );
 

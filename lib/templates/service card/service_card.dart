@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/screens/roles/user-ui/service%20details/service_details_screen.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
@@ -45,12 +44,25 @@ class ServiceCard extends StatelessWidget {
                 left: Radius.circular(10),
                 right: Radius.circular(10),
               ),
-              child: Image.network(
-                serviceModel.imageUrl,
-                width: 70,
-                height: 90,
-                fit: BoxFit.cover,
-              ),
+              child: serviceModel.imageUrl.isNotEmpty
+                  ? Image.network(
+                      serviceModel.imageUrl,
+                      width: 70,
+                      height: 90,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        width: 70,
+                        height: 90,
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                      ),
+                    )
+                  : Container(
+                      width: 70,
+                      height: 90,
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.build, color: Colors.grey),
+                    ),
             ),
 
             const SizedBox(width: 10),
@@ -92,12 +104,16 @@ class ServiceCard extends StatelessWidget {
 
                       const SizedBox(width: 5),
 
-                      Text(
-                        '${serviceModel.rating} (${serviceModel.reviewCount} Reviews)',
-                        style: TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 15,
-                          fontWeight: FontWeight.normal,
+                      Flexible(
+                        child: Text(
+                          '${serviceModel.rating} (${serviceModel.reviewCount} Reviews)',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 15,
+                            fontWeight: FontWeight.normal,
+                          ),
                         ),
                       ),
                     ],
@@ -117,43 +133,50 @@ class ServiceCard extends StatelessWidget {
               ),
             ),
 
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                IconButton(
-                  onPressed: onBookMark,
-                  icon: Icon(Icons.bookmark_add, size: 30),
-                ),
-
-                const SizedBox(height: 25),
-
-                if (serviceModel.discountPercent != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryColor,
-                      borderRadius: BorderRadius.horizontal(
-                        left: Radius.circular(5),
-                        right: Radius.circular(5),
-                      ),
-                    ),
-
-                    child: Text(
-                      '${serviceModel.discountPercent!.toInt()}% Off',
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 15,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.white,
-                      ),
-                    ),
+            // Fixed width — without this, the column's natural size grows
+            // or shrinks with the discount text ("5% Off" vs "100% Off"),
+            // and once that plus the rest of the row exceeds the card's
+            // width, the Row overflows. The amount varies by item, which is
+            // exactly what showed up as inconsistent overflow while scrolling.
+            SizedBox(
+              width: 64,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: onBookMark,
+                    icon: Icon(Icons.bookmark_add, size: 28),
                   ),
-              ],
+
+                  const SizedBox(height: 25),
+
+                  if (serviceModel.discountPercent != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryColor,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        '${serviceModel.discountPercent!.toInt()}% Off',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ],
         ),

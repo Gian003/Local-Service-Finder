@@ -35,6 +35,43 @@ class BookingService {
     }
   }
 
+  // Demo path for presentations: asks the backend to create AND immediately
+  // confirm the PaymentIntent using Stripe's built-in test card token, so
+  // there's a genuine 'succeeded' charge to show confirmBooking() verifying
+  // — without ever presenting Stripe's hosted payment sheet. Only works
+  // against a test-mode secret key; see PaymentController::createPaymentIntent.
+  static Future<String?> createDemoConfirmedPaymentIntent({
+    required int serviceId,
+  }) async {
+    try {
+      final response = await ApiService.postRequest('payment/intent', {
+        'service_id': serviceId,
+        'demo_card': true,
+      }, auth: true);
+
+      if (response.statusCode == 200) {
+        try {
+          final data = ResponseHandler.parseJson(response.body);
+          final status = ResponseHandler.getString(data, 'status');
+          if (status != 'succeeded') return null;
+          final paymentIntentId =
+              ResponseHandler.getString(data, 'payment_intent_id');
+          return paymentIntentId.isNotEmpty ? paymentIntentId : null;
+        } on ApiException catch (e) {
+          debugPrint('Parse error: ${e.message}');
+          return null;
+        }
+      }
+      return null;
+    } on AuthException catch (e) {
+      debugPrint('Auth error: ${e.message}');
+      return null;
+    } catch (e) {
+      debugPrint('Demo payment intent creation failed: $e');
+      return null;
+    }
+  }
+
   // Step 2: Process Stripe payment. Returns the underlying PaymentIntent id
   // on success — the server needs this to verify the charge in confirmBooking
   // rather than just trusting that the app called it. Returns null if the
@@ -64,8 +101,10 @@ class BookingService {
   // Step 3: Confirm booking in database. ApiService.postRequest attaches an
   // idempotency_key automatically — see its doc comment — which the server
   // uses to recognize "same attempt, response got lost" and return the
-  // already-created booking instead of creating a duplicate.
-  static Future<bool> confirmBooking({
+  // already-created booking instead of creating a duplicate. Returns the
+  // created booking (so the confirmation UI can show a real reference
+  // number) or null on failure.
+  static Future<Map<String, dynamic>?> confirmBooking({
     required int serviceId,
     required int workerId,
     required int addressId,
@@ -86,16 +125,22 @@ class BookingService {
       }, auth: true);
 
       if (response.statusCode == 201) {
-        return true;
+        try {
+          final data = ResponseHandler.parseJson(response.body);
+          return data['booking'] as Map<String, dynamic>?;
+        } on ApiException catch (e) {
+          debugPrint('Parse error: ${e.message}');
+          return null;
+        }
       }
 
-      return false;
+      return null;
     } on AuthException catch (e) {
       debugPrint('Auth error: ${e.message}');
-      return false;
+      return null;
     } catch (e) {
       debugPrint('Booking confirmation failed: $e');
-      return false;
+      return null;
     }
   }
 }

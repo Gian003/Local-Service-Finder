@@ -1,8 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart' hide ImageInfo;
+import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lsf/dataset/mock_service.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/bookmark/bookmark_screen.dart';
 import 'package:lsf/screens/roles/user-ui/navigation/home/notification/notification_screen.dart';
@@ -33,12 +32,22 @@ class _HomeScreenState extends State<HomeScreen> {
   );
   Timer? _autoScrollTimer;
   int _currentCarouselIndex = 0;
-  final int _carouselItemCount = ImageInfo.values.length;
 
   //Service List
   List<ServiceModel> _serviceList = [];
   bool _isLoading = true;
   bool _isShowingCachedData = false;
+
+  // Promo carousel is built from real services rather than static content —
+  // discounted ones first since those are what's actually worth advertising;
+  // fall back to whatever's available so the carousel isn't empty on a
+  // fresh/test database with no discounts configured yet.
+  List<ServiceModel> get _promoServices {
+    final discounted = _serviceList
+        .where((s) => (s.discountPercent ?? 0) > 0)
+        .toList();
+    return discounted.isNotEmpty ? discounted : _serviceList.take(5).toList();
+  }
 
   Future<void> _loadServices() async {
     final result = await ServiceServices.getAllServices();
@@ -60,12 +69,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _startAutoScroll() {
     _autoScrollTimer?.cancel();
-    _autoScrollTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
       if (!mounted) return;
 
+      final count = _promoServices.length;
+      if (count == 0) return;
+
       if (_carouselController.hasClients) {
-        _currentCarouselIndex =
-            (_currentCarouselIndex + 1) % _carouselItemCount;
+        _currentCarouselIndex = (_currentCarouselIndex + 1) % count;
         _carouselController.animateToItem(_currentCarouselIndex);
       }
     });
@@ -181,27 +192,42 @@ class _HomeScreenState extends State<HomeScreen> {
               //Body
 
               //Carousel View
-              SizedBox(
-                height: 200,
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (notification) {
-                    if (notification is ScrollStartNotification) {
-                      _autoScrollTimer?.cancel();
-                    } else if (notification is ScrollEndNotification) {
-                      _startAutoScroll();
-                    }
-                    return false;
-                  },
-                  child: CarouselView.weighted(
-                    controller: _carouselController,
-                    itemSnapping: true,
-                    flexWeights: const <int>[7],
-                    children: ImageInfo.values.map((ImageInfo image) {
-                      return HeroLayoutCard(imageInfo: image);
-                    }).toList(),
+              if (_isLoading)
+                const SizedBox(
+                  height: 200,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (_promoServices.isNotEmpty)
+                SizedBox(
+                  height: 200,
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification is ScrollStartNotification) {
+                        _autoScrollTimer?.cancel();
+                      } else if (notification is ScrollEndNotification) {
+                        _startAutoScroll();
+                      }
+                      return false;
+                    },
+                    child: CarouselView.weighted(
+                      controller: _carouselController,
+                      itemSnapping: true,
+                      flexWeights: const <int>[7],
+                      children: _promoServices.map((service) {
+                        return PromoCard(
+                          service: service,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ServiceDetailsScreen(serviceModel: service),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ),
-              ),
 
               const SizedBox(height: 20),
 

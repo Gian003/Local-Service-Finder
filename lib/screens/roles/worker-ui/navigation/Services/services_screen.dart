@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/services/api_service.dart';
 import 'package:lsf/templates/service%20card/service_model.dart';
@@ -15,6 +17,7 @@ class WorkerServicesScreen extends StatefulWidget {
 class WorkerServicesScreenState extends State<WorkerServicesScreen> {
   List<ServiceModel> _services = [];
   bool _isLoading = true;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -46,13 +49,23 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
     }
   }
 
-  void _showAddServiceSheet() {
-    // Capture before async gaps inside the sheet callbacks
+  // Shared sheet for both adding a new service and editing an existing one —
+  // pass [existing] to pre-fill the form and PATCH it instead of creating.
+  void _showServiceFormSheet({ServiceModel? existing}) {
+    final isEditing = existing != null;
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final titleController = TextEditingController();
-    final priceController = TextEditingController();
-    final descriptionController = TextEditingController();
-    String selectedCategory = 'cleaning';
+    final titleController = TextEditingController(text: existing?.title);
+    final priceController = TextEditingController(
+      text: existing != null ? existing.price.toStringAsFixed(0) : '',
+    );
+    final descriptionController =
+        TextEditingController(text: existing?.description);
+    String selectedCategory = existing?.category ?? 'cleaning';
+
+    File? coverImageFile;
+    List<File> galleryFiles = [];
+    File? videoFile;
+    bool isSaving = false;
 
     showModalBottomSheet(
       context: context,
@@ -63,6 +76,90 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
       builder: (modalContext) {
         return StatefulBuilder(
           builder: (modalContext, setModalState) {
+            Future<void> pickCover() async {
+              final picked =
+                  await _picker.pickImage(source: ImageSource.gallery);
+              if (picked != null) {
+                setModalState(() => coverImageFile = File(picked.path));
+              }
+            }
+
+            Future<void> pickGallery() async {
+              final picked = await _picker.pickMultiImage();
+              if (picked.isNotEmpty) {
+                setModalState(
+                  () => galleryFiles = picked.map((x) => File(x.path)).toList(),
+                );
+              }
+            }
+
+            Future<void> pickVideo() async {
+              final picked =
+                  await _picker.pickVideo(source: ImageSource.gallery);
+              if (picked != null) {
+                setModalState(() => videoFile = File(picked.path));
+              }
+            }
+
+            Future<void> submit() async {
+              if (titleController.text.isEmpty ||
+                  priceController.text.isEmpty) {
+                return;
+              }
+
+              setModalState(() => isSaving = true);
+              final modalNavigator = Navigator.of(modalContext);
+
+              final fields = {
+                'title': titleController.text.trim(),
+                'price': (double.tryParse(priceController.text) ?? 0)
+                    .toString(),
+                'description': descriptionController.text.trim(),
+                'category': selectedCategory,
+              };
+
+              try {
+                final response = await ApiService.multipartRequest(
+                  isEditing
+                      ? 'worker-auth/my-services/${existing.id}'
+                      : 'worker-auth/my-services',
+                  fields: fields,
+                  coverImage: coverImageFile,
+                  galleryImages: galleryFiles.isNotEmpty ? galleryFiles : null,
+                  video: videoFile,
+                  auth: true,
+                );
+
+                if (!mounted) return;
+
+                final ok = isEditing
+                    ? response.statusCode == 200
+                    : response.statusCode == 201;
+
+                if (ok) {
+                  modalNavigator.pop();
+                  _fetchServices();
+                } else {
+                  setModalState(() => isSaving = false);
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        isEditing
+                            ? 'Failed to update service'
+                            : 'Failed to add service',
+                      ),
+                    ),
+                  );
+                }
+              } catch (_) {
+                if (!mounted) return;
+                setModalState(() => isSaving = false);
+                scaffoldMessenger.showSnackBar(
+                  const SnackBar(content: Text('Network error, please try again')),
+                );
+              }
+            }
+
             return Padding(
               padding: EdgeInsets.only(
                 left: 20,
@@ -70,134 +167,271 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
                 top: 20,
                 bottom: MediaQuery.of(modalContext).viewInsets.bottom + 20,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Add New Service',
-                    style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  TextField(
-                    controller: titleController,
-                    decoration: InputDecoration(
-                      labelText: 'Service Title',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isEditing ? 'Edit Service' : 'Add New Service',
+                      style: const TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 16),
 
-                  TextField(
-                    controller: priceController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Price (₱)',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    // Cover photo
+                    Text(
+                      'Cover Photo',
+                      style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[700],
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  TextField(
-                    controller: descriptionController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: pickCover,
+                      child: Container(
+                        width: double.infinity,
+                        height: 130,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: coverImageFile != null
+                            ? Image.file(coverImageFile!, fit: BoxFit.cover)
+                            : (existing?.imageUrl.isNotEmpty ?? false)
+                                ? Image.network(
+                                    existing!.imageUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) =>
+                                        _pickerPlaceholder('Tap to add a cover photo'),
+                                  )
+                                : _pickerPlaceholder('Tap to add a cover photo'),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 16),
 
-                  DropdownButtonFormField<String>(
-                    initialValue: selectedCategory,
-                    decoration: InputDecoration(
-                      labelText: 'Category',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    // Gallery photos
+                    Text(
+                      'Gallery Photos',
+                      style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[700],
                       ),
                     ),
-                    items:
-                        ['cleaning', 'plumbing', 'repair', 'roofing', 'electrical']
-                            .map((cat) => DropdownMenuItem(
-                                  value: cat,
-                                  child: Text(cat),
-                                ))
-                            .toList(),
-                    onChanged: (val) {
-                      if (val != null) {
-                        setModalState(() => selectedCategory = val);
-                      }
-                    },
-                  ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 76,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          GestureDetector(
+                            onTap: pickGallery,
+                            child: Container(
+                              width: 76,
+                              height: 76,
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[100],
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: Icon(Icons.add_photo_alternate_outlined,
+                                  color: Colors.grey[500]),
+                            ),
+                          ),
+                          if (galleryFiles.isNotEmpty)
+                            ...galleryFiles.map(
+                              (file) => ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Container(
+                                  width: 76,
+                                  height: 76,
+                                  margin: const EdgeInsets.only(right: 8),
+                                  child: Image.file(file, fit: BoxFit.cover),
+                                ),
+                              ),
+                            )
+                          else if (existing?.galleryImages?.isNotEmpty ?? false)
+                            ...existing!.galleryImages!.map(
+                              (url) => ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Container(
+                                  width: 76,
+                                  height: 76,
+                                  margin: const EdgeInsets.only(right: 8),
+                                  child: Image.network(url, fit: BoxFit.cover),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (galleryFiles.isEmpty &&
+                        (existing?.galleryImages?.isNotEmpty ?? false))
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          'Adding new photos replaces the current gallery.',
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 11,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 16),
 
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        if (titleController.text.isEmpty ||
-                            priceController.text.isEmpty) {
-                          return;
-                        }
+                    // Demo video
+                    Text(
+                      'Demo Video',
+                      style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: pickVideo,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.videocam_outlined, color: Colors.grey[600]),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                videoFile != null
+                                    ? videoFile!.path.split(Platform.pathSeparator).last
+                                    : (existing?.videoUrl != null
+                                        ? 'Video already added — tap to replace'
+                                        : 'Tap to add a demo video'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontFamily: 'Montserrat',
+                                  fontSize: 13,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
 
-                        Navigator.pop(modalContext);
+                    const SizedBox(height: 16),
 
-                        final response = await ApiService.postRequest(
-                          'worker-auth/my-services',
-                          {
-                            'title': titleController.text.trim(),
-                            'price':
-                                double.tryParse(priceController.text) ?? 0,
-                            'description': descriptionController.text.trim(),
-                            'category': selectedCategory,
-                          },
-                          auth: true,
-                        );
-
-                        if (!mounted) return;
-                        if (response.statusCode == 201) {
-                          _fetchServices();
-                        } else {
-                          scaffoldMessenger.showSnackBar(
-                            const SnackBar(
-                                content: Text('Failed to add service')),
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryColor,
-                        shape: RoundedRectangleBorder(
+                    TextField(
+                      controller: titleController,
+                      decoration: InputDecoration(
+                        labelText: 'Service Title',
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      child: const Text(
-                        'Add Service',
-                        style: TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: priceController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Price (₱)',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: descriptionController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        labelText: 'Description',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedCategory,
+                      decoration: InputDecoration(
+                        labelText: 'Category',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      items: ['cleaning', 'plumbing', 'repair', 'roofing', 'electrical']
+                          .map((cat) => DropdownMenuItem(
+                                value: cat,
+                                child: Text(cat),
+                              ))
+                          .toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setModalState(() => selectedCategory = val);
+                        }
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: isSaving ? null : submit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: isSaving
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                isEditing ? 'Save Changes' : 'Add Service',
+                                style: const TextStyle(
+                                  fontFamily: 'Montserrat',
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -208,6 +442,26 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
       priceController.dispose();
       descriptionController.dispose();
     });
+  }
+
+  Widget _pickerPlaceholder(String label) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.add_a_photo_outlined, color: Colors.grey[400], size: 28),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'Montserrat',
+              fontSize: 12,
+              color: Colors.grey[500],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _deleteService(ServiceModel service) {
@@ -278,7 +532,7 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
                   ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: _showAddServiceSheet,
+                  onPressed: () => _showServiceFormSheet(),
                   icon: const Icon(Icons.add, color: Colors.white, size: 18),
                   label: const Text(
                     'Add',
@@ -418,7 +672,7 @@ class WorkerServicesScreenState extends State<WorkerServicesScreen> {
           Column(
             children: [
               IconButton(
-                onPressed: () {},
+                onPressed: () => _showServiceFormSheet(existing: service),
                 icon: const Icon(Icons.edit_outlined, size: 20),
                 color: Colors.grey,
               ),

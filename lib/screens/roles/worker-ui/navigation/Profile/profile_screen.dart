@@ -4,6 +4,7 @@ import 'package:lsf/config/app_config.dart';
 import 'package:lsf/global%20variable/colors.dart';
 import 'package:lsf/services/api_service.dart';
 import 'package:lsf/services/auth_service.dart';
+import 'package:lsf/utils/image_helper.dart';
 
 class WorkerProfileScreen extends StatefulWidget {
   const WorkerProfileScreen({super.key});
@@ -244,9 +245,9 @@ class WorkerProfileScreenState extends State<WorkerProfileScreen> {
             children: [
               CircleAvatar(
                 radius: 35,
-                backgroundImage: photo != null ? NetworkImage(photo) : null,
+                backgroundImage: safeNetworkImage(photo),
                 backgroundColor: Colors.grey[200],
-                child: photo == null
+                child: (photo == null || photo.isEmpty)
                     ? Text(
                         name.isNotEmpty ? name[0].toUpperCase() : 'W',
                         style: TextStyle(

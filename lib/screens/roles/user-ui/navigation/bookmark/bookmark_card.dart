@@ -13,26 +13,44 @@ class BookmarkCard extends StatelessWidget {
       case 'completed':
         return Colors.green;
       case 'pending':
+      case 'accepted':
         return Colors.orange;
       case 'cancelled':
+      case 'rejected':
         return Colors.red;
       default:
         return Colors.grey;
     }
   }
 
+  String get _statusLabel {
+    if (bookmark.status.isEmpty) return 'Unknown';
+    return bookmark.status[0].toUpperCase() + bookmark.status.substring(1);
+  }
+
   //Date label per status
   String get _dateLabel {
+    final date = bookmark.date;
+    if (date == null) return 'Date unavailable';
+
+    final formatted = '${date.day}/${date.month}/${date.year}'
+        '${bookmark.time.isNotEmpty ? ' · ${bookmark.time}' : ''}';
+
     switch (bookmark.status) {
       case 'completed':
-        return 'Completed on ${bookmark.date.day}/${bookmark.date.month}/${bookmark.date.year}';
-      case 'pending':
-        return 'Upcoming on ${bookmark.date.day}/${bookmark.date.month}/${bookmark.date.year}';
+        return 'Completed on $formatted';
       case 'cancelled':
-        return 'Cancelled on ${bookmark.date.day}/${bookmark.date.month}/${bookmark.date.year}';
+      case 'rejected':
+        return 'Cancelled on $formatted';
       default:
-        return bookmark.date.toString();
+        return 'Scheduled for $formatted';
     }
+  }
+
+  String get _categoryLabel {
+    final type = bookmark.serviceType;
+    if (type.isEmpty) return 'Service';
+    return type[0].toUpperCase() + type.substring(1);
   }
 
   @override
@@ -40,30 +58,36 @@ class BookmarkCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.horizontal(
-            left: Radius.circular(12),
-            right: Radius.circular(12),
-          ),
-          
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             //Image
             ClipRRect(
-              borderRadius: BorderRadius.horizontal(
-                left: Radius.circular(12),
-                right: Radius.circular(12),
-              ),
-              child: Image.network(
-                bookmark.imageUrl,
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-              ),
+              borderRadius: BorderRadius.circular(12),
+              child: bookmark.imageUrl.isNotEmpty
+                  ? Image.network(
+                      bookmark.imageUrl,
+                      width: 84,
+                      height: 84,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          _imageFallback(),
+                    )
+                  : _imageFallback(),
             ),
 
             const SizedBox(width: 12),
@@ -73,40 +97,70 @@ class BookmarkCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          bookmark.serviceName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _statusColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          _statusLabel,
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: _statusColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 3),
+
                   Text(
-                    bookmark.serviceType,
+                    _categoryLabel,
                     style: TextStyle(
                       fontFamily: 'Montserrat',
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
                       color: AppColors.secondaryColor,
                     ),
                   ),
 
-                  Text(
-                    bookmark.serviceName,
-                    style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontSize: 15,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 6),
 
                   RichText(
                     text: TextSpan(
                       style: TextStyle(fontFamily: 'Montserrat', fontSize: 11),
                       children: [
                         TextSpan(
-                          text: 'Service Provider: ',
+                          text: 'Provider: ',
                           style: TextStyle(color: Colors.grey[600]),
                         ),
                         TextSpan(
                           text: bookmark.providerName,
                           style: TextStyle(
-                            color: AppColors.secondaryColor,
+                            color: Colors.black87,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -114,15 +168,33 @@ class BookmarkCard extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
 
-                  Text(
-                    _dateLabel,
-                    style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontSize: 11,
-                      color: _statusColor,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _dateLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 11,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ),
+                      if (bookmark.price > 0)
+                        Text(
+                          '₱${bookmark.price.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),
@@ -130,6 +202,15 @@ class BookmarkCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _imageFallback() {
+    return Container(
+      width: 84,
+      height: 84,
+      color: Colors.grey.shade100,
+      child: Icon(Icons.home_repair_service, color: Colors.grey.shade400, size: 32),
     );
   }
 }

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 import 'package:lsf/config/app_config.dart';
 import 'package:lsf/services/navigation_service.dart';
 import 'http_client.dart';
@@ -62,6 +64,22 @@ class ApiService {
   static Future<void> clearRole() => _locked(() => _storage.delete(key: 'role'));
 
   static Future<void> clearAll() => _locked(() => _storage.deleteAll());
+
+  // ── First-run UI flags ──────────────────────────────────────────────────
+
+  // Not sensitive data, but goes through the same secure storage the rest of
+  // this class already uses rather than adding a second storage mechanism
+  // (e.g. shared_preferences) just for one boolean.
+  static Future<bool> hasSeenNavTour({required String role}) async {
+    final value = await _locked(
+      () => _storage.read(key: 'seen_nav_tour_$role'),
+    );
+    return value == 'true';
+  }
+
+  static Future<void> markNavTourSeen({required String role}) => _locked(
+        () => _storage.write(key: 'seen_nav_tour_$role', value: 'true'),
+      );
 
   // ── Internal helpers ─────────────────────────────────────────────────────
 
@@ -133,6 +151,57 @@ class ApiService {
       debugPrintStack(stackTrace: st);
       rethrow;
     }
+  }
+
+  // File uploads (images/video) go through here instead of postRequest —
+  // deliberately a single attempt with no automatic retry, since blindly
+  // re-sending a large video on a flaky connection is exactly what we don't
+  // want; the idempotency_key still protects against duplicates if the
+  // caller retries by hand.
+  static Future<http.Response> multipartRequest(
+    String endpoint, {
+    required Map<String, String> fields,
+    File? coverImage,
+    List<File>? galleryImages,
+    File? video,
+    bool auth = true,
+  }) async {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/$endpoint'),
+    );
+
+    request.headers['Accept'] = 'application/json';
+    if (auth) {
+      final token = await getToken();
+      if (token != null) request.headers['Authorization'] = 'Bearer $token';
+    }
+
+    request.fields.addAll(fields);
+    request.fields.putIfAbsent('idempotency_key', _newIdempotencyKey);
+
+    if (coverImage != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath('cover_image', coverImage.path),
+      );
+    }
+    if (galleryImages != null) {
+      for (final file in galleryImages) {
+        request.files.add(
+          await http.MultipartFile.fromPath('gallery_images[]', file.path),
+        );
+      }
+    }
+    if (video != null) {
+      request.files.add(await http.MultipartFile.fromPath('video', video.path));
+    }
+
+    final streamedResponse = await request.send().timeout(
+      const Duration(seconds: 90),
+    );
+    final response = await http.Response.fromStream(streamedResponse);
+    _handleAuthError(response.statusCode);
+    return response;
   }
 
   static Future<dynamic> putRequest(
